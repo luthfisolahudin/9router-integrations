@@ -9,6 +9,11 @@ The live `/v1/models` response contained exactly these five models.
 - `cbcn/deepseek-v4-flash`: client `max` -> wire `xhigh`
 - `cbcn/kimi-k3`: client `max` -> wire `xhigh`
 
+This is a compatibility-route matrix, not a claim about native provider
+capability. Kimi K3 advertises native `max` support, but OpenCode, standalone Pi,
+and tt Pi currently use 9Router's OpenAI/Anthropic-compatible route. That route
+was the measured boundary and normalized literal `max` to `xhigh`.
+
 For every model, an explicit `reasoning_effort=max` request completed but safe
 9Router metadata reported `THINK:xhigh`, proving that `max` was normalized.
 The matching explicit `xhigh` request completed with `finish_reason=stop` and
