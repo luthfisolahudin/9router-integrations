@@ -24,3 +24,13 @@ test("projects exactly the live records with one max variant", async () => {
 		globalThis.fetch = originalFetch;
 	}
 });
+
+test("forces measured effort on auxiliary OpenCode turns", async () => {
+	const hooks = await NineRouterModels({} as never);
+	const output = { temperature: 0, topP: 1, options: { reasoningEffort: "minimal" } };
+	await hooks["chat.params"]?.(
+		{ model: { id: "cbcn/minimax-m3", reasoning: true }, provider: { id: "9router" } } as never,
+		output,
+	);
+	assert.equal(output.options.reasoningEffort, "xhigh");
+});

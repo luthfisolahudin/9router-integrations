@@ -54,4 +54,9 @@ export const NineRouterModels: Plugin = async () => ({
 			models,
 		};
 	},
+	"chat.params": async ({ model, provider }, output) => {
+		if (provider.id !== "9router" || !model.reasoning) return;
+		// OpenCode auxiliary turns can override variants; see docs/EFFORT_MATRIX.md.
+		output.options.reasoningEffort = highestWireEffort(model.id);
+	},
 });
