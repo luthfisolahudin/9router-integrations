@@ -12,8 +12,9 @@ test("projects exactly the live records with one max variant", async () => {
 		});
 	try {
 		const hooks = await NineRouterModels({} as never);
-		const config = { provider: {} };
+		const config = { provider: {}, small_model: "" };
 		await hooks.config?.(config as never);
+		assert.equal(config.small_model, "9router/cbcn/deepseek-v4-flash");
 		const models = (config.provider as Record<string, { models: Record<string, { variants: unknown; options: unknown }> }>)[
 			"9router"
 		].models;

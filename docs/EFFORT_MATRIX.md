@@ -18,6 +18,11 @@ payloads were retained.
 Client-facing `max` therefore means "the highest effort this route actually
 applies," not a promise to transmit the literal string `max`.
 
+OpenCode applies the mapping in its model defaults and request-parameter hook.
+Title generation bypasses that hook, so the plugin pins OpenCode's small model
+to the measured DeepSeek V4 Flash path instead of letting each selected model
+receive an internal lower-effort request.
+
 Re-fetch the live catalog and repeat `max` first whenever 9Router, CodeBuddy,
 the active connection set, or one of these model revisions changes. Retry
 `xhigh` only when `max` fails or is demonstrably normalized or ignored. An

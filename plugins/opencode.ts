@@ -40,6 +40,8 @@ function toOpenCodeModel(record: CatalogRecord) {
 export const NineRouterModels: Plugin = async () => ({
 	config: async (config) => {
 		const models = Object.fromEntries((await fetchCatalog()).map((record) => [record.id, toOpenCodeModel(record)]));
+		// Title turns bypass chat.params; pin them to a measured model. See docs/EFFORT_MATRIX.md.
+		config.small_model = "9router/cbcn/deepseek-v4-flash";
 		config.provider ??= {};
 		const existing = config.provider["9router"] ?? {};
 		config.provider["9router"] = {
