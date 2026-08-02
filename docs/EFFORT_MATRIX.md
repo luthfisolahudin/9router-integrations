@@ -14,6 +14,10 @@ capability. Kimi K3 advertises native `max` support, but OpenCode, standalone Pi
 and tt Pi currently use 9Router's OpenAI/Anthropic-compatible route. That route
 was the measured boundary and normalized literal `max` to `xhigh`.
 
+Kimi was also probed through `/v1/messages` with adaptive thinking and
+`output_config.effort=max`, matching Pi's transport. It completed successfully,
+but 9Router still reported `THINK:xhigh`.
+
 For every model, an explicit `reasoning_effort=max` request completed but safe
 9Router metadata reported `THINK:xhigh`, proving that `max` was normalized.
 The matching explicit `xhigh` request completed with `finish_reason=stop` and
