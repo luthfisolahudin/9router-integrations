@@ -6,6 +6,9 @@ export const MEASURED_WIRE_EFFORT = {
 	"cbcn/deepseek-v4-pro": "xhigh",
 	"cbcn/deepseek-v4-flash": "xhigh",
 	"cbcn/kimi-k3": "xhigh",
+	"cx/gpt-5.6-sol": "max",
+	"cx/gpt-5.6-terra": "max",
+	"cx/gpt-5.6-luna": "max",
 } as const satisfies Record<string, WireEffort>;
 
 /**

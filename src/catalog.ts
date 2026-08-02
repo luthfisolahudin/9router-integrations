@@ -83,11 +83,13 @@ export function parseCatalog(payload: unknown): CatalogRecord[] {
 const KNOWN_BRANDS: Record<string, string> = {
 	deepseek: "DeepSeek",
 	glm: "GLM",
+	gpt: "GPT",
 	kimi: "Kimi",
 	minimax: "MiniMax",
 };
 const KNOWN_OWNERS: Record<string, string> = {
 	cbcn: "CodeBuddy CN",
+	cx: "OpenAI Codex",
 };
 
 function prettifySlugToken(token: string): string {

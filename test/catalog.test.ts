@@ -23,6 +23,9 @@ test("renders friendly names for the active catalog", () => {
 	assert.equal(displayName("cbcn/deepseek-v4-pro"), "DeepSeek V4 Pro (CodeBuddy CN)");
 	assert.equal(displayName("cbcn/deepseek-v4-flash"), "DeepSeek V4 Flash (CodeBuddy CN)");
 	assert.equal(displayName("cbcn/kimi-k3"), "Kimi K3 (CodeBuddy CN)");
+	assert.equal(displayName("cx/gpt-5.6-sol"), "GPT 5.6 Sol (OpenAI Codex)");
+	assert.equal(displayName("cx/gpt-5.6-terra"), "GPT 5.6 Terra (OpenAI Codex)");
+	assert.equal(displayName("cx/gpt-5.6-luna"), "GPT 5.6 Luna (OpenAI Codex)");
 });
 
 test("degrades gracefully on unknown owners, slugs, and missing prefixes", () => {
