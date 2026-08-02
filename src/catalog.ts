@@ -79,6 +79,38 @@ export function parseCatalog(payload: unknown): CatalogRecord[] {
 	return records;
 }
 
+// Brand and owner casing is not derivable from slugs, so both are curated.
+const KNOWN_BRANDS: Record<string, string> = {
+	deepseek: "DeepSeek",
+	glm: "GLM",
+	kimi: "Kimi",
+	minimax: "MiniMax",
+};
+const KNOWN_OWNERS: Record<string, string> = {
+	cbcn: "CodeBuddy CN",
+};
+
+function prettifySlugToken(token: string): string {
+	const brand = KNOWN_BRANDS[token.toLowerCase()];
+	if (brand !== undefined) return brand;
+	// Version tokens carry their own casing: v4, 5.2.
+	if (/^v?\d/i.test(token)) return token.toUpperCase();
+	return token.charAt(0).toUpperCase() + token.slice(1);
+}
+
+/**
+ * Renders a catalog model ID for pickers: `cbcn/kimi-k3` -> `Kimi K3 (CodeBuddy CN)`.
+ * @see ../README.md
+ */
+export function displayName(id: string): string {
+	const slash = id.indexOf("/");
+	const owner = slash === -1 ? undefined : id.slice(0, slash);
+	const slug = slash === -1 ? id : id.slice(slash + 1);
+	const pretty = slug.split("-").map(prettifySlugToken).join(" ");
+	if (owner === undefined) return pretty;
+	return `${pretty} (${KNOWN_OWNERS[owner] ?? owner})`;
+}
+
 function combinedSignal(external: AbortSignal | undefined, timeoutMs: number | undefined): AbortSignal | undefined {
 	if (external === undefined && timeoutMs === undefined) return undefined;
 	if (external === undefined) return AbortSignal.timeout(timeoutMs!);

@@ -13,6 +13,10 @@ policy shared by OpenCode, standalone Pi, and tt Pi.
 Consumers load these TypeScript entrypoints directly from this repository. No
 package publication or runtime dependency installation is required.
 
+The catalog serves no display names, so `displayName()` in `src/catalog.ts`
+derives picker labels locally: `cbcn/kimi-k3` shows as `Kimi K3 (CodeBuddy CN)`.
+Model IDs remain the canonical key everywhere else.
+
 ## Checks
 
 ```sh

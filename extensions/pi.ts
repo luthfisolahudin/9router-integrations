@@ -2,6 +2,7 @@ import type { ExtensionAPI, ProviderConfig, ProviderModelConfig } from "@earendi
 
 import {
 	catalogCapabilities,
+	displayName,
 	fetchCatalog,
 	resolveApiKey,
 	resolveBaseUrl,
@@ -45,12 +46,7 @@ export function toPiModel(record: CatalogRecord): ProviderModelConfig {
 
 	return {
 		id: record.id,
-		name:
-			typeof record.name === "string"
-				? record.name
-				: typeof record.display_name === "string"
-					? record.display_name
-					: record.id,
+		name: displayName(record.id),
 		reasoning,
 		input: capabilities.vision === true ? ["text", "image"] : ["text"],
 		cost: ZERO_COST,

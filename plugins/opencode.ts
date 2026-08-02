@@ -1,6 +1,6 @@
 import type { Plugin } from "@opencode-ai/plugin";
 
-import { catalogCapabilities, fetchCatalog, resolveApiKey, resolveBaseUrl, type CatalogRecord } from "../src/catalog.ts";
+import { catalogCapabilities, displayName, fetchCatalog, resolveApiKey, resolveBaseUrl, type CatalogRecord } from "../src/catalog.ts";
 import { highestWireEffort } from "../src/effort.ts";
 
 function toOpenCodeModel(record: CatalogRecord) {
@@ -17,7 +17,7 @@ function toOpenCodeModel(record: CatalogRecord) {
 
 	const effort = reasoning ? highestWireEffort(record.id) : undefined;
 	return {
-		name: typeof record.name === "string" ? record.name : record.id,
+		name: displayName(record.id),
 		attachment: input.length > 1,
 		reasoning,
 		...(typeof capabilities.tools === "boolean" ? { tool_call: capabilities.tools } : {}),
