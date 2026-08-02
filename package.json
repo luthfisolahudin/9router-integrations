@@ -1,0 +1,12 @@
+{
+  "name": "9router-integrations",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Canonical 9Router model-catalog integration shared by OpenCode, standalone Pi, and tt Pi.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.ts",
+    "typecheck": "bun x --offline tsc -p tsconfig.json",
+    "check": "pnpm run typecheck && pnpm run test"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "es2022",
+    "lib": ["es2022", "dom"],
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "strict": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "erasableSyntaxOnly": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "paths": {
+      "@earendil-works/pi-coding-agent": [
+        "/home/luthfi/.cache/.bun/install/global/node_modules/@earendil-works/pi-coding-agent/dist/index.d.ts"
+      ],
+      "@opencode-ai/plugin": [
+        "/home/luthfi/.cache/opencode/node_modules/@opencode-ai/plugin/dist/index.d.ts"
+      ]
+    }
+  },
+  "include": ["src", "extensions", "plugins", "types"]
+}
