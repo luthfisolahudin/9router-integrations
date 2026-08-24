@@ -24,6 +24,12 @@ replays reasoning through `reasoning_content`. Kimi was also probed on
 with adaptive thinking and `output_config.effort=max`. It completed successfully,
 but 9Router still reported `THINK:xhigh`.
 
+On 2026-08-24, standalone Pi, OpenCode, and a tracked tt worker each completed
+exact text, read-tool, and generated-image turns through OpenAI Chat
+Completions. All three read `TT OPENAI IMAGE 7429` exactly and completed with
+requested Terra `max`. The Terra route exposes no safe metadata proving a
+distinct effective effort beyond that requested wire value.
+
 For the five CodeBuddy CN models, an explicit `reasoning_effort=max` request
 completed but safe 9Router metadata reported `THINK:xhigh`, proving that `max`
 was normalized. The matching explicit `xhigh` request completed with
