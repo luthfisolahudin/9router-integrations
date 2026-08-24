@@ -14,11 +14,14 @@ contained exactly these eight models.
 
 This is a compatibility-route matrix, not a claim about native provider
 capability. Kimi K3 advertises native `max` support, but OpenCode, standalone Pi,
-and tt Pi currently use 9Router's OpenAI/Anthropic-compatible route. That route
-was the measured boundary and normalized literal `max` to `xhigh`.
+and tt Pi currently use 9Router's OpenAI Chat Completions route at
+`<router-root>/v1`. That route was the measured boundary and normalized literal
+`max` to `xhigh`.
 
-Kimi was also probed through `/v1/messages` with adaptive thinking and
-`output_config.effort=max`, matching Pi's transport. It completed successfully,
+Pi uses its `openai-completions` adapter with OpenAI `reasoning_effort` and
+replays reasoning through `reasoning_content`. Kimi was also probed on
+2026-08-03 through the historical `/v1/messages` Anthropic Messages transport
+with adaptive thinking and `output_config.effort=max`. It completed successfully,
 but 9Router still reported `THINK:xhigh`.
 
 For the five CodeBuddy CN models, an explicit `reasoning_effort=max` request

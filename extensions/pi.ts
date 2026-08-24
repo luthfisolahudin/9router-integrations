@@ -4,8 +4,8 @@ import {
 	catalogCapabilities,
 	displayName,
 	fetchCatalog,
+	resolveApiBaseUrl,
 	resolveApiKey,
-	resolveBaseUrl,
 	type CatalogRecord,
 } from "../src/catalog.ts";
 import { highestWireEffort } from "../src/effort.ts";
@@ -20,15 +20,26 @@ const HIDDEN_THINKING_LEVELS = {
 	xhigh: null,
 } satisfies NonNullable<ProviderModelConfig["thinkingLevelMap"]>;
 
-const DEEPSEEK_FLASH_FALLBACK: CatalogRecord = {
-	id: "cbcn/deepseek-v4-flash",
-	capabilities: {
-		vision: true,
-		reasoning: true,
-		contextWindow: 1_000_000,
-		maxOutput: 50_000,
+const STARTUP_FALLBACK: CatalogRecord[] = [
+	{
+		id: "cbcn/deepseek-v4-flash",
+		capabilities: {
+			vision: true,
+			reasoning: true,
+			contextWindow: 1_000_000,
+			maxOutput: 50_000,
+		},
 	},
-};
+	{
+		id: "cx/gpt-5.6-terra",
+		capabilities: {
+			vision: true,
+			reasoning: true,
+			contextWindow: 272_000,
+			maxOutput: 128_000,
+		},
+	},
+];
 
 function positiveNumber(value: unknown, fallback: number): number {
 	return typeof value === "number" && Number.isFinite(value) && value > 0 ? value : fallback;
@@ -56,7 +67,11 @@ export function toPiModel(record: CatalogRecord): ProviderModelConfig {
 			? {
 					// Client max maps to the measured wire value; see docs/EFFORT_MATRIX.md.
 					thinkingLevelMap: { ...HIDDEN_THINKING_LEVELS, max: highestWireEffort(record.id) },
-					compat: { forceAdaptiveThinking: true },
+					compat: {
+						requiresReasoningContentOnAssistantMessages: true,
+						supportsReasoningEffort: true,
+						thinkingFormat: "openai",
+					},
 				}
 			: {}),
 	};
@@ -64,14 +79,19 @@ export function toPiModel(record: CatalogRecord): ProviderModelConfig {
 
 /** Registers the canonical 9Router provider in Pi. */
 export default function registerNineRouter(pi: ExtensionAPI): void {
+	let models = STARTUP_FALLBACK.map(toPiModel);
 	const provider: ProviderConfig = {
 		name: "9Router",
-		baseUrl: resolveBaseUrl(),
+		baseUrl: resolveApiBaseUrl(),
 		apiKey: resolveApiKey(),
 		authHeader: true,
-		api: "anthropic-messages",
-		models: [toPiModel(DEEPSEEK_FLASH_FALLBACK)],
-		refreshModels: async ({ signal }) => (await fetchCatalog({ signal })).map(toPiModel),
+		api: "openai-completions",
+		models,
+		refreshModels: async ({ allowNetwork, signal }) => {
+			if (!allowNetwork || signal.aborted) return models;
+			models = (await fetchCatalog({ signal })).map(toPiModel);
+			return models;
+		},
 	};
 	pi.registerProvider("9router", provider);
 }

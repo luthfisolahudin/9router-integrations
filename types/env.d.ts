@@ -15,7 +15,11 @@ declare module "@earendil-works/pi-coding-agent" {
 		contextWindow: number;
 		maxTokens: number;
 		thinkingLevelMap?: Record<string, string | null>;
-		compat?: { forceAdaptiveThinking?: boolean };
+		compat?: {
+			requiresReasoningContentOnAssistantMessages?: boolean;
+			supportsReasoningEffort?: boolean;
+			thinkingFormat?: "openai";
+		};
 	}
 
 	export interface ProviderConfig {
@@ -23,9 +27,9 @@ declare module "@earendil-works/pi-coding-agent" {
 		baseUrl: string;
 		apiKey: string;
 		authHeader: boolean;
-		api: "anthropic-messages";
+		api: "openai-completions";
 		models: ProviderModelConfig[];
-		refreshModels?: (options: { signal?: AbortSignal }) => Promise<ProviderModelConfig[]>;
+		refreshModels?: (options: { allowNetwork: boolean; signal: AbortSignal }) => Promise<ProviderModelConfig[]>;
 	}
 
 	export interface ExtensionAPI {

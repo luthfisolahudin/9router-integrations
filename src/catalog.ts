@@ -126,6 +126,11 @@ export function resolveBaseUrl(value?: string): string {
 		.replace(/\/v1$/, "");
 }
 
+/** Resolves 9Router's OpenAI-compatible API root. @see ../README.md */
+export function resolveApiBaseUrl(value?: string): string {
+	return `${resolveBaseUrl(value)}/v1`;
+}
+
 export function resolveApiKey(value?: string): string {
 	return value ?? process.env.NINE_ROUTER_API_KEY ?? DEFAULT_API_KEY;
 }
@@ -136,11 +141,11 @@ export function resolveApiKey(value?: string): string {
  * @see ../docs/EFFORT_MATRIX.md
  */
 export async function fetchCatalog(options: FetchCatalogOptions = {}): Promise<CatalogRecord[]> {
-	const baseUrl = resolveBaseUrl(options.baseUrl);
+	const baseUrl = resolveApiBaseUrl(options.baseUrl);
 	const apiKey = resolveApiKey(options.apiKey);
 	let response: Response;
 	try {
-		response = await fetch(`${baseUrl}/v1/models`, {
+		response = await fetch(`${baseUrl}/models`, {
 			headers: { Authorization: `Bearer ${apiKey}` },
 			signal: combinedSignal(options.signal, options.timeoutMs ?? 5_000),
 		});

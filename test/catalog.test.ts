@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { displayName, parseCatalog, resolveBaseUrl } from "../src/catalog.ts";
+import { displayName, fetchCatalog, parseCatalog, resolveApiBaseUrl, resolveBaseUrl } from "../src/catalog.ts";
 
 test("preserves exact catalog membership", () => {
 	const records = parseCatalog({ data: [{ id: "cbcn/glm-5.2" }, { id: "cbcn/kimi-k3" }] });
@@ -13,8 +13,24 @@ test("rejects malformed and duplicate records instead of dropping them", () => {
 	assert.throws(() => parseCatalog({ data: [{ id: "same" }, { id: "same" }] }), /duplicate/);
 });
 
-test("normalizes base URLs with or without v1", () => {
+test("normalizes root and v1 URLs for discovery and OpenAI API calls", async () => {
 	assert.equal(resolveBaseUrl("http://127.0.0.1:20128/v1/"), "http://127.0.0.1:20128");
+	assert.equal(resolveApiBaseUrl("http://127.0.0.1:20128"), "http://127.0.0.1:20128/v1");
+	assert.equal(resolveApiBaseUrl("http://127.0.0.1:20128/v1/"), "http://127.0.0.1:20128/v1");
+
+	const originalFetch = globalThis.fetch;
+	let request: Request | undefined;
+	globalThis.fetch = async (input, init) => {
+		request = new Request(input, init);
+		return new Response(JSON.stringify({ data: [{ id: "cx/gpt-5.6-terra" }] }), { status: 200 });
+	};
+	try {
+		await fetchCatalog({ baseUrl: "http://127.0.0.1:20128/v1/", apiKey: "test-key" });
+		assert.equal(request?.url, "http://127.0.0.1:20128/v1/models");
+		assert.equal(request?.headers.get("Authorization"), "Bearer test-key");
+	} finally {
+		globalThis.fetch = originalFetch;
+	}
 });
 
 test("renders friendly names for the active catalog", () => {
