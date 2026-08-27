@@ -94,6 +94,10 @@ const KNOWN_OWNERS: Record<string, string> = {
 	cbcn: "CodeBuddy CN",
 	cx: "OpenAI Codex",
 };
+const KNOWN_MODEL_NAMES: Record<string, string> = {
+	"ag/claude-opus-4-6-thinking": "Claude Opus 4.6 Thinking",
+	"ag/claude-sonnet-4-6": "Claude Sonnet 4.6",
+};
 
 function prettifySlugToken(token: string): string {
 	const brand = KNOWN_BRANDS[token.toLowerCase()];
@@ -111,7 +115,7 @@ export function displayName(id: string): string {
 	const slash = id.indexOf("/");
 	const owner = slash === -1 ? undefined : id.slice(0, slash);
 	const slug = slash === -1 ? id : id.slice(slash + 1);
-	const pretty = slug.split("-").map(prettifySlugToken).join(" ");
+	const pretty = KNOWN_MODEL_NAMES[id] ?? slug.split("-").map(prettifySlugToken).join(" ");
 	if (owner === undefined) return pretty;
 	return `${pretty} (${KNOWN_OWNERS[owner] ?? owner})`;
 }

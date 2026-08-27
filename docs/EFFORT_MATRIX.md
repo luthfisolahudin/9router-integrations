@@ -65,11 +65,6 @@ OpenAI-format `reasoning_content`. The route exposed no safe effective-effort
 metadata or evidence of normalization, so the highest-first policy keeps
 literal `max`.
 
-Gemini Pro Agent is not part of the effort matrix because its catalog record
-reports `reasoning=false`. A text smoke test completed with the exact requested
-output and `finish_reason=stop` at `max_tokens=256`; a 64-token probe was safely
-truncated because the route reported 57 reasoning tokens.
-
 Client-facing `max` therefore means "the highest effort this route actually
 applies," not a promise to transmit the literal string `max`.
 

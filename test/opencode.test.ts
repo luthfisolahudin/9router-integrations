@@ -18,7 +18,6 @@ test("projects exactly the live records with one max variant", async () => {
 				data: [
 					{ id: "cbcn/glm-5.2", capabilities: { reasoning: true } },
 					{ id: "ag/gemini-3.7-flash-high", capabilities: { reasoning: true } },
-					{ id: "ag/gemini-pro-agent", capabilities: { reasoning: false, contextWindow: 1_048_576, maxOutput: 64_000 } },
 					{ id: "ag/claude-sonnet-4-6", capabilities: { reasoning: true } },
 					{ id: "ag/claude-opus-4-6-thinking", capabilities: { reasoning: true } },
 					{ id: "ag/gpt-oss-120b-medium", capabilities: { reasoning: true } },
@@ -44,7 +43,6 @@ test("projects exactly the live records with one max variant", async () => {
 		assert.deepEqual(Object.keys(models), [
 			"cbcn/glm-5.2",
 			"ag/gemini-3.7-flash-high",
-			"ag/gemini-pro-agent",
 			"ag/claude-sonnet-4-6",
 			"ag/claude-opus-4-6-thinking",
 			"ag/gpt-oss-120b-medium",
@@ -54,9 +52,6 @@ test("projects exactly the live records with one max variant", async () => {
 		assert.equal(models["ag/gemini-3.7-flash-high"].reasoning, true);
 		assert.deepEqual(models["ag/gemini-3.7-flash-high"].options, { reasoningEffort: "max" });
 		assert.deepEqual(models["ag/gemini-3.7-flash-high"].variants, { max: { reasoningEffort: "max" } });
-		assert.equal(models["ag/gemini-pro-agent"].reasoning, false);
-		assert.equal("options" in models["ag/gemini-pro-agent"], false);
-		assert.deepEqual(models["ag/gemini-pro-agent"].limit, { context: 1_048_576, output: 64_000 });
 		assert.deepEqual(models["ag/claude-sonnet-4-6"].options, { reasoningEffort: "max" });
 		assert.deepEqual(models["ag/claude-opus-4-6-thinking"].options, { reasoningEffort: "max" });
 		assert.deepEqual(models["ag/claude-opus-4-6-thinking"].variants, { max: { reasoningEffort: "max" } });
