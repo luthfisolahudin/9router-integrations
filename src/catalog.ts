@@ -87,6 +87,7 @@ const KNOWN_BRANDS: Record<string, string> = {
 	gpt: "GPT",
 	kimi: "Kimi",
 	minimax: "MiniMax",
+	oss: "OSS",
 };
 const KNOWN_OWNERS: Record<string, string> = {
 	ag: "Antigravity",

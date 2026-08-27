@@ -44,7 +44,7 @@ test("uses OpenAI reasoning fields for the measured client max map", () => {
 });
 
 test("keeps an unmeasured reasoning model visible without forcing effort", () => {
-	const model = toPiModel({ id: "ag/gemini-future", capabilities: { reasoning: true } });
+	const model = toPiModel({ id: "ag/future-reasoning-model", capabilities: { reasoning: true } });
 	assert.equal(model.reasoning, true);
 	assert.equal(model.thinkingLevelMap, undefined);
 	assert.equal(model.compat, undefined);
@@ -94,6 +94,10 @@ test("retains fallbacks offline and replaces them with the exact live catalog", 
 				data: [
 					{ id: "cx/gpt-5.6-terra", capabilities: { reasoning: true } },
 					{ id: "ag/gemini-3.7-flash-high", capabilities: { reasoning: true } },
+					{ id: "ag/gemini-pro-agent", capabilities: { reasoning: false, contextWindow: 1_048_576, maxOutput: 64_000 } },
+					{ id: "ag/claude-sonnet-4-6", capabilities: { reasoning: true } },
+					{ id: "ag/claude-opus-4-6-thinking", capabilities: { reasoning: true } },
+					{ id: "ag/gpt-oss-120b-medium", capabilities: { reasoning: true } },
 				],
 			}),
 			{
@@ -115,10 +119,18 @@ test("retains fallbacks offline and replaces them with the exact live catalog", 
 		assert.deepEqual(live.map(({ id }) => id), [
 			"cx/gpt-5.6-terra",
 			"ag/gemini-3.7-flash-high",
+			"ag/gemini-pro-agent",
+			"ag/claude-sonnet-4-6",
+			"ag/claude-opus-4-6-thinking",
+			"ag/gpt-oss-120b-medium",
 		]);
 		assert.deepEqual((await provider.refreshModels({ allowNetwork: false, signal })).map(({ id }) => id), [
 			"cx/gpt-5.6-terra",
 			"ag/gemini-3.7-flash-high",
+			"ag/gemini-pro-agent",
+			"ag/claude-sonnet-4-6",
+			"ag/claude-opus-4-6-thinking",
+			"ag/gpt-oss-120b-medium",
 		]);
 		assert.equal(fetches, 1);
 	} finally {
