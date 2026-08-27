@@ -1,9 +1,9 @@
 import type { Plugin } from "@opencode-ai/plugin";
 
 import { catalogCapabilities, displayName, fetchCatalog, resolveApiKey, resolveBaseUrl, type CatalogRecord } from "../src/catalog.ts";
-import { highestWireEffort } from "../src/effort.ts";
+import { measuredWireEffort } from "../src/effort.ts";
 
-function toOpenCodeModel(record: CatalogRecord) {
+export function toOpenCodeModel(record: CatalogRecord) {
 	const capabilities = catalogCapabilities(record);
 	const reasoning = capabilities.reasoning === true;
 	const input: Array<"text" | "audio" | "image" | "video" | "pdf"> = ["text"];
@@ -15,7 +15,7 @@ function toOpenCodeModel(record: CatalogRecord) {
 	if (capabilities.imageOutput === true) output.push("image");
 	if (capabilities.audioOutput === true) output.push("audio");
 
-	const effort = reasoning ? highestWireEffort(record.id) : undefined;
+	const effort = reasoning ? measuredWireEffort(record.id) : undefined;
 	return {
 		name: displayName(record.id),
 		attachment: input.length > 1,
@@ -59,6 +59,7 @@ export const NineRouterModels: Plugin = async () => ({
 	"chat.params": async ({ model, provider }, output) => {
 		if (provider.id !== "9router" || !model.reasoning) return;
 		// OpenCode auxiliary turns can override variants; see docs/EFFORT_MATRIX.md.
-		output.options.reasoningEffort = highestWireEffort(model.id);
+		const effort = measuredWireEffort(model.id);
+		if (effort !== undefined) output.options.reasoningEffort = effort;
 	},
 });

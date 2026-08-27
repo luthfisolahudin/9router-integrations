@@ -12,5 +12,5 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true
   },
-  "include": ["src", "extensions", "plugins", "types"]
+  "include": ["src", "extensions", "plugins", "scripts", "types"]
 }

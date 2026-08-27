@@ -2,6 +2,8 @@
 // no runtime dependencies; these are the only Node globals the code touches.
 declare const process: {
 	env: Record<string, string | undefined>;
+	argv: string[];
+	exitCode?: number;
 };
 
 // Keep typechecking portable without coupling the repo to local tool paths.

@@ -9,7 +9,15 @@ export const MEASURED_WIRE_EFFORT = {
 	"cx/gpt-5.6-sol": "max",
 	"cx/gpt-5.6-terra": "max",
 	"cx/gpt-5.6-luna": "max",
+	"ag/gemini-3.7-flash-high": "max",
 } as const satisfies Record<string, WireEffort>;
+
+/** Returns the measured wire effort, or undefined until the route is probed. */
+export function measuredWireEffort(modelId: string): WireEffort | undefined {
+	return Object.hasOwn(MEASURED_WIRE_EFFORT, modelId)
+		? MEASURED_WIRE_EFFORT[modelId as keyof typeof MEASURED_WIRE_EFFORT]
+		: undefined;
+}
 
 /**
  * Resolves the measured highest wire effort behind client-facing `max`.
@@ -17,8 +25,9 @@ export const MEASURED_WIRE_EFFORT = {
  * @see ../docs/EFFORT_MATRIX.md
  */
 export function highestWireEffort(modelId: string): WireEffort {
-	if (!Object.hasOwn(MEASURED_WIRE_EFFORT, modelId)) {
+	const effort = measuredWireEffort(modelId);
+	if (effort === undefined) {
 		throw new Error(`No measured 9Router effort for active reasoning model: ${modelId}`);
 	}
-	return MEASURED_WIRE_EFFORT[modelId as keyof typeof MEASURED_WIRE_EFFORT];
+	return effort;
 }

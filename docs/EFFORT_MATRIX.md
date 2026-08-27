@@ -1,7 +1,9 @@
 # 9Router effort matrix
 
-Measured on 2026-08-03 through local 9Router. The live `/v1/models` response
-contained exactly these eight models.
+Measured on 2026-08-03 and 2026-08-25 through local 9Router. The current
+`/v1/models` response contains eight active reasoning models; the effort
+entries below cover those models plus the previously measured historical
+record.
 
 - `cbcn/glm-5.2`: client `max` -> wire `xhigh`
 - `cbcn/minimax-m3`: client `max` -> wire `xhigh`
@@ -11,6 +13,9 @@ contained exactly these eight models.
 - `cx/gpt-5.6-sol`: client `max` -> wire `max`
 - `cx/gpt-5.6-terra`: client `max` -> wire `max`
 - `cx/gpt-5.6-luna`: client `max` -> wire `max`
+- `ag/gemini-3.7-flash-high`: client `max` -> wire `max`
+
+The `ag` model is labeled as Antigravity in client model pickers.
 
 This is a compatibility-route matrix, not a claim about native provider
 capability. Kimi K3 advertises native `max` support, but OpenCode, standalone Pi,
@@ -52,4 +57,6 @@ receive an internal lower-effort request.
 Re-fetch the live catalog and repeat `max` first whenever 9Router, CodeBuddy,
 the active connection set, or one of these model revisions changes. Retry
 `xhigh` only when `max` fails or is demonstrably normalized or ignored. An
-unmeasured active reasoning model must fail loudly until that probe is complete.
+unmeasured active reasoning model remains visible without an explicit effort so
+one new catalog record cannot hide either provider; `pnpm check:catalog` fails
+loudly until that probe is complete.

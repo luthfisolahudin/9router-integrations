@@ -28,7 +28,15 @@ replaces those fallbacks with the exact live membership.
 
 ```sh
 pnpm check
+pnpm check:catalog
 ```
+
+`pnpm check:catalog` fetches the live catalog, exercises both client
+projections, and fails when a new reasoning model has no measured wire-effort
+entry. Runtime integrations keep that model visible without forcing an
+unverified effort while the measurement is pending. Pass
+`pnpm check:catalog --allow-unmeasured` when checking projection compatibility
+without requiring the effort table to be complete.
 
 Live effort evidence and the re-probe rule are recorded in
 [`docs/EFFORT_MATRIX.md`](docs/EFFORT_MATRIX.md).

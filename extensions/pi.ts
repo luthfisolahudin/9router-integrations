@@ -8,7 +8,7 @@ import {
 	resolveApiKey,
 	type CatalogRecord,
 } from "../src/catalog.ts";
-import { highestWireEffort } from "../src/effort.ts";
+import { measuredWireEffort } from "../src/effort.ts";
 
 const ZERO_COST = { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 };
 const HIDDEN_THINKING_LEVELS = {
@@ -47,13 +47,12 @@ function positiveNumber(value: unknown, fallback: number): number {
 
 /**
  * Projects one live 9Router record into Pi's provider model format.
- * @throws When a reasoning model has no measured highest effort.
  * @see ../docs/EFFORT_MATRIX.md
  */
 export function toPiModel(record: CatalogRecord): ProviderModelConfig {
 	const capabilities = catalogCapabilities(record);
 	const reasoning = capabilities.reasoning === true;
-	if (reasoning) highestWireEffort(record.id);
+	const effort = reasoning ? measuredWireEffort(record.id) : undefined;
 
 	return {
 		id: record.id,
@@ -63,10 +62,10 @@ export function toPiModel(record: CatalogRecord): ProviderModelConfig {
 		cost: ZERO_COST,
 		contextWindow: positiveNumber(capabilities.contextWindow, 128_000),
 		maxTokens: positiveNumber(capabilities.maxOutput, 16_384),
-		...(reasoning
+		...(reasoning && effort !== undefined
 			? {
 					// Client max maps to the measured wire value; see docs/EFFORT_MATRIX.md.
-					thinkingLevelMap: { ...HIDDEN_THINKING_LEVELS, max: highestWireEffort(record.id) },
+					thinkingLevelMap: { ...HIDDEN_THINKING_LEVELS, max: effort },
 					compat: {
 						requiresReasoningContentOnAssistantMessages: true,
 						supportsReasoningEffort: true,

@@ -82,12 +82,14 @@ export function parseCatalog(payload: unknown): CatalogRecord[] {
 // Brand and owner casing is not derivable from slugs, so both are curated.
 const KNOWN_BRANDS: Record<string, string> = {
 	deepseek: "DeepSeek",
+	gemini: "Gemini",
 	glm: "GLM",
 	gpt: "GPT",
 	kimi: "Kimi",
 	minimax: "MiniMax",
 };
 const KNOWN_OWNERS: Record<string, string> = {
+	ag: "Antigravity",
 	cbcn: "CodeBuddy CN",
 	cx: "OpenAI Codex",
 };

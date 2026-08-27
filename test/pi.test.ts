@@ -43,6 +43,13 @@ test("uses OpenAI reasoning fields for the measured client max map", () => {
 	});
 });
 
+test("keeps an unmeasured reasoning model visible without forcing effort", () => {
+	const model = toPiModel({ id: "ag/gemini-future", capabilities: { reasoning: true } });
+	assert.equal(model.reasoning, true);
+	assert.equal(model.thinkingLevelMap, undefined);
+	assert.equal(model.compat, undefined);
+});
+
 test("registers the OpenAI Chat Completions provider with pinned fallbacks", () => {
 	const provider = registeredProvider();
 	assert.equal(provider.api, "openai-completions");
@@ -82,10 +89,18 @@ test("retains fallbacks offline and replaces them with the exact live catalog", 
 	globalThis.fetch = async (_input, init) => {
 		fetches += 1;
 		requestSignal = init?.signal;
-		return new Response(JSON.stringify({ data: [{ id: "cx/gpt-5.6-terra", capabilities: { reasoning: true } }] }), {
-			status: 200,
-			headers: { "content-type": "application/json" },
-		});
+		return new Response(
+			JSON.stringify({
+				data: [
+					{ id: "cx/gpt-5.6-terra", capabilities: { reasoning: true } },
+					{ id: "ag/gemini-3.7-flash-high", capabilities: { reasoning: true } },
+				],
+			}),
+			{
+				status: 200,
+				headers: { "content-type": "application/json" },
+			},
+		);
 	};
 	try {
 		const provider = registeredProvider();
@@ -97,8 +112,14 @@ test("retains fallbacks offline and replaces them with the exact live catalog", 
 		const live = await provider.refreshModels({ allowNetwork: true, signal });
 		assert.equal(requestSignal?.aborted, false);
 		assert.equal(fetches, 1);
-		assert.deepEqual(live.map(({ id }) => id), ["cx/gpt-5.6-terra"]);
-		assert.deepEqual((await provider.refreshModels({ allowNetwork: false, signal })).map(({ id }) => id), ["cx/gpt-5.6-terra"]);
+		assert.deepEqual(live.map(({ id }) => id), [
+			"cx/gpt-5.6-terra",
+			"ag/gemini-3.7-flash-high",
+		]);
+		assert.deepEqual((await provider.refreshModels({ allowNetwork: false, signal })).map(({ id }) => id), [
+			"cx/gpt-5.6-terra",
+			"ag/gemini-3.7-flash-high",
+		]);
 		assert.equal(fetches, 1);
 	} finally {
 		globalThis.fetch = originalFetch;

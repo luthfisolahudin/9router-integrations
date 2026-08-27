@@ -42,6 +42,7 @@ test("renders friendly names for the active catalog", () => {
 	assert.equal(displayName("cx/gpt-5.6-sol"), "GPT 5.6 Sol (OpenAI Codex)");
 	assert.equal(displayName("cx/gpt-5.6-terra"), "GPT 5.6 Terra (OpenAI Codex)");
 	assert.equal(displayName("cx/gpt-5.6-luna"), "GPT 5.6 Luna (OpenAI Codex)");
+	assert.equal(displayName("ag/gemini-3.7-flash-high"), "Gemini 3.7 Flash High (Antigravity)");
 });
 
 test("degrades gracefully on unknown owners, slugs, and missing prefixes", () => {
