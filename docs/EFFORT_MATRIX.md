@@ -13,6 +13,7 @@ record.
 - `cx/gpt-5.6-sol`: client `max` -> wire `max`
 - `cx/gpt-5.6-terra`: client `max` -> wire `max`
 - `cx/gpt-5.6-luna`: client `max` -> wire `max`
+- `ag/gemini-3.8-flash-high`: client `max` -> wire `max`
 - `ag/gemini-3.7-flash-high`: client `max` -> wire `max`
 - `ag/claude-sonnet-4-6`: client `max` -> wire `max`
 - `ag/claude-opus-4-6-thinking`: client `max` -> wire `max`

@@ -9,6 +9,7 @@ export const MEASURED_WIRE_EFFORT = {
 	"cx/gpt-5.6-sol": "max",
 	"cx/gpt-5.6-terra": "max",
 	"cx/gpt-5.6-luna": "max",
+	"ag/gemini-3.8-flash-high": "max",
 	"ag/gemini-3.7-flash-high": "max",
 	"ag/claude-sonnet-4-6": "max",
 	"ag/claude-opus-4-6-thinking": "max",
