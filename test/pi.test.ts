@@ -26,7 +26,7 @@ function registeredProvider(): RegisteredProvider {
 }
 
 test("uses OpenAI reasoning fields for the measured client max map", () => {
-	const model = toPiModel({ id: "cbcn/kimi-k3", capabilities: { reasoning: true } });
+	const model = toPiModel({ id: "cbcn/kimi-k3-1", capabilities: { reasoning: true } });
 	assert.deepEqual(model.thinkingLevelMap, {
 		off: null,
 		minimal: null,
@@ -93,7 +93,7 @@ test("retains fallbacks offline and replaces them with the exact live catalog", 
 			JSON.stringify({
 				data: [
 					{ id: "cx/gpt-5.6-terra", capabilities: { reasoning: true } },
-					{ id: "ag/gemini-3.7-flash-high", capabilities: { reasoning: true } },
+					{ id: "cbcn/glm-5.3", capabilities: { reasoning: true } },
 					{ id: "ag/claude-sonnet-4-6", capabilities: { reasoning: true } },
 					{ id: "ag/claude-opus-4-6-thinking", capabilities: { reasoning: true } },
 					{ id: "ag/gpt-oss-120b-medium", capabilities: { reasoning: true } },
@@ -117,14 +117,14 @@ test("retains fallbacks offline and replaces them with the exact live catalog", 
 		assert.equal(fetches, 1);
 		assert.deepEqual(live.map(({ id }) => id), [
 			"cx/gpt-5.6-terra",
-			"ag/gemini-3.7-flash-high",
+			"cbcn/glm-5.3",
 			"ag/claude-sonnet-4-6",
 			"ag/claude-opus-4-6-thinking",
 			"ag/gpt-oss-120b-medium",
 		]);
 		assert.deepEqual((await provider.refreshModels({ allowNetwork: false, signal })).map(({ id }) => id), [
 			"cx/gpt-5.6-terra",
-			"ag/gemini-3.7-flash-high",
+			"cbcn/glm-5.3",
 			"ag/claude-sonnet-4-6",
 			"ag/claude-opus-4-6-thinking",
 			"ag/gpt-oss-120b-medium",

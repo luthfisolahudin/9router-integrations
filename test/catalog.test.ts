@@ -4,12 +4,12 @@ import test from "node:test";
 import { displayName, fetchCatalog, parseCatalog, resolveApiBaseUrl, resolveBaseUrl } from "../src/catalog.ts";
 
 test("preserves exact catalog membership", () => {
-	const records = parseCatalog({ data: [{ id: "cbcn/glm-5.2" }, { id: "cbcn/kimi-k3" }] });
-	assert.deepEqual(records.map(({ id }) => id), ["cbcn/glm-5.2", "cbcn/kimi-k3"]);
+	const records = parseCatalog({ data: [{ id: "cbcn/glm-5.3" }, { id: "cbcn/kimi-k3" }] });
+	assert.deepEqual(records.map(({ id }) => id), ["cbcn/glm-5.3", "cbcn/kimi-k3"]);
 });
 
 test("rejects malformed and duplicate records instead of dropping them", () => {
-	assert.throws(() => parseCatalog({ data: [{ id: "cbcn/glm-5.2" }, {}] }), /usable id/);
+	assert.throws(() => parseCatalog({ data: [{ id: "cbcn/glm-5.3" }, {}] }), /usable id/);
 	assert.throws(() => parseCatalog({ data: [{ id: "same" }, { id: "same" }] }), /duplicate/);
 });
 
@@ -34,18 +34,19 @@ test("normalizes root and v1 URLs for discovery and OpenAI API calls", async () 
 });
 
 test("renders friendly names for the active catalog", () => {
-	assert.equal(displayName("cbcn/glm-5.2"), "GLM 5.2 (CodeBuddy CN)");
 	assert.equal(displayName("cbcn/minimax-m3"), "MiniMax M3 (CodeBuddy CN)");
+	assert.equal(displayName("cbcn/glm-5.3"), "GLM 5.3 (CodeBuddy CN)");
+	assert.equal(displayName("cbcn/glm-5.3-flash"), "GLM 5.3 Flash (CodeBuddy CN)");
+	assert.equal(displayName("cbcn/kimi-k3-1"), "Kimi K3 1 (CodeBuddy CN)");
 	assert.equal(displayName("cbcn/deepseek-v4-pro"), "DeepSeek V4 Pro (CodeBuddy CN)");
 	assert.equal(displayName("cbcn/deepseek-v4-flash"), "DeepSeek V4 Flash (CodeBuddy CN)");
 	assert.equal(displayName("cbcn/kimi-k3"), "Kimi K3 (CodeBuddy CN)");
+	assert.equal(displayName("cx/gpt-6-astra"), "GPT 6 Astra (OpenAI Codex)");
 	assert.equal(displayName("cx/gpt-5.6-sol"), "GPT 5.6 Sol (OpenAI Codex)");
 	assert.equal(displayName("cx/gpt-5.6-terra"), "GPT 5.6 Terra (OpenAI Codex)");
 	assert.equal(displayName("cx/gpt-5.6-luna"), "GPT 5.6 Luna (OpenAI Codex)");
+	assert.equal(displayName("cx/gpt-5.5"), "GPT 5.5 (OpenAI Codex)");
 	assert.equal(displayName("ag/gemini-3.8-flash-high"), "Gemini 3.8 Flash High (Antigravity)");
-	assert.equal(displayName("ag/gemini-3.8-flash-medium"), "Gemini 3.8 Flash Medium (Antigravity)");
-	assert.equal(displayName("ag/gemini-3.8-flash-low"), "Gemini 3.8 Flash Low (Antigravity)");
-	assert.equal(displayName("ag/gemini-3.7-flash-high"), "Gemini 3.7 Flash High (Antigravity)");
 	assert.equal(displayName("ag/claude-sonnet-4-6"), "Claude Sonnet 4.6 (Antigravity)");
 	assert.equal(displayName("ag/claude-opus-4-6-thinking"), "Claude Opus 4.6 Thinking (Antigravity)");
 	assert.equal(displayName("ag/gpt-oss-120b-medium"), "GPT OSS 120B Medium (Antigravity)");

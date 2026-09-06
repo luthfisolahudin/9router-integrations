@@ -16,8 +16,8 @@ test("projects exactly the live records with one max variant", async () => {
 		new Response(
 			JSON.stringify({
 				data: [
-					{ id: "cbcn/glm-5.2", capabilities: { reasoning: true } },
-					{ id: "ag/gemini-3.7-flash-high", capabilities: { reasoning: true } },
+					{ id: "cbcn/glm-5.3", capabilities: { reasoning: true } },
+					{ id: "cx/gpt-5.5", capabilities: { reasoning: true } },
 					{ id: "ag/claude-sonnet-4-6", capabilities: { reasoning: true } },
 					{ id: "ag/claude-opus-4-6-thinking", capabilities: { reasoning: true } },
 					{ id: "ag/gpt-oss-120b-medium", capabilities: { reasoning: true } },
@@ -41,22 +41,23 @@ test("projects exactly the live records with one max variant", async () => {
 		assert.equal(provider.options.baseURL, "http://127.0.0.1:20128/v1");
 		const models = provider.models;
 		assert.deepEqual(Object.keys(models), [
-			"cbcn/glm-5.2",
-			"ag/gemini-3.7-flash-high",
+			"cbcn/glm-5.3",
+			"cx/gpt-5.5",
 			"ag/claude-sonnet-4-6",
 			"ag/claude-opus-4-6-thinking",
 			"ag/gpt-oss-120b-medium",
 		]);
-		assert.deepEqual(models["cbcn/glm-5.2"].options, { reasoningEffort: "xhigh" });
-		assert.deepEqual(models["cbcn/glm-5.2"].variants, { max: { reasoningEffort: "xhigh" } });
-		assert.equal(models["ag/gemini-3.7-flash-high"].reasoning, true);
-		assert.deepEqual(models["ag/gemini-3.7-flash-high"].options, { reasoningEffort: "max" });
-		assert.deepEqual(models["ag/gemini-3.7-flash-high"].variants, { max: { reasoningEffort: "max" } });
+		assert.deepEqual(models["cbcn/glm-5.3"].options, { reasoningEffort: "max" });
+		assert.deepEqual(models["cbcn/glm-5.3"].variants, { max: { reasoningEffort: "max" } });
+		assert.equal(models["cx/gpt-5.5"].reasoning, true);
+		assert.deepEqual(models["cx/gpt-5.5"].options, { reasoningEffort: "xhigh" });
+		assert.deepEqual(models["cx/gpt-5.5"].variants, { max: { reasoningEffort: "xhigh" } });
 		assert.deepEqual(models["ag/claude-sonnet-4-6"].options, { reasoningEffort: "max" });
+		assert.deepEqual(models["ag/claude-sonnet-4-6"].variants, { max: { reasoningEffort: "max" } });
 		assert.deepEqual(models["ag/claude-opus-4-6-thinking"].options, { reasoningEffort: "max" });
 		assert.deepEqual(models["ag/claude-opus-4-6-thinking"].variants, { max: { reasoningEffort: "max" } });
-		assert.deepEqual(models["ag/gpt-oss-120b-medium"].options, { reasoningEffort: "max" });
-		assert.deepEqual(models["ag/gpt-oss-120b-medium"].variants, { max: { reasoningEffort: "max" } });
+		assert.deepEqual(models["ag/gpt-oss-120b-medium"].options, { reasoningEffort: "xhigh" });
+		assert.deepEqual(models["ag/gpt-oss-120b-medium"].variants, { max: { reasoningEffort: "xhigh" } });
 	} finally {
 		globalThis.fetch = originalFetch;
 	}

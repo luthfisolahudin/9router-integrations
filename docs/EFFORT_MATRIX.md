@@ -1,72 +1,78 @@
 # 9Router effort matrix
 
-Measured on 2026-08-03, 2026-08-25, and 2026-08-27 through local 9Router. The current
-`/v1/models` response contains eleven active reasoning models; the effort
-entries below cover those models plus the previously measured historical
-record.
+Measured on 2026-09-06 through local 9Router. The current `/v1/models` response
+contains sixteen active reasoning models; the effort entries below cover those
+models.
 
-- `cbcn/glm-5.2`: client `max` -> wire `xhigh`
 - `cbcn/minimax-m3`: client `max` -> wire `xhigh`
+- `cbcn/glm-5.3`: client `max` -> wire `max`
+- `cbcn/glm-5.3-flash`: client `max` -> wire `max`
+- `cbcn/kimi-k3-1`: client `max` -> wire `xhigh`
 - `cbcn/deepseek-v4-pro`: client `max` -> wire `xhigh`
 - `cbcn/deepseek-v4-flash`: client `max` -> wire `xhigh`
-- `cbcn/kimi-k3`: client `max` -> wire `xhigh`
+- `cbcn/kimi-k3`: client `max` -> wire `max`
+- `cx/gpt-6-astra`: client `max` -> wire `max`
 - `cx/gpt-5.6-sol`: client `max` -> wire `max`
 - `cx/gpt-5.6-terra`: client `max` -> wire `max`
 - `cx/gpt-5.6-luna`: client `max` -> wire `max`
+- `cx/gpt-5.5`: client `max` -> wire `xhigh`
 - `ag/gemini-3.8-flash-high`: client `max` -> wire `max`
-- `ag/gemini-3.8-flash-medium`: client `max` -> wire `max`
-- `ag/gemini-3.8-flash-low`: client `max` -> wire `max`
-- `ag/gemini-3.7-flash-high`: client `max` -> wire `max`
 - `ag/claude-sonnet-4-6`: client `max` -> wire `max`
 - `ag/claude-opus-4-6-thinking`: client `max` -> wire `max`
-- `ag/gpt-oss-120b-medium`: client `max` -> wire `max`
+- `ag/gpt-oss-120b-medium`: client `max` -> wire `xhigh`
 
-Models with the `ag` owner prefix are labeled as Antigravity in client model pickers.
+Models with the `ag` owner prefix are labeled as Antigravity in client model
+pickers. Models with `cbcn` are labeled as CodeBuddy CN, and `cx` as OpenAI
+Codex.
 
 This is a compatibility-route matrix, not a claim about native provider
-capability. Kimi K3 advertises native `max` support, but OpenCode, standalone Pi,
-and tt Pi currently use 9Router's OpenAI Chat Completions route at
-`<router-root>/v1`. That route was the measured boundary and normalized literal
-`max` to `xhigh`.
+capability. OpenCode, standalone Pi, and tt Pi use 9Router's OpenAI Chat
+Completions route at `<router-root>/v1`. 9Router console request logs print
+`THINK:<level>` for each routed request, providing safe observable evidence of
+the effective effort actually transmitted upstream.
 
 Pi uses its `openai-completions` adapter with OpenAI `reasoning_effort` and
-replays reasoning through `reasoning_content`. Kimi was also probed on
-2026-08-03 through the historical `/v1/messages` Anthropic Messages transport
-with adaptive thinking and `output_config.effort=max`. It completed successfully,
-but 9Router still reported `THINK:xhigh`.
+replays reasoning through `reasoning_content`.
 
-On 2026-08-24, standalone Pi, OpenCode, and a tracked tt worker each completed
-exact text, read-tool, and generated-image turns through OpenAI Chat
-Completions. All three read `TT OPENAI IMAGE 7429` exactly and completed with
-requested Terra `max`. The Terra route exposes no safe metadata proving a
-distinct effective effort beyond that requested wire value.
+For `cbcn/glm-5.3`, `cbcn/glm-5.3-flash`, and `cbcn/kimi-k3`, explicit
+`reasoning_effort=max` requests completed with HTTP 200, `finish_reason=stop`,
+and router logs reported `THINK:max`. While older router revisions normalized
+Kimi K3 to `xhigh`, the updated router transmits literal `max`.
 
-For the five CodeBuddy CN models, an explicit `reasoning_effort=max` request
-completed but safe 9Router metadata reported `THINK:xhigh`, proving that `max`
-was normalized. The matching explicit `xhigh` request completed with
-`finish_reason=stop` and metadata reported `THINK:xhigh`.
+For `cbcn/minimax-m3`, `cbcn/kimi-k3-1`, `cbcn/deepseek-v4-pro`, and
+`cbcn/deepseek-v4-flash`, an explicit `reasoning_effort=max` request completed
+with HTTP 200 but safe router metadata reported `THINK:xhigh`, proving that `max`
+was normalized. Matching explicit `xhigh` requests completed with
+`finish_reason=stop` and router metadata reported `THINK:xhigh`.
 
-For the three `cx` models, explicit `reasoning_effort=max` requests completed
-with HTTP 200 and `finish_reason=stop`. The route exposed no safe effective-
-effort metadata and gave no evidence that `max` was rejected, normalized, or
-ignored, so the highest-first policy keeps literal `max`. No hidden reasoning,
-credentials, or request payloads were retained.
+For `cx/gpt-5.6-terra` and `cx/gpt-5.6-luna`, explicit `reasoning_effort=max`
+requests completed with HTTP 200, `finish_reason=stop`, and router logs
+reported `THINK:max`.
 
-For Claude Opus 4.6 Thinking, baseline and explicit `reasoning_effort=max`
-requests completed with HTTP 200, `finish_reason=stop`, and the exact requested
-text. The route exposed no safe effective-effort metadata or evidence of
-normalization, so the highest-first policy keeps literal `max`.
+For `cx/gpt-5.5`, explicit `reasoning_effort=max` completed with HTTP 200 and
+`finish_reason=stop`, but router logs reported `THINK:xhigh`, proving
+normalization. Matching explicit `xhigh` requests completed with HTTP 200 and
+`THINK:xhigh`.
 
-For Claude Sonnet 4.6, baseline and explicit `reasoning_effort=max` requests
-completed with HTTP 200, `finish_reason=stop`, and the exact requested text.
-The route exposed no safe effective-effort metadata or evidence of
-normalization, so the highest-first policy keeps literal `max`.
+For `cx/gpt-6-astra` and `cx/gpt-5.6-sol`, the router accepted
+`reasoning_effort=max` and reported `THINK:max`. Upstream Codex returns HTTP 400
+for ChatGPT-authenticated accounts regardless of requested effort, but the
+router shows no normalization, so highest-first keeps literal `max`.
 
-For GPT OSS 120B Medium, baseline and explicit `reasoning_effort=max` requests
-completed with HTTP 200, `finish_reason=stop`, the exact requested text, and
-OpenAI-format `reasoning_content`. The route exposed no safe effective-effort
-metadata or evidence of normalization, so the highest-first policy keeps
-literal `max`.
+For `ag/gemini-3.8-flash-high`, explicit `reasoning_effort=max` requests
+completed with HTTP 200, and the router translated it to Gemini's highest tier
+`THINK:high`. Literal wire `max` is preserved.
+
+For `ag/claude-sonnet-4-6`, explicit `reasoning_effort=max` completed with
+HTTP 200, `finish_reason=stop`, and router logs reported `THINK:max`.
+
+For `ag/claude-opus-4-6-thinking`, explicit `reasoning_effort=max` completed
+with HTTP 200 and the router translated it to Claude budget `THINK:128k`.
+Literal wire `max` is preserved.
+
+For `ag/gpt-oss-120b-medium`, explicit `reasoning_effort=max` completed with
+HTTP 200, and the router logged `THINK:xhigh`. Matching explicit `xhigh`
+completed with HTTP 200 and `THINK:xhigh`.
 
 Client-facing `max` therefore means "the highest effort this route actually
 applies," not a promise to transmit the literal string `max`.

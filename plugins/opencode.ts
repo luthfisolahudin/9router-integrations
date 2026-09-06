@@ -24,7 +24,7 @@ export function toOpenCodeModel(record: CatalogRecord) {
 		...(effort
 			? {
 					interleaved: { field: "reasoning_content" as const },
-					// 9Router currently normalizes wire max to xhigh; see docs/EFFORT_MATRIX.md.
+					// Client max maps to the measured wire value; see docs/EFFORT_MATRIX.md.
 					options: { reasoningEffort: effort },
 					variants: { max: { reasoningEffort: effort } },
 				}
