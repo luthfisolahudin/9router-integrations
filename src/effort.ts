@@ -26,16 +26,3 @@ export function measuredWireEffort(modelId: string): WireEffort | undefined {
 		? MEASURED_WIRE_EFFORT[modelId as keyof typeof MEASURED_WIRE_EFFORT]
 		: undefined;
 }
-
-/**
- * Resolves the measured highest wire effort behind client-facing `max`.
- * @throws When an active reasoning model has not been measured.
- * @see ../docs/EFFORT_MATRIX.md
- */
-export function highestWireEffort(modelId: string): WireEffort {
-	const effort = measuredWireEffort(modelId);
-	if (effort === undefined) {
-		throw new Error(`No measured 9Router effort for active reasoning model: ${modelId}`);
-	}
-	return effort;
-}

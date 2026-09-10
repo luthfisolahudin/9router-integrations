@@ -20,7 +20,20 @@ declare module "@earendil-works/pi-coding-agent" {
 		compat?: {
 			requiresReasoningContentOnAssistantMessages?: boolean;
 			supportsReasoningEffort?: boolean;
-			thinkingFormat?: "openai";
+			// Mirror @earendil-works/pi-ai's ThinkingFormat union (types.d.ts) so
+			// this shim does not silently narrow real values the adapter accepts.
+			thinkingFormat?:
+				| "openai"
+				| "openrouter"
+				| "together"
+				| "baseten"
+				| "deepseek"
+				| "zai"
+				| "qwen"
+				| "chat-template"
+				| "qwen-chat-template"
+				| "string-thinking"
+				| "ant-ling";
 		};
 	}
 

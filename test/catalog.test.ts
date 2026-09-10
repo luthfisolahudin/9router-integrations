@@ -57,3 +57,17 @@ test("degrades gracefully on unknown owners, slugs, and missing prefixes", () =>
 	assert.equal(displayName("acme/foo-bar"), "Foo Bar (acme)");
 	assert.equal(displayName("orphan-model"), "Orphan Model");
 });
+
+test("never renders an empty picker label for partial ids", () => {
+	assert.equal(displayName(""), "");
+	assert.equal(displayName("/"), "/");
+	assert.equal(displayName("/b"), "B");
+	assert.equal(displayName("a/"), "a/");
+});
+
+test("normalizes noisy base URLs and rejects whitespace-only ids", async () => {
+	assert.equal(resolveBaseUrl("  http://127.0.0.1:20128/v1  "), "http://127.0.0.1:20128");
+	assert.equal(resolveApiBaseUrl("http://127.0.0.1:20128/V1"), "http://127.0.0.1:20128/v1");
+	assert.throws(() => parseCatalog({ data: [{ id: "   " }] }), /usable id/);
+	assert.deepEqual(parseCatalog({ data: [{ id: "  cbcn/glm-5.3  " }] }).map(({ id }) => id), ["cbcn/glm-5.3"]);
+});

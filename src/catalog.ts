@@ -46,7 +46,7 @@ export function catalogCapabilities(record: CatalogRecord): Record<string, unkno
  */
 export function requireStringId(record: Record<string, unknown>): string {
 	const id = record.id;
-	if (typeof id === "string" && id.length > 0) return id;
+	if (typeof id === "string" && id.trim().length > 0) return id.trim();
 	throw new Error("9Router catalog entry is missing a usable id");
 }
 
@@ -109,14 +109,17 @@ function prettifySlugToken(token: string): string {
 
 /**
  * Renders a catalog model ID for pickers: `cbcn/kimi-k3` -> `Kimi K3 (CodeBuddy CN)`.
+ * Degrades to the raw id when no owner/slug is present, so malformed or partial
+ * ids never render empty picker labels like `" ()"`.
  * @see ../README.md
  */
 export function displayName(id: string): string {
 	const slash = id.indexOf("/");
-	const owner = slash === -1 ? undefined : id.slice(0, slash);
-	const slug = slash === -1 ? id : id.slice(slash + 1);
+	const owner = slash === -1 ? "" : id.slice(0, slash).trim();
+	const slug = (slash === -1 ? id : id.slice(slash + 1)).trim();
+	if (slug.length === 0) return id;
 	const pretty = KNOWN_MODEL_NAMES[id] ?? slug.split("-").map(prettifySlugToken).join(" ");
-	if (owner === undefined) return pretty;
+	if (owner.length === 0) return pretty;
 	return `${pretty} (${KNOWN_OWNERS[owner] ?? owner})`;
 }
 
@@ -129,8 +132,9 @@ function combinedSignal(external: AbortSignal | undefined, timeoutMs: number | u
 
 export function resolveBaseUrl(value?: string): string {
 	return (value ?? process.env.NINE_ROUTER_BASE_URL ?? DEFAULT_BASE_URL)
+		.trim()
 		.replace(/\/+$/, "")
-		.replace(/\/v1$/, "");
+		.replace(/\/v1$/i, "");
 }
 
 /** Resolves 9Router's OpenAI-compatible API root. @see ../README.md */
