@@ -84,6 +84,22 @@ Title generation bypasses that hook, so the plugin pins OpenCode's small model
 to the measured DeepSeek V4 Flash path instead of letting each selected model
 receive an internal lower-effort request.
 
+## Capability invariants
+
+Effort is only half of the catalog contract: modality is the other. The router
+derives `vision` from its own hand-written tables and name heuristics, and a
+table gap silently drops image input without throwing. `cbcn/deepseek-v4.1-flash`
+regressed this way — the CodeBuddy CN table had no exact entry, so the id fell
+through to the generic `*deepseek-v4*` pattern (no `vision`), and both client
+projections emitted `input: ["text"]` even though V4.1-Flash ships a natively
+trained DeepSeek-ViT vision encoder. `src/invariants.ts` records that fact (and
+similar externally verifiable ones) so `pnpm check:catalog` fails instead of
+silently degrading a model.
+
+When adding a model whose modality or reasoning support is externally
+verifiable, add an invariant entry alongside the effort measurement. Run
+`pnpm check:catalog` after any router, CodeBuddy, or connection-set change.
+
 Re-fetch the live catalog and repeat `max` first whenever 9Router, CodeBuddy,
 the active connection set, or one of these model revisions changes. Retry
 `xhigh` only when `max` fails or is demonstrably normalized or ignored. An

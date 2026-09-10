@@ -32,11 +32,19 @@ pnpm check:catalog
 ```
 
 `pnpm check:catalog` fetches the live catalog, exercises both client
-projections, and fails when a new reasoning model has no measured wire-effort
-entry. Runtime integrations keep that model visible without forcing an
-unverified effort while the measurement is pending. Pass
-`pnpm check:catalog --allow-unmeasured` when checking projection compatibility
-without requiring the effort table to be complete.
+projections, verifies curated capability invariants, and fails when a new
+reasoning model has no measured wire-effort entry. Runtime integrations keep
+that model visible without forcing an unverified effort while the measurement
+is pending. Pass `pnpm check:catalog --allow-unmeasured` when checking
+projection compatibility without requiring the effort table to be complete, or
+`--allow-stale` while pruning effort entries for retired models.
+
+The capability invariants in `src/invariants.ts` are the independent source of
+truth for externally verifiable facts (for example, that
+`cbcn/deepseek-v4.1-flash` is natively multimodal). They catch a router
+capability regression that the projections alone cannot: a wrong `vision` flag
+silently drops image input without throwing, so `check:catalog` would otherwise
+pass.
 
 Live effort evidence and the re-probe rule are recorded in
 [`docs/EFFORT_MATRIX.md`](docs/EFFORT_MATRIX.md).
