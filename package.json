@@ -4,6 +4,10 @@
   "private": true,
   "description": "Canonical 9Router model-catalog integration shared by OpenCode, standalone Pi, and tt Pi.",
   "type": "module",
+  "packageManager": "pnpm@12.3.4",
+  "engines": {
+    "node": ">=22.18.0"
+  },
   "scripts": {
     "test": "node --test test/*.test.ts",
     "typecheck": "tsc -p tsconfig.json",
