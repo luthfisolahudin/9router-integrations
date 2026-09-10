@@ -4,11 +4,12 @@ import test from "node:test";
 import { highestWireEffort, measuredWireEffort, MEASURED_WIRE_EFFORT } from "../src/effort.ts";
 
 test("maps every measured model to its highest observed route effort", () => {
-	assert.equal(Object.keys(MEASURED_WIRE_EFFORT).length, 16);
+	assert.equal(Object.keys(MEASURED_WIRE_EFFORT).length, 17);
 	for (const id of Object.keys(MEASURED_WIRE_EFFORT)) {
 		assert.equal(highestWireEffort(id), MEASURED_WIRE_EFFORT[id as keyof typeof MEASURED_WIRE_EFFORT]);
 	}
 	assert.equal(highestWireEffort("cbcn/deepseek-v4-flash"), "xhigh");
+	assert.equal(highestWireEffort("cbcn/deepseek-v4.1-flash"), "xhigh");
 	assert.equal(highestWireEffort("cbcn/glm-5.3"), "max");
 	assert.equal(highestWireEffort("cbcn/kimi-k3"), "max");
 	assert.equal(highestWireEffort("cbcn/kimi-k3-1"), "xhigh");

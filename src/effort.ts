@@ -7,6 +7,7 @@ export const MEASURED_WIRE_EFFORT = {
 	"cbcn/kimi-k3-1": "xhigh",
 	"cbcn/deepseek-v4-pro": "xhigh",
 	"cbcn/deepseek-v4-flash": "xhigh",
+	"cbcn/deepseek-v4.1-flash": "xhigh",
 	"cbcn/kimi-k3": "max",
 	"cx/gpt-6-astra": "max",
 	"cx/gpt-5.6-sol": "max",

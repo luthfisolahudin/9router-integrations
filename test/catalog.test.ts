@@ -40,6 +40,7 @@ test("renders friendly names for the active catalog", () => {
 	assert.equal(displayName("cbcn/kimi-k3-1"), "Kimi K3 1 (CodeBuddy CN)");
 	assert.equal(displayName("cbcn/deepseek-v4-pro"), "DeepSeek V4 Pro (CodeBuddy CN)");
 	assert.equal(displayName("cbcn/deepseek-v4-flash"), "DeepSeek V4 Flash (CodeBuddy CN)");
+	assert.equal(displayName("cbcn/deepseek-v4.1-flash"), "DeepSeek V4.1 Flash (CodeBuddy CN)");
 	assert.equal(displayName("cbcn/kimi-k3"), "Kimi K3 (CodeBuddy CN)");
 	assert.equal(displayName("cx/gpt-6-astra"), "GPT 6 Astra (OpenAI Codex)");
 	assert.equal(displayName("cx/gpt-5.6-sol"), "GPT 5.6 Sol (OpenAI Codex)");

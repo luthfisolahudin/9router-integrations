@@ -1,8 +1,8 @@
 # 9Router effort matrix
 
-Measured on 2026-09-06 through local 9Router. The current `/v1/models` response
-contains sixteen active reasoning models; the effort entries below cover those
-models.
+Measured on 2026-09-06 and 2026-09-10 through local 9Router. The current
+`/v1/models` response contains seventeen active reasoning models; the effort
+entries below cover those models.
 
 - `cbcn/minimax-m3`: client `max` -> wire `xhigh`
 - `cbcn/glm-5.3`: client `max` -> wire `max`
@@ -10,6 +10,7 @@ models.
 - `cbcn/kimi-k3-1`: client `max` -> wire `xhigh`
 - `cbcn/deepseek-v4-pro`: client `max` -> wire `xhigh`
 - `cbcn/deepseek-v4-flash`: client `max` -> wire `xhigh`
+- `cbcn/deepseek-v4.1-flash`: client `max` -> wire `xhigh`
 - `cbcn/kimi-k3`: client `max` -> wire `max`
 - `cx/gpt-6-astra`: client `max` -> wire `max`
 - `cx/gpt-5.6-sol`: client `max` -> wire `max`
@@ -39,11 +40,12 @@ For `cbcn/glm-5.3`, `cbcn/glm-5.3-flash`, and `cbcn/kimi-k3`, explicit
 and router logs reported `THINK:max`. While older router revisions normalized
 Kimi K3 to `xhigh`, the updated router transmits literal `max`.
 
-For `cbcn/minimax-m3`, `cbcn/kimi-k3-1`, `cbcn/deepseek-v4-pro`, and
-`cbcn/deepseek-v4-flash`, an explicit `reasoning_effort=max` request completed
-with HTTP 200 but safe router metadata reported `THINK:xhigh`, proving that `max`
-was normalized. Matching explicit `xhigh` requests completed with
-`finish_reason=stop` and router metadata reported `THINK:xhigh`.
+For `cbcn/minimax-m3`, `cbcn/kimi-k3-1`, `cbcn/deepseek-v4-pro`,
+`cbcn/deepseek-v4-flash`, and `cbcn/deepseek-v4.1-flash`, an explicit
+`reasoning_effort=max` request completed with HTTP 200 but safe router metadata
+reported `THINK:xhigh`, proving that `max` was normalized. Matching explicit
+`xhigh` requests completed with `finish_reason=stop` and router metadata
+reported `THINK:xhigh`.
 
 For `cx/gpt-5.6-terra` and `cx/gpt-5.6-luna`, explicit `reasoning_effort=max`
 requests completed with HTTP 200, `finish_reason=stop`, and router logs
