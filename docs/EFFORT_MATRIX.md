@@ -2,7 +2,9 @@
 
 Measured on 2026-09-06 and 2026-09-10 through local 9Router. The current
 `/v1/models` response contains seventeen active reasoning models; the effort
-entries below cover those models.
+entries below cover those models. The `ag/gemini-3.8-flash-high` translation
+was re-confirmed on 2026-09-13 against router revision `b8442118` (a
+pi-originated request logged `THINK:high`).
 
 - `cbcn/minimax-m3`: client `max` -> wire `xhigh`
 - `cbcn/glm-5.3`: client `max` -> wire `max`
@@ -63,7 +65,12 @@ router shows no normalization, so highest-first keeps literal `max`.
 
 For `ag/gemini-3.8-flash-high`, explicit `reasoning_effort=max` requests
 completed with HTTP 200, and the router translated it to Gemini's highest tier
-`THINK:high`. Literal wire `max` is preserved.
+`THINK:high`. Literal wire `max` is preserved. Re-confirmed 2026-09-13 on
+revision `b8442118`: the router logged `THINK:high` for a pi-originated `POST
+ag/gemini-3.8-flash-high`; the upstream completion could not be re-observed that
+day because the container could not reach the Google API to refresh the
+Antigravity OAuth token. This entry asserts the router-side translation, not the
+upstream completion.
 
 For `ag/claude-sonnet-4-6`, explicit `reasoning_effort=max` completed with
 HTTP 200, `finish_reason=stop`, and router logs reported `THINK:max`.
