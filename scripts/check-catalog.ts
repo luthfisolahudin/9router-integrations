@@ -48,12 +48,13 @@ if (absentInvariants.length > 0) {
 	console.error("Remove the invariant if the retirement is intentional.");
 }
 
-if (
+const failed =
 	projectionFailures.length > 0 ||
 	capabilityViolations.length > 0 ||
 	(staleEffortEntries.length > 0 && !allowStale) ||
-	(unmeasuredReasoningModels.length > 0 && !allowUnmeasured)
-) {
+	(unmeasuredReasoningModels.length > 0 && !allowUnmeasured);
+
+if (failed) {
 	process.exitCode = 1;
 } else {
 	console.log(
