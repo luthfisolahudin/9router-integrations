@@ -4,6 +4,7 @@ import test from "node:test";
 import type { Config } from "@opencode-ai/plugin";
 
 import { NineRouterModels, toOpenCodeModel } from "../plugins/opencode.ts";
+import { catalogFixture, mockFetch } from "./helpers.ts";
 
 test("keeps an unmeasured reasoning model visible without forcing effort", () => {
 	const model = toOpenCodeModel({ id: "ag/future-reasoning-model", capabilities: { reasoning: true } });
@@ -13,23 +14,21 @@ test("keeps an unmeasured reasoning model visible without forcing effort", () =>
 });
 
 test("projects exactly the live records with one max variant", async () => {
-	const originalFetch = globalThis.fetch;
-	globalThis.fetch = async () =>
+	const restoreFetch = mockFetch(async () =>
 		new Response(
-			JSON.stringify({
-				data: [
-					{ id: "cbcn/glm-5.3", capabilities: { reasoning: true } },
-					{ id: "cx/gpt-5.5", capabilities: { reasoning: true } },
-					{ id: "ag/claude-sonnet-4-6", capabilities: { reasoning: true } },
-					{ id: "ag/claude-opus-4-6-thinking", capabilities: { reasoning: true } },
-					{ id: "ag/gpt-oss-120b-medium", capabilities: { reasoning: true } },
-				],
-			}),
+			catalogFixture(
+				{ id: "cbcn/glm-5.3", capabilities: { reasoning: true } },
+				{ id: "cx/gpt-5.5", capabilities: { reasoning: true } },
+				{ id: "ag/claude-sonnet-4-6", capabilities: { reasoning: true } },
+				{ id: "ag/claude-opus-4-6-thinking", capabilities: { reasoning: true } },
+				{ id: "ag/gpt-oss-120b-medium", capabilities: { reasoning: true } },
+			),
 			{
 				status: 200,
 				headers: { "content-type": "application/json" },
 			},
-		);
+		)
+	);
 	try {
 		const hooks = await NineRouterModels({} as never);
 		const config: Config = { provider: {}, small_model: "" };
@@ -65,7 +64,7 @@ test("projects exactly the live records with one max variant", async () => {
 		assert.deepEqual(models["ag/gpt-oss-120b-medium"].options, { reasoningEffort: "max" });
 		assert.deepEqual(models["ag/gpt-oss-120b-medium"].variants, { max: { reasoningEffort: "max" } });
 	} finally {
-		globalThis.fetch = originalFetch;
+		restoreFetch();
 	}
 });
 

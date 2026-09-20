@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import registerNineRouter, { toPiModel } from "../extensions/pi.ts";
+import { catalogFixture, mockFetch } from "./helpers.ts";
 
 type RegisteredProvider = {
 	api: string;
@@ -83,28 +84,25 @@ test("registers the OpenAI Chat Completions provider with pinned fallbacks", () 
 });
 
 test("retains fallbacks offline and replaces them with the exact live catalog", async () => {
-	const originalFetch = globalThis.fetch;
 	let fetches = 0;
 	let requestSignal: AbortSignal | null | undefined;
-	globalThis.fetch = async (_input, init) => {
+	const restoreFetch = mockFetch(async (_input, init) => {
 		fetches += 1;
 		requestSignal = init?.signal;
 		return new Response(
-			JSON.stringify({
-				data: [
-					{ id: "cx/gpt-5.6-terra", capabilities: { reasoning: true } },
-					{ id: "cbcn/glm-5.3", capabilities: { reasoning: true } },
-					{ id: "ag/claude-sonnet-4-6", capabilities: { reasoning: true } },
-					{ id: "ag/claude-opus-4-6-thinking", capabilities: { reasoning: true } },
-					{ id: "ag/gpt-oss-120b-medium", capabilities: { reasoning: true } },
-				],
-			}),
+			catalogFixture(
+				{ id: "cx/gpt-5.6-terra", capabilities: { reasoning: true } },
+				{ id: "cbcn/glm-5.3", capabilities: { reasoning: true } },
+				{ id: "ag/claude-sonnet-4-6", capabilities: { reasoning: true } },
+				{ id: "ag/claude-opus-4-6-thinking", capabilities: { reasoning: true } },
+				{ id: "ag/gpt-oss-120b-medium", capabilities: { reasoning: true } },
+			),
 			{
 				status: 200,
 				headers: { "content-type": "application/json" },
 			},
 		);
-	};
+	});
 	try {
 		const provider = registeredProvider();
 		const signal = new AbortController().signal;
@@ -131,18 +129,18 @@ test("retains fallbacks offline and replaces them with the exact live catalog", 
 		]);
 		assert.equal(fetches, 1);
 	} finally {
-		globalThis.fetch = originalFetch;
+		restoreFetch();
 	}
 });
 
 test("aborts a Pi catalog refresh through its signal", async () => {
-	const originalFetch = globalThis.fetch;
 	let requestSignal: AbortSignal | null | undefined;
-	globalThis.fetch = async (_input, init) =>
+	const restoreFetch = mockFetch(async (_input, init) =>
 		await new Promise<Response>((_resolve, reject) => {
 			requestSignal = init?.signal;
 			requestSignal?.addEventListener("abort", () => reject(new Error("aborted")), { once: true });
-		});
+		})
+	);
 	try {
 		const controller = new AbortController();
 		const refresh = registeredProvider().refreshModels({ allowNetwork: true, signal: controller.signal });
@@ -151,17 +149,16 @@ test("aborts a Pi catalog refresh through its signal", async () => {
 		controller.abort();
 		await assert.rejects(refresh, /discovery was aborted/);
 	} finally {
-		globalThis.fetch = originalFetch;
+		restoreFetch();
 	}
 });
 
 test("does not fetch when the Pi refresh signal is already aborted", async () => {
-	const originalFetch = globalThis.fetch;
 	let fetches = 0;
-	globalThis.fetch = async () => {
+	const restoreFetch = mockFetch(async () => {
 		fetches += 1;
 		throw new Error("refresh must not fetch after abort");
-	};
+	});
 	try {
 		const controller = new AbortController();
 		controller.abort();
@@ -169,6 +166,6 @@ test("does not fetch when the Pi refresh signal is already aborted", async () =>
 		assert.equal(fetches, 0);
 		assert.deepEqual(models.map(({ id }) => id), ["cbcn/deepseek-v4.1-flash", "cx/gpt-5.6-terra"]);
 	} finally {
-		globalThis.fetch = originalFetch;
+		restoreFetch();
 	}
 });
