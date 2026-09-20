@@ -1,42 +1,17 @@
-import { catalogCapabilities, fetchCatalog } from "../src/catalog.ts";
-import { measuredWireEffort, MEASURED_WIRE_EFFORT } from "../src/effort.ts";
-import { checkCapabilityInvariants } from "../src/invariants.ts";
-import { toOpenCodeModel } from "../plugins/opencode.ts";
-import { toPiModel } from "../extensions/pi.ts";
+import { fetchCatalog } from "../src/catalog.ts";
+import { buildCatalogReport } from "../src/check-report.ts";
 
 const allowUnmeasured = process.argv.includes("--allow-unmeasured");
 const allowStale = process.argv.includes("--allow-stale");
 
-function formatError(error: unknown): string {
-	return error instanceof Error ? error.message : String(error);
-}
-
 const records = await fetchCatalog();
-const projectionFailures: string[] = [];
-const unmeasuredReasoningModels: string[] = [];
-const { violations: capabilityViolations, absent: absentInvariants } = checkCapabilityInvariants(records);
-
-for (const record of records) {
-	try {
-		toOpenCodeModel(record);
-	} catch (error) {
-		projectionFailures.push(`OpenCode ${record.id}: ${formatError(error)}`);
-	}
-	try {
-		toPiModel(record);
-	} catch (error) {
-		projectionFailures.push(`Pi ${record.id}: ${formatError(error)}`);
-	}
-
-	if (catalogCapabilities(record).reasoning === true && measuredWireEffort(record.id) === undefined) {
-		unmeasuredReasoningModels.push(record.id);
-	}
-}
-
-// A measured effort for a model the router no longer serves is stale evidence:
-// it silently survives catalog changes and implies coverage that no longer exists.
-const liveIds = new Set(records.map((record) => record.id));
-const staleEffortEntries = Object.keys(MEASURED_WIRE_EFFORT).filter((modelId) => !liveIds.has(modelId));
+const {
+	projectionFailures,
+	capabilityViolations,
+	staleEffortEntries,
+	unmeasuredReasoningModels,
+	absentInvariants,
+} = buildCatalogReport(records);
 
 if (projectionFailures.length > 0) {
 	console.error("9Router integration check failed: a catalog record crashes a client projection.");
@@ -73,13 +48,14 @@ if (absentInvariants.length > 0) {
 	console.error("Remove the invariant if the retirement is intentional.");
 }
 
-const failed =
+if (
 	projectionFailures.length > 0 ||
 	capabilityViolations.length > 0 ||
 	(staleEffortEntries.length > 0 && !allowStale) ||
-	(unmeasuredReasoningModels.length > 0 && !allowUnmeasured);
-
-if (!failed) {
+	(unmeasuredReasoningModels.length > 0 && !allowUnmeasured)
+) {
+	process.exitCode = 1;
+} else {
 	console.log(
 		`9Router catalog OK: ${records.length} model(s) projected for OpenCode and Pi; capability invariants hold.`,
 	);
