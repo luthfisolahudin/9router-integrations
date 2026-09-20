@@ -9,6 +9,11 @@ policy shared by OpenCode, standalone Pi, and tt Pi.
 - `extensions/pi.ts` registers Pi's OpenAI Chat Completions-compatible provider at `<router-root>/v1`.
 - `src/catalog.ts` owns discovery and exact catalog validation.
 - `src/effort.ts` owns the measured model-to-wire-effort mapping.
+- `src/capabilities.ts` projects raw capability flags into the shared view both
+  client integrations read.
+- `src/check-report.ts` is the pure analysis behind `pnpm check:catalog`; the
+  script only fetches, prints, and sets the exit code.
+- `src/invariants.ts` owns curated capability ground truth.
 
 Consumers load these TypeScript entrypoints directly from this repository. No
 package publication or runtime dependency installation is required.
