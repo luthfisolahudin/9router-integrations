@@ -1,14 +1,7 @@
 import type { ExtensionAPI, ProviderConfig, ProviderModelConfig } from "@earendil-works/pi-coding-agent";
 
-import {
-	catalogCapabilities,
-	displayName,
-	fetchCatalog,
-	resolveApiBaseUrl,
-	resolveApiKey,
-	type CatalogRecord,
-} from "../src/catalog.ts";
-import { measuredWireEffort } from "../src/effort.ts";
+import { capabilityView } from "../src/capabilities.ts";
+import { displayName, fetchCatalog, resolveApiBaseUrl, resolveApiKey, type CatalogRecord } from "../src/catalog.ts";
 
 const ZERO_COST = { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 };
 const HIDDEN_THINKING_LEVELS = {
@@ -50,19 +43,18 @@ function positiveNumber(value: unknown, fallback: number): number {
  * @see ../docs/EFFORT_MATRIX.md
  */
 export function toPiModel(record: CatalogRecord): ProviderModelConfig {
-	const capabilities = catalogCapabilities(record);
-	const reasoning = capabilities.reasoning === true;
-	const effort = reasoning ? measuredWireEffort(record.id) : undefined;
+	const capabilities = capabilityView(record);
+	const effort = capabilities.effort;
 
 	return {
 		id: record.id,
 		name: displayName(record.id),
-		reasoning,
-		input: capabilities.vision === true ? ["text", "image"] : ["text"],
+		reasoning: capabilities.reasoning,
+		input: capabilities.vision ? ["text", "image"] : ["text"],
 		cost: ZERO_COST,
 		contextWindow: positiveNumber(capabilities.contextWindow, 128_000),
 		maxTokens: positiveNumber(capabilities.maxOutput, 16_384),
-		...(reasoning && effort !== undefined
+		...(capabilities.reasoning && effort !== undefined
 			? {
 					// Client max maps to the measured wire value; see docs/EFFORT_MATRIX.md.
 					thinkingLevelMap: { ...HIDDEN_THINKING_LEVELS, max: effort },

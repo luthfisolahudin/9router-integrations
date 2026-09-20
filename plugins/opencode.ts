@@ -1,26 +1,26 @@
 import type { Plugin } from "@opencode-ai/plugin";
 
-import { catalogCapabilities, displayName, fetchCatalog, resolveApiKey, resolveBaseUrl, type CatalogRecord } from "../src/catalog.ts";
+import { capabilityView } from "../src/capabilities.ts";
+import { displayName, fetchCatalog, resolveApiKey, resolveBaseUrl, type CatalogRecord } from "../src/catalog.ts";
 import { measuredWireEffort } from "../src/effort.ts";
 
 export function toOpenCodeModel(record: CatalogRecord) {
-	const capabilities = catalogCapabilities(record);
-	const reasoning = capabilities.reasoning === true;
+	const capabilities = capabilityView(record);
 	const input: Array<"text" | "audio" | "image" | "video" | "pdf"> = ["text"];
 	const output: Array<"text" | "audio" | "image" | "video" | "pdf"> = ["text"];
-	if (capabilities.audioInput === true) input.push("audio");
-	if (capabilities.vision === true) input.push("image");
-	if (capabilities.videoInput === true) input.push("video");
-	if (capabilities.pdf === true) input.push("pdf");
-	if (capabilities.imageOutput === true) output.push("image");
-	if (capabilities.audioOutput === true) output.push("audio");
+	if (capabilities.audioInput) input.push("audio");
+	if (capabilities.vision) input.push("image");
+	if (capabilities.videoInput) input.push("video");
+	if (capabilities.pdf) input.push("pdf");
+	if (capabilities.imageOutput) output.push("image");
+	if (capabilities.audioOutput) output.push("audio");
 
-	const effort = reasoning ? measuredWireEffort(record.id) : undefined;
+	const effort = capabilities.effort;
 	return {
 		name: displayName(record.id),
 		attachment: input.length > 1,
-		reasoning,
-		...(typeof capabilities.tools === "boolean" ? { tool_call: capabilities.tools } : {}),
+		reasoning: capabilities.reasoning,
+		...(capabilities.tools !== undefined ? { tool_call: capabilities.tools } : {}),
 		...(effort
 			? {
 					interleaved: { field: "reasoning_content" as const },
@@ -29,7 +29,7 @@ export function toOpenCodeModel(record: CatalogRecord) {
 					variants: { max: { reasoningEffort: effort } },
 				}
 			: {}),
-		...(typeof capabilities.contextWindow === "number" && typeof capabilities.maxOutput === "number"
+		...(capabilities.contextWindow !== undefined && capabilities.maxOutput !== undefined
 			? { limit: { context: capabilities.contextWindow, output: capabilities.maxOutput } }
 			: {}),
 		modalities: { input, output },
