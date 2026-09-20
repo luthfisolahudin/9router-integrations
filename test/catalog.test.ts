@@ -242,3 +242,17 @@ test("falls back to defaults when env is unset", () => {
 		if (originalKey !== undefined) process.env.NINE_ROUTER_API_KEY = originalKey;
 	}
 });
+
+test("rejects whitespace-only base URLs and API keys instead of fetching an empty host", () => {
+	assert.throws(() => resolveBaseUrl("   "), /base URL is empty/);
+	assert.throws(() => resolveApiKey("   "), /API key is empty/);
+	// The env fallback must get the same guard, not just explicit arguments.
+	const originalKey = process.env.NINE_ROUTER_API_KEY;
+	process.env.NINE_ROUTER_API_KEY = "  ";
+	try {
+		assert.throws(() => resolveApiKey(), /API key is empty/);
+	} finally {
+		if (originalKey === undefined) delete process.env.NINE_ROUTER_API_KEY;
+		else process.env.NINE_ROUTER_API_KEY = originalKey;
+	}
+});

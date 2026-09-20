@@ -147,10 +147,15 @@ function combinedSignal(external: AbortSignal | undefined, timeoutMs: number | u
 }
 
 export function resolveBaseUrl(value?: string): string {
-	return (value ?? process.env.NINE_ROUTER_BASE_URL ?? DEFAULT_BASE_URL)
+	const resolved = (value ?? process.env.NINE_ROUTER_BASE_URL ?? DEFAULT_BASE_URL)
 		.trim()
-		.replace(/\/+$/, "")
-		.replace(/\/v1$/i, "");
+		.replace(/\/+$/, "");
+	if (resolved.length === 0) {
+		throw new Error(
+			"9Router base URL is empty after trimming; set NINE_ROUTER_BASE_URL or pass baseUrl explicitly",
+		);
+	}
+	return resolved.replace(/\/v1$/i, "");
 }
 
 /** Resolves 9Router's OpenAI-compatible API root. @see ../README.md */
@@ -159,7 +164,11 @@ export function resolveApiBaseUrl(value?: string): string {
 }
 
 export function resolveApiKey(value?: string): string {
-	return value ?? process.env.NINE_ROUTER_API_KEY ?? DEFAULT_API_KEY;
+	const resolved = value ?? process.env.NINE_ROUTER_API_KEY ?? DEFAULT_API_KEY;
+	if (resolved.trim().length === 0) {
+		throw new Error("9Router API key is empty; set NINE_ROUTER_API_KEY or pass apiKey explicitly");
+	}
+	return resolved;
 }
 
 /**
