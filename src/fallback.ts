@@ -12,6 +12,9 @@ export const STARTUP_FALLBACK: readonly CatalogRecord[] = [
 		capabilities: {
 			vision: true,
 			reasoning: true,
+			// Mirrors the curated invariant: offline OpenCode must keep tool calls
+			// on its pinned small model, not just when the router is up.
+			tools: true,
 			contextWindow: 1_000_000,
 			maxOutput: 384_000,
 		},
