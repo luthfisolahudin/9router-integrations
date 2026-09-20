@@ -22,12 +22,12 @@ const HIDDEN_THINKING_LEVELS = {
 
 const STARTUP_FALLBACK: CatalogRecord[] = [
 	{
-		id: "cbcn/deepseek-v4-flash",
+		id: "cbcn/deepseek-v4.1-flash",
 		capabilities: {
 			vision: true,
 			reasoning: true,
 			contextWindow: 1_000_000,
-			maxOutput: 50_000,
+			maxOutput: 384_000,
 		},
 	},
 	{

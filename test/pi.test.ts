@@ -26,7 +26,7 @@ function registeredProvider(): RegisteredProvider {
 }
 
 test("uses OpenAI reasoning fields for the measured client max map", () => {
-	const model = toPiModel({ id: "cbcn/kimi-k3-1", capabilities: { reasoning: true } });
+	const model = toPiModel({ id: "cbcn/minimax-m3", capabilities: { reasoning: true } });
 	assert.deepEqual(model.thinkingLevelMap, {
 		off: null,
 		minimal: null,
@@ -56,7 +56,7 @@ test("registers the OpenAI Chat Completions provider with pinned fallbacks", () 
 	assert.equal(provider.baseUrl, "http://127.0.0.1:20128/v1");
 	assert.equal(provider.authHeader, true);
 	assert.notEqual(provider.apiKey.length, 0);
-	assert.deepEqual(provider.models.map(({ id }) => id), ["cbcn/deepseek-v4-flash", "cx/gpt-5.6-terra"]);
+	assert.deepEqual(provider.models.map(({ id }) => id), ["cbcn/deepseek-v4.1-flash", "cx/gpt-5.6-terra"]);
 	assert.deepEqual(provider.models[1], {
 		id: "cx/gpt-5.6-terra",
 		name: "GPT 5.6 Terra (OpenAI Codex)",
@@ -72,7 +72,7 @@ test("registers the OpenAI Chat Completions provider with pinned fallbacks", () 
 			medium: null,
 			high: null,
 			xhigh: null,
-			max: "max",
+			max: "xhigh",
 		},
 		compat: {
 			requiresReasoningContentOnAssistantMessages: true,
@@ -110,7 +110,7 @@ test("retains fallbacks offline and replaces them with the exact live catalog", 
 		const signal = new AbortController().signal;
 		const offline = await provider.refreshModels({ allowNetwork: false, signal });
 		assert.equal(fetches, 0);
-		assert.deepEqual(offline.map(({ id }) => id), ["cbcn/deepseek-v4-flash", "cx/gpt-5.6-terra"]);
+		assert.deepEqual(offline.map(({ id }) => id), ["cbcn/deepseek-v4.1-flash", "cx/gpt-5.6-terra"]);
 
 		const live = await provider.refreshModels({ allowNetwork: true, signal });
 		assert.equal(requestSignal?.aborted, false);
@@ -167,7 +167,7 @@ test("does not fetch when the Pi refresh signal is already aborted", async () =>
 		controller.abort();
 		const models = await registeredProvider().refreshModels({ allowNetwork: true, signal: controller.signal });
 		assert.equal(fetches, 0);
-		assert.deepEqual(models.map(({ id }) => id), ["cbcn/deepseek-v4-flash", "cx/gpt-5.6-terra"]);
+		assert.deepEqual(models.map(({ id }) => id), ["cbcn/deepseek-v4.1-flash", "cx/gpt-5.6-terra"]);
 	} finally {
 		globalThis.fetch = originalFetch;
 	}

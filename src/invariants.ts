@@ -31,24 +31,9 @@ export const CAPABILITY_INVARIANTS: readonly CapabilityInvariant[] = [
 		note: "V4.1-Flash is natively multimodal (DeepSeek-ViT vision encoder in the base model); text+image input, 1M context, 384K output.",
 	},
 	{
-		id: "cbcn/deepseek-v4-pro",
-		expected: { vision: true, reasoning: true },
-		note: "V4-Pro accepts image input per the CodeBuddy CN gateway capability table.",
-	},
-	{
-		id: "cbcn/deepseek-v4-flash",
-		expected: { vision: true, reasoning: true },
-		note: "V4-Flash accepts image input (its vision variant was folded into V4.1-Flash).",
-	},
-	{
 		id: "cbcn/kimi-k3",
 		expected: { vision: true, reasoning: true, videoInput: true },
 		note: "Kimi K3 is a multimodal reasoning model with image and video input.",
-	},
-	{
-		id: "cbcn/kimi-k3-1",
-		expected: { vision: true, reasoning: true },
-		note: "Kimi K3-1 is the image-capable reasoning variant.",
 	},
 	{
 		id: "cbcn/minimax-m3",

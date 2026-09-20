@@ -3,8 +3,15 @@ import test from "node:test";
 
 import { displayName, fetchCatalog, parseCatalog, resolveApiBaseUrl, resolveBaseUrl } from "../src/catalog.ts";
 
-test("preserves exact catalog membership", () => {
-	const records = parseCatalog({ data: [{ id: "cbcn/glm-5.3" }, { id: "cbcn/kimi-k3" }] });
+test("preserves exact catalog membership while excluding dropped models", () => {
+	const records = parseCatalog({
+		data: [
+			{ id: "cbcn/glm-5.3" },
+			{ id: "cbcn/kimi-k3" },
+			{ id: "cbcn/deepseek-v4-flash" },
+			{ id: "cx/codex-auto-review" },
+		],
+	});
 	assert.deepEqual(records.map(({ id }) => id), ["cbcn/glm-5.3", "cbcn/kimi-k3"]);
 });
 
@@ -37,9 +44,6 @@ test("renders friendly names for the active catalog", () => {
 	assert.equal(displayName("cbcn/minimax-m3"), "MiniMax M3 (CodeBuddy CN)");
 	assert.equal(displayName("cbcn/glm-5.3"), "GLM 5.3 (CodeBuddy CN)");
 	assert.equal(displayName("cbcn/glm-5.3-flash"), "GLM 5.3 Flash (CodeBuddy CN)");
-	assert.equal(displayName("cbcn/kimi-k3-1"), "Kimi K3 1 (CodeBuddy CN)");
-	assert.equal(displayName("cbcn/deepseek-v4-pro"), "DeepSeek V4 Pro (CodeBuddy CN)");
-	assert.equal(displayName("cbcn/deepseek-v4-flash"), "DeepSeek V4 Flash (CodeBuddy CN)");
 	assert.equal(displayName("cbcn/deepseek-v4.1-flash"), "DeepSeek V4.1 Flash (CodeBuddy CN)");
 	assert.equal(displayName("cbcn/kimi-k3"), "Kimi K3 (CodeBuddy CN)");
 	assert.equal(displayName("cx/gpt-6-astra"), "GPT 6 Astra (OpenAI Codex)");
@@ -47,10 +51,10 @@ test("renders friendly names for the active catalog", () => {
 	assert.equal(displayName("cx/gpt-5.6-terra"), "GPT 5.6 Terra (OpenAI Codex)");
 	assert.equal(displayName("cx/gpt-5.6-luna"), "GPT 5.6 Luna (OpenAI Codex)");
 	assert.equal(displayName("cx/gpt-5.5"), "GPT 5.5 (OpenAI Codex)");
-	assert.equal(displayName("ag/gemini-3.8-flash-high"), "Gemini 3.8 Flash High (Antigravity)");
+	assert.equal(displayName("ag/gemini-3.8-flash-high"), "Gemini 3.8 Flash (Antigravity)");
 	assert.equal(displayName("ag/claude-sonnet-4-6"), "Claude Sonnet 4.6 (Antigravity)");
-	assert.equal(displayName("ag/claude-opus-4-6-thinking"), "Claude Opus 4.6 Thinking (Antigravity)");
-	assert.equal(displayName("ag/gpt-oss-120b-medium"), "GPT OSS 120B Medium (Antigravity)");
+	assert.equal(displayName("ag/claude-opus-4-6-thinking"), "Claude Opus 4.6 (Antigravity)");
+	assert.equal(displayName("ag/gpt-oss-120b-medium"), "GPT OSS 120B (Antigravity)");
 });
 
 test("degrades gracefully on unknown owners, slugs, and missing prefixes", () => {

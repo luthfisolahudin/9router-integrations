@@ -19,7 +19,7 @@ Model IDs remain the canonical key everywhere else. Catalog discovery remains at
 `<router-root>/v1/models`, while OpenCode and Pi use `<router-root>/v1` as their
 OpenAI-compatible API base.
 
-Pi starts offline with DeepSeek V4 Flash and the tt-pinned GPT 5.6 Terra
+Pi starts offline with DeepSeek V4.1 Flash and the tt-pinned GPT 5.6 Terra
 fallback. Terra is a reasoning, text-and-image model with a 272,000-token
 context window and 128,000-token output limit. A successful catalog refresh
 replaces those fallbacks with the exact live membership.

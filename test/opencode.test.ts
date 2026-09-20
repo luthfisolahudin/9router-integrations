@@ -32,7 +32,7 @@ test("projects exactly the live records with one max variant", async () => {
 		const hooks = await NineRouterModels({} as never);
 		const config = { provider: {}, small_model: "" };
 		await hooks.config?.(config as never);
-		assert.equal(config.small_model, "9router/cbcn/deepseek-v4-flash");
+		assert.equal(config.small_model, "9router/cbcn/deepseek-v4.1-flash");
 		const provider = (config.provider as Record<
 			string,
 			{ models: Record<string, { variants: unknown; options: unknown }>; npm: string; options: { baseURL: string } }
@@ -47,8 +47,8 @@ test("projects exactly the live records with one max variant", async () => {
 			"ag/claude-opus-4-6-thinking",
 			"ag/gpt-oss-120b-medium",
 		]);
-		assert.deepEqual(models["cbcn/glm-5.3"].options, { reasoningEffort: "max" });
-		assert.deepEqual(models["cbcn/glm-5.3"].variants, { max: { reasoningEffort: "max" } });
+		assert.deepEqual(models["cbcn/glm-5.3"].options, { reasoningEffort: "xhigh" });
+		assert.deepEqual(models["cbcn/glm-5.3"].variants, { max: { reasoningEffort: "xhigh" } });
 		assert.equal(models["cx/gpt-5.5"].reasoning, true);
 		assert.deepEqual(models["cx/gpt-5.5"].options, { reasoningEffort: "xhigh" });
 		assert.deepEqual(models["cx/gpt-5.5"].variants, { max: { reasoningEffort: "xhigh" } });
@@ -56,8 +56,8 @@ test("projects exactly the live records with one max variant", async () => {
 		assert.deepEqual(models["ag/claude-sonnet-4-6"].variants, { max: { reasoningEffort: "max" } });
 		assert.deepEqual(models["ag/claude-opus-4-6-thinking"].options, { reasoningEffort: "max" });
 		assert.deepEqual(models["ag/claude-opus-4-6-thinking"].variants, { max: { reasoningEffort: "max" } });
-		assert.deepEqual(models["ag/gpt-oss-120b-medium"].options, { reasoningEffort: "xhigh" });
-		assert.deepEqual(models["ag/gpt-oss-120b-medium"].variants, { max: { reasoningEffort: "xhigh" } });
+		assert.deepEqual(models["ag/gpt-oss-120b-medium"].options, { reasoningEffort: "max" });
+		assert.deepEqual(models["ag/gpt-oss-120b-medium"].variants, { max: { reasoningEffort: "max" } });
 	} finally {
 		globalThis.fetch = originalFetch;
 	}

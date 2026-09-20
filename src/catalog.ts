@@ -50,6 +50,13 @@ export function requireStringId(record: Record<string, unknown>): string {
 	throw new Error("9Router catalog entry is missing a usable id");
 }
 
+export const DROPPED_MODEL_IDS = new Set<string>([
+	"cbcn/kimi-k3-1",
+	"cbcn/deepseek-v4-pro",
+	"cbcn/deepseek-v4-flash",
+	"cx/codex-auto-review",
+]);
+
 /**
  * Validates a 9Router model-list response without changing its membership.
  * @throws When the response is malformed, empty, or contains duplicate IDs.
@@ -69,13 +76,15 @@ export function parseCatalog(payload: unknown): CatalogRecord[] {
 	}
 
 	const seen = new Set<string>();
-	const records = entries.map((entry) => {
+	const records: CatalogRecord[] = [];
+	for (const entry of entries) {
 		if (!isRecord(entry)) throw new Error("9Router catalog contains a non-object model record");
 		const id = requireStringId(entry);
 		if (seen.has(id)) throw new Error(`9Router catalog contains duplicate model id: ${id}`);
 		seen.add(id);
-		return { ...entry, id } as CatalogRecord;
-	});
+		if (DROPPED_MODEL_IDS.has(id)) continue;
+		records.push({ ...entry, id } as CatalogRecord);
+	}
 	return records;
 }
 
@@ -95,8 +104,10 @@ const KNOWN_OWNERS: Record<string, string> = {
 	cx: "OpenAI Codex",
 };
 const KNOWN_MODEL_NAMES: Record<string, string> = {
-	"ag/claude-opus-4-6-thinking": "Claude Opus 4.6 Thinking",
+	"ag/claude-opus-4-6-thinking": "Claude Opus 4.6",
 	"ag/claude-sonnet-4-6": "Claude Sonnet 4.6",
+	"ag/gemini-3.8-flash-high": "Gemini 3.8 Flash",
+	"ag/gpt-oss-120b-medium": "GPT OSS 120B",
 };
 
 function prettifySlugToken(token: string): string {

@@ -1,32 +1,28 @@
 # 9Router effort matrix
 
-Measured on 2026-09-06 and 2026-09-10 through local 9Router. The current
-`/v1/models` response contains seventeen active reasoning models; the effort
-entries below cover those models. The `ag/gemini-3.8-flash-high` translation
-was re-confirmed on 2026-09-13 against router revision `b8442118` (a
-pi-originated request logged `THINK:high`).
+Measured through local 9Router. The current active reasoning models and their
+configured wire effort mappings are listed below:
 
 - `cbcn/minimax-m3`: client `max` -> wire `xhigh`
-- `cbcn/glm-5.3`: client `max` -> wire `max`
-- `cbcn/glm-5.3-flash`: client `max` -> wire `max`
-- `cbcn/kimi-k3-1`: client `max` -> wire `xhigh`
-- `cbcn/deepseek-v4-pro`: client `max` -> wire `xhigh`
-- `cbcn/deepseek-v4-flash`: client `max` -> wire `xhigh`
+- `cbcn/glm-5.3`: client `max` -> wire `xhigh`
+- `cbcn/glm-5.3-flash`: client `max` -> wire `xhigh`
 - `cbcn/deepseek-v4.1-flash`: client `max` -> wire `xhigh`
-- `cbcn/kimi-k3`: client `max` -> wire `max`
-- `cx/gpt-6-astra`: client `max` -> wire `max`
-- `cx/gpt-5.6-sol`: client `max` -> wire `max`
-- `cx/gpt-5.6-terra`: client `max` -> wire `max`
-- `cx/gpt-5.6-luna`: client `max` -> wire `max`
+- `cbcn/kimi-k3`: client `max` -> wire `xhigh`
+- `cx/gpt-6-astra`: client `max` -> wire `xhigh`
+- `cx/gpt-5.6-sol`: client `max` -> wire `xhigh`
+- `cx/gpt-5.6-terra`: client `max` -> wire `xhigh`
+- `cx/gpt-5.6-luna`: client `max` -> wire `xhigh`
 - `cx/gpt-5.5`: client `max` -> wire `xhigh`
 - `ag/gemini-3.8-flash-high`: client `max` -> wire `max`
 - `ag/claude-sonnet-4-6`: client `max` -> wire `max`
 - `ag/claude-opus-4-6-thinking`: client `max` -> wire `max`
-- `ag/gpt-oss-120b-medium`: client `max` -> wire `xhigh`
+- `ag/gpt-oss-120b-medium`: client `max` -> wire `max`
 
 Models with the `ag` owner prefix are labeled as Antigravity in client model
 pickers. Models with `cbcn` are labeled as CodeBuddy CN, and `cx` as OpenAI
-Codex.
+Codex. Unused models (`cbcn/kimi-k3-1`, `cbcn/deepseek-v4-pro`,
+`cbcn/deepseek-v4-flash`, and `cx/codex-auto-review`) are dropped from client catalog
+projections.
 
 This is a compatibility-route matrix, not a claim about native provider
 capability. OpenCode, standalone Pi, and tt Pi use 9Router's OpenAI Chat
@@ -88,7 +84,7 @@ applies," not a promise to transmit the literal string `max`.
 
 OpenCode applies the mapping in its model defaults and request-parameter hook.
 Title generation bypasses that hook, so the plugin pins OpenCode's small model
-to the measured DeepSeek V4 Flash path instead of letting each selected model
+to the measured DeepSeek V4.1 Flash path instead of letting each selected model
 receive an internal lower-effort request.
 
 ## Capability invariants
