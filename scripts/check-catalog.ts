@@ -1,5 +1,5 @@
 import { fetchCatalog } from "../src/catalog.ts";
-import { buildCatalogReport } from "../src/check-report.ts";
+import { buildCatalogReport, isFatalCheck } from "../src/check-report.ts";
 
 const allowUnmeasured = process.argv.includes("--allow-unmeasured");
 const allowStale = process.argv.includes("--allow-stale");
@@ -55,13 +55,12 @@ if (staleDisplayNameEntries.length > 0) {
 	console.error("Remove the entry if the retirement is intentional.");
 }
 
-const failed =
-	projectionFailures.length > 0 ||
-	capabilityViolations.length > 0 ||
-	(staleEffortEntries.length > 0 && !allowStale) ||
-	(unmeasuredReasoningModels.length > 0 && !allowUnmeasured);
-
-if (failed) {
+if (
+	isFatalCheck(
+		{ projectionFailures, capabilityViolations, staleEffortEntries, unmeasuredReasoningModels },
+		{ allowStale, allowUnmeasured },
+	)
+) {
 	process.exitCode = 1;
 } else {
 	console.log(

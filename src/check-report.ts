@@ -69,3 +69,20 @@ export function buildCatalogReport(records: readonly CatalogRecord[]): CatalogCh
 		staleDisplayNameEntries,
 	};
 }
+
+/**
+ * Decides whether a check run fails after the CLI's leniency flags. Pure so
+ * the flag semantics (stale/unmeasured tolerances) stay testable without
+ * spawning the script.
+ */
+export function isFatalCheck(
+	report: Pick<CatalogCheckReport, "projectionFailures" | "capabilityViolations" | "staleEffortEntries" | "unmeasuredReasoningModels">,
+	options: { allowStale: boolean; allowUnmeasured: boolean },
+): boolean {
+	return (
+		report.projectionFailures.length > 0 ||
+		report.capabilityViolations.length > 0 ||
+		(report.staleEffortEntries.length > 0 && !options.allowStale) ||
+		(report.unmeasuredReasoningModels.length > 0 && !options.allowUnmeasured)
+	);
+}

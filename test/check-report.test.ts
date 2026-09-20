@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import type { CatalogRecord } from "../src/catalog.ts";
-import { buildCatalogReport } from "../src/check-report.ts";
+import { buildCatalogReport, isFatalCheck } from "../src/check-report.ts";
 import { catalogFixture } from "./helpers.ts";
 
 // Replica of the live 14-model catalog with invariant-satisfying capabilities,
@@ -99,4 +99,17 @@ test("flags curated display names for retired models without failing the report"
 test("reports no stale display names for the full live-shaped catalog", () => {
 	const report = buildCatalogReport(recordsFrom(...LIVE_CATALOG));
 	assert.deepEqual(report.staleDisplayNameEntries, []);
+});
+
+test("isFatalCheck honors the stale and unmeasured leniency flags", () => {
+	const base = { projectionFailures: [], capabilityViolations: [] };
+	// Stale entries fail unless --allow-stale.
+	assert.equal(isFatalCheck({ ...base, staleEffortEntries: ["x"], unmeasuredReasoningModels: [] }, { allowStale: false, allowUnmeasured: false }), true);
+	assert.equal(isFatalCheck({ ...base, staleEffortEntries: ["x"], unmeasuredReasoningModels: [] }, { allowStale: true, allowUnmeasured: false }), false);
+	// Unmeasured models fail unless --allow-unmeasured.
+	assert.equal(isFatalCheck({ ...base, staleEffortEntries: [], unmeasuredReasoningModels: ["y"] }, { allowStale: false, allowUnmeasured: false }), true);
+	assert.equal(isFatalCheck({ ...base, staleEffortEntries: [], unmeasuredReasoningModels: ["y"] }, { allowStale: false, allowUnmeasured: true }), false);
+	// Leniency flags never rescue projection crashes or capability violations.
+	assert.equal(isFatalCheck({ ...base, projectionFailures: ["crash"], staleEffortEntries: [], unmeasuredReasoningModels: [] }, { allowStale: true, allowUnmeasured: true }), true);
+	assert.equal(isFatalCheck({ ...base, capabilityViolations: ["contradiction"], staleEffortEntries: [], unmeasuredReasoningModels: [] }, { allowStale: true, allowUnmeasured: true }), true);
 });
