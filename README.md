@@ -13,6 +13,7 @@ policy shared by OpenCode, standalone Pi, and tt Pi.
   client integrations read.
 - `src/check-report.ts` is the pure analysis behind `pnpm check:catalog`; the
   script only fetches, prints, and sets the exit code.
+- `src/fallback.ts` owns the pinned offline startup catalog shared by both clients.
 - `src/invariants.ts` owns curated capability ground truth.
 
 Consumers load these TypeScript entrypoints directly from this repository. No
@@ -24,10 +25,11 @@ Model IDs remain the canonical key everywhere else. Catalog discovery remains at
 `<router-root>/v1/models`, while OpenCode and Pi use `<router-root>/v1` as their
 OpenAI-compatible API base.
 
-Pi starts offline with DeepSeek V4.1 Flash and the tt-pinned GPT 5.6 Terra
-fallback. Terra is a reasoning, text-and-image model with a 272,000-token
-context window and 128,000-token output limit. A successful catalog refresh
-replaces those fallbacks with the exact live membership.
+Both clients start offline with DeepSeek V4.1 Flash and the tt-pinned GPT 5.6
+Terra fallback (`src/fallback.ts`); OpenCode logs a discovery-failure warning
+when it boots on the fallback. Terra is a reasoning, text-and-image model with
+a 272,000-token context window and 128,000-token output limit. A successful
+catalog refresh replaces those fallbacks with the exact live membership.
 
 ## Checks
 

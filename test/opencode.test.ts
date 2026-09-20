@@ -134,6 +134,22 @@ test("preserves user-supplied provider options while filling 9router defaults", 
 	}
 });
 
+test("starts OpenCode on pinned fallback models when discovery fails", async () => {
+	const restoreFetch = mockFetch(async () => {
+		throw new Error("connection refused");
+	});
+	try {
+		const hooks = await NineRouterModels({} as never);
+		const config: Config = { provider: {} };
+		await hooks.config?.(config);
+		const provider = (config.provider as Record<string, { models: Record<string, unknown> }>)["9router"];
+		assert.deepEqual(Object.keys(provider.models), ["cbcn/deepseek-v4.1-flash", "cx/gpt-5.6-terra"]);
+		assert.equal(config.small_model, "9router/cbcn/deepseek-v4.1-flash");
+	} finally {
+		restoreFetch();
+	}
+});
+
 test("does not override effort for an unmeasured reasoning model", async () => {
 	const hooks = await NineRouterModels({} as never);
 	const output = { temperature: 0, topP: 1, options: { reasoningEffort: "minimal" } };

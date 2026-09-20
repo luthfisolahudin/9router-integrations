@@ -3,6 +3,7 @@ import type { Plugin } from "@opencode-ai/plugin";
 import { capabilityView } from "../src/capabilities.ts";
 import { displayName, fetchCatalog, resolveApiKey, resolveBaseUrl, type CatalogRecord } from "../src/catalog.ts";
 import { measuredWireEffort } from "../src/effort.ts";
+import { STARTUP_FALLBACK } from "../src/fallback.ts";
 
 export function toOpenCodeModel(record: CatalogRecord) {
 	const capabilities = capabilityView(record);
@@ -39,7 +40,18 @@ export function toOpenCodeModel(record: CatalogRecord) {
 /** Loads the exact active 9Router catalog into OpenCode. */
 export const NineRouterModels: Plugin = async () => ({
 	config: async (config) => {
-		const models = Object.fromEntries((await fetchCatalog()).map((record) => [record.id, toOpenCodeModel(record)]));
+		// Offline parity with Pi: start on the pinned fallback records, then swap
+		// in the exact live membership once discovery succeeds.
+		let records: CatalogRecord[];
+		try {
+			records = await fetchCatalog();
+		} catch (error) {
+			records = STARTUP_FALLBACK as CatalogRecord[];
+			console.error(
+				`9Router model discovery failed (${error instanceof Error ? error.message : String(error)}); starting with ${records.length} pinned fallback models until a refresh succeeds`,
+			);
+		}
+		const models = Object.fromEntries(records.map((record) => [record.id, toOpenCodeModel(record)]));
 		// Title turns bypass chat.params; pin them to a measured model. See docs/EFFORT_MATRIX.md.
 		config.small_model = "9router/cbcn/deepseek-v4.1-flash";
 		config.provider ??= {};

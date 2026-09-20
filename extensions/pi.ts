@@ -2,6 +2,7 @@ import type { ExtensionAPI, ProviderConfig, ProviderModelConfig } from "@earendi
 
 import { capabilityView } from "../src/capabilities.ts";
 import { displayName, fetchCatalog, resolveApiBaseUrl, resolveApiKey, type CatalogRecord } from "../src/catalog.ts";
+import { STARTUP_FALLBACK } from "../src/fallback.ts";
 
 const ZERO_COST = { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 };
 const HIDDEN_THINKING_LEVELS = {
@@ -12,27 +13,6 @@ const HIDDEN_THINKING_LEVELS = {
 	high: null,
 	xhigh: null,
 } satisfies NonNullable<ProviderModelConfig["thinkingLevelMap"]>;
-
-const STARTUP_FALLBACK: CatalogRecord[] = [
-	{
-		id: "cbcn/deepseek-v4.1-flash",
-		capabilities: {
-			vision: true,
-			reasoning: true,
-			contextWindow: 1_000_000,
-			maxOutput: 384_000,
-		},
-	},
-	{
-		id: "cx/gpt-5.6-terra",
-		capabilities: {
-			vision: true,
-			reasoning: true,
-			contextWindow: 272_000,
-			maxOutput: 128_000,
-		},
-	},
-];
 
 function positiveNumber(value: unknown, fallback: number): number {
 	return typeof value === "number" && Number.isFinite(value) && value > 0 ? value : fallback;
