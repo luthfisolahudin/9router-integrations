@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { displayName, fetchCatalog, parseCatalog, resolveApiBaseUrl, resolveBaseUrl } from "../src/catalog.ts";
+import { displayName, fetchCatalog, parseCatalog, resolveApiBaseUrl, resolveApiKey, resolveBaseUrl } from "../src/catalog.ts";
 import { catalogFixture, mockFetch } from "./helpers.ts";
 
 test("preserves exact catalog membership while excluding dropped models", () => {
@@ -126,4 +126,39 @@ test("normalizes noisy base URLs and rejects whitespace-only ids", async () => {
 	assert.equal(resolveApiBaseUrl("http://127.0.0.1:20128/V1"), "http://127.0.0.1:20128/v1");
 	assert.throws(() => parseCatalog({ data: [{ id: "   " }] }), /usable id/);
 	assert.deepEqual(parseCatalog({ data: [{ id: "  cbcn/glm-5.3  " }] }).map(({ id }) => id), ["cbcn/glm-5.3"]);
+});
+
+test("prefers explicit arguments over env, then env over defaults", () => {
+	const originalUrl = process.env.NINE_ROUTER_BASE_URL;
+	const originalKey = process.env.NINE_ROUTER_API_KEY;
+	process.env.NINE_ROUTER_BASE_URL = "http://10.0.0.5:20128/v1/";
+	process.env.NINE_ROUTER_API_KEY = "env-key";
+	try {
+		assert.equal(resolveBaseUrl(), "http://10.0.0.5:20128");
+		assert.equal(resolveApiBaseUrl(), "http://10.0.0.5:20128/v1");
+		assert.equal(resolveApiKey(), "env-key");
+		assert.equal(resolveBaseUrl("http://127.0.0.1:20128"), "http://127.0.0.1:20128");
+		assert.equal(resolveApiKey("explicit-key"), "explicit-key");
+		assert.equal(resolveBaseUrl(undefined), "http://10.0.0.5:20128");
+	} finally {
+		if (originalUrl === undefined) delete process.env.NINE_ROUTER_BASE_URL;
+		else process.env.NINE_ROUTER_BASE_URL = originalUrl;
+		if (originalKey === undefined) delete process.env.NINE_ROUTER_API_KEY;
+		else process.env.NINE_ROUTER_API_KEY = originalKey;
+	}
+});
+
+test("falls back to defaults when env is unset", () => {
+	const originalUrl = process.env.NINE_ROUTER_BASE_URL;
+	const originalKey = process.env.NINE_ROUTER_API_KEY;
+	delete process.env.NINE_ROUTER_BASE_URL;
+	delete process.env.NINE_ROUTER_API_KEY;
+	try {
+		assert.equal(resolveBaseUrl(), "http://127.0.0.1:20128");
+		assert.equal(resolveApiBaseUrl(), "http://127.0.0.1:20128/v1");
+		assert.equal(resolveApiKey(), "sk_9router");
+	} finally {
+		if (originalUrl !== undefined) process.env.NINE_ROUTER_BASE_URL = originalUrl;
+		if (originalKey !== undefined) process.env.NINE_ROUTER_API_KEY = originalKey;
+	}
 });
