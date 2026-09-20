@@ -111,6 +111,7 @@ const KNOWN_MODEL_NAMES: Record<string, string> = {
 };
 
 function prettifySlugToken(token: string): string {
+	if (token.length === 0) return token;
 	const brand = KNOWN_BRANDS[token.toLowerCase()];
 	if (brand !== undefined) return brand;
 	// Version tokens carry their own casing: v4, 5.2.
@@ -121,7 +122,7 @@ function prettifySlugToken(token: string): string {
 /**
  * Renders a catalog model ID for pickers: `cbcn/kimi-k3` -> `Kimi K3 (CodeBuddy CN)`.
  * Degrades to the raw id when no owner/slug is present, so malformed or partial
- * ids never render empty picker labels like `" ()"`.
+ * ids never render empty or whitespace-only picker labels like `" ()"`.
  * @see ../README.md
  */
 export function displayName(id: string): string {
@@ -129,7 +130,10 @@ export function displayName(id: string): string {
 	const owner = slash === -1 ? "" : id.slice(0, slash).trim();
 	const slug = (slash === -1 ? id : id.slice(slash + 1)).trim();
 	if (slug.length === 0) return id;
-	const pretty = KNOWN_MODEL_NAMES[id] ?? slug.split("-").map(prettifySlugToken).join(" ");
+	// Empty tokens from repeated separators (`kimi--k3`, `-k3`, `k3-`) are
+	// dropped so the label can never collapse into whitespace.
+	const pretty = KNOWN_MODEL_NAMES[id] ?? slug.split("-").filter((token) => token.length > 0).map(prettifySlugToken).join(" ");
+	if (pretty.length === 0) return id;
 	if (owner.length === 0) return pretty;
 	return `${pretty} (${KNOWN_OWNERS[owner] ?? owner})`;
 }

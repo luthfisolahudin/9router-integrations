@@ -163,6 +163,44 @@ test("never renders an empty picker label for partial ids", () => {
 	assert.equal(displayName("a/"), "a/");
 });
 
+test("never renders whitespace-only labels for arbitrary ids", () => {
+	// Property: for any string, the rendered label is either the raw input or
+	// a label with no leading/trailing whitespace. Covers repeated separators
+	// like `-`, `--`, `a/-`, `a/b--c` without enumerating them by hand.
+	const alphabet = "abk3-/. \t";
+	let seed = 0x9e3779b9;
+	const next = () => {
+		// xorshift for reproducibility; no crypto needed for display names.
+		seed ^= seed << 13;
+		seed ^= seed >>> 17;
+		seed ^= seed << 5;
+		return seed >>> 0;
+	};
+	for (let round = 0; round < 500; round += 1) {
+		const length = next() % 10;
+		let id = "";
+		for (let i = 0; i < length; i += 1) id += alphabet[next() % alphabet.length];
+		for (const candidate of [id, `${id}-${id}`, `x/${id}`, `${id}/x`, `x/${id}/y`]) {
+			const label = displayName(candidate);
+			// Either the function degraded to the raw id, or it produced a real
+			// label; a whitespace-only non-identity label is a defect.
+			assert.ok(
+				label === candidate || label.trim().length > 0,
+				`displayName(${JSON.stringify(candidate)}) rendered whitespace-only label ${JSON.stringify(label)}`,
+			);
+		}
+	}
+});
+
+test("renders separator-heavy slugs without collapsed whitespace", () => {
+	assert.equal(displayName("-"), "-");
+	assert.equal(displayName("--"), "--");
+	assert.equal(displayName("-foo"), "Foo");
+	assert.equal(displayName("foo-"), "Foo");
+	assert.equal(displayName("a/--b"), "B (a)");
+	assert.equal(displayName("a/b--c"), "B C (a)");
+});
+
 test("normalizes noisy base URLs and rejects whitespace-only ids", async () => {
 	assert.equal(resolveBaseUrl("  http://127.0.0.1:20128/v1  "), "http://127.0.0.1:20128");
 	assert.equal(resolveApiBaseUrl("http://127.0.0.1:20128/V1"), "http://127.0.0.1:20128/v1");
