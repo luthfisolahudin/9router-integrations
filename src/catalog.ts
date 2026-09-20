@@ -135,10 +135,10 @@ export function displayName(id: string): string {
 }
 
 function combinedSignal(external: AbortSignal | undefined, timeoutMs: number | undefined): AbortSignal | undefined {
-	if (external === undefined && timeoutMs === undefined) return undefined;
-	if (external === undefined) return AbortSignal.timeout(timeoutMs!);
-	if (timeoutMs === undefined) return external;
-	return AbortSignal.any([external, AbortSignal.timeout(timeoutMs)]);
+	if (external !== undefined) {
+		return timeoutMs === undefined ? external : AbortSignal.any([external, AbortSignal.timeout(timeoutMs)]);
+	}
+	return timeoutMs === undefined ? undefined : AbortSignal.timeout(timeoutMs);
 }
 
 export function resolveBaseUrl(value?: string): string {
