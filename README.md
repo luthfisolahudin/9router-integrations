@@ -36,6 +36,12 @@ pnpm check
 pnpm check:catalog
 ```
 
+`pnpm check` typechecks every project file (including `test/`) and runs the
+unit test suite. The tests cover catalog parsing for every envelope shape, URL
+and env-variable resolution, display-name rendering, both client projections,
+capability invariants, the capability view, and the check report itself; they
+stub the network via `globalThis.fetch`, so they run without a live router.
+
 `pnpm check:catalog` fetches the live catalog, exercises both client
 projections, verifies curated capability invariants, and fails when a new
 reasoning model has no measured wire-effort entry. Runtime integrations keep
