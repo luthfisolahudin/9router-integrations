@@ -51,11 +51,14 @@ test("passes numeric limits through and leaves fallbacks to the clients", () => 
 	assert.equal(view.maxOutput, 128_000);
 });
 
-test("drops non-number limits; non-finite numbers pass through like before", () => {
-	// Faithful to the original projections: `typeof NaN === "number"`, so the
-	// old OpenCode path emitted NaN limits and the view must not silently
-	// change that. Pi filters non-finite values via positiveNumber().
+test("drops non-number and non-finite limits instead of inventing defaults", () => {
+	// `typeof NaN === "number"`, so the view must filter on Number.isFinite to
+	// keep a broken router payload from reaching OpenCode's `limit` as NaN.
 	const view = capabilityView({ id: "m", capabilities: { contextWindow: "272k", maxOutput: Number.NaN } });
 	assert.equal(view.contextWindow, undefined);
-	assert.ok(Number.isNaN(view.maxOutput));
+	assert.equal(view.maxOutput, undefined);
+	assert.equal(
+		capabilityView({ id: "m", capabilities: { contextWindow: Number.POSITIVE_INFINITY } }).contextWindow,
+		undefined,
+	);
 });
