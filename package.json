@@ -15,6 +15,7 @@
     "check:catalog": "node scripts/check-catalog.ts"
   },
   "devDependencies": {
+    "@types/node": "^24.13.6",
     "typescript": "^7.0.2"
   }
 }

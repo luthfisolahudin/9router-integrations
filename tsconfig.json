@@ -6,11 +6,12 @@
     "moduleResolution": "nodenext",
     "strict": true,
     "noEmit": true,
+    "types": ["node"],
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "erasableSyntaxOnly": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true
   },
-  "include": ["src", "extensions", "plugins", "scripts", "types"]
+  "include": ["src", "extensions", "plugins", "scripts", "types", "test"]
 }

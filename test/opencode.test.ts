@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import type { Config } from "@opencode-ai/plugin";
+
 import { NineRouterModels, toOpenCodeModel } from "../plugins/opencode.ts";
 
 test("keeps an unmeasured reasoning model visible without forcing effort", () => {
@@ -30,12 +32,16 @@ test("projects exactly the live records with one max variant", async () => {
 		);
 	try {
 		const hooks = await NineRouterModels({} as never);
-		const config = { provider: {}, small_model: "" };
-		await hooks.config?.(config as never);
+		const config: Config = { provider: {}, small_model: "" };
+		await hooks.config?.(config);
 		assert.equal(config.small_model, "9router/cbcn/deepseek-v4.1-flash");
 		const provider = (config.provider as Record<
 			string,
-			{ models: Record<string, { variants: unknown; options: unknown }>; npm: string; options: { baseURL: string } }
+			{
+				models: Record<string, ReturnType<typeof toOpenCodeModel>>;
+				npm: string;
+				options: { baseURL: string };
+			}
 		>)["9router"];
 		assert.equal(provider.npm, "@ai-sdk/openai-compatible");
 		assert.equal(provider.options.baseURL, "http://127.0.0.1:20128/v1");
