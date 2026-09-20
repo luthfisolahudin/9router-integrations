@@ -78,6 +78,32 @@ test("forces measured effort on auxiliary OpenCode turns", async () => {
 	assert.equal(output.options.reasoningEffort, "xhigh");
 });
 
+test("preserves user-supplied provider options while filling 9router defaults", async () => {
+	const restoreFetch = mockFetch(async () => new Response(catalogFixture({ id: "cx/gpt-5.5", capabilities: { reasoning: true } }), { status: 200 }));
+	try {
+		const hooks = await NineRouterModels({} as never);
+		const config: Config = {
+			provider: {
+				"9router": { options: { baseURL: "http://stale:1", headers: { "x-custom": "keep-me" } } },
+				"other-provider": { options: { baseURL: "http://elsewhere:2" } },
+			},
+		};
+		await hooks.config?.(config);
+		const nine = (config.provider as Record<string, { options: Record<string, unknown> }>)["9router"];
+		// Managed fields are overwritten; anything the user set is preserved.
+		assert.equal(nine.options.baseURL, "http://127.0.0.1:20128/v1");
+		assert.equal(nine.options.apiKey, "sk_9router");
+		assert.deepEqual(nine.options.headers, { "x-custom": "keep-me" });
+		// Unrelated providers must not be touched at all.
+		assert.deepEqual(
+			(config.provider as Record<string, { options: Record<string, unknown> }>)["other-provider"],
+			{ options: { baseURL: "http://elsewhere:2" } },
+		);
+	} finally {
+		restoreFetch();
+	}
+});
+
 test("does not override effort for an unmeasured reasoning model", async () => {
 	const hooks = await NineRouterModels({} as never);
 	const output = { temperature: 0, topP: 1, options: { reasoningEffort: "minimal" } };
