@@ -13,6 +13,36 @@ test("keeps an unmeasured reasoning model visible without forcing effort", () =>
 	assert.equal("options" in model, false);
 });
 
+test("projects every capability flag into OpenCode modalities and attachment", () => {
+	const model = toOpenCodeModel({
+		id: "cbcn/full-modality-model",
+		capabilities: {
+			vision: true,
+			audioInput: true,
+			videoInput: true,
+			pdf: true,
+			imageOutput: true,
+			audioOutput: true,
+			reasoning: true,
+			tools: false,
+		},
+	});
+	assert.deepEqual(model.modalities, {
+		input: ["text", "audio", "image", "video", "pdf"],
+		output: ["text", "image", "audio"],
+	});
+	assert.equal(model.attachment, true);
+	// A boolean tools flag must survive the tri-state read either way.
+	assert.equal(model.tool_call, false);
+});
+
+test("keeps OpenCode attachment false for text-only models", () => {
+	const model = toOpenCodeModel({ id: "cx/text-only", capabilities: { reasoning: false } });
+	assert.deepEqual(model.modalities, { input: ["text"], output: ["text"] });
+	assert.equal(model.attachment, false);
+	assert.equal("tool_call" in model, false);
+});
+
 test("projects exactly the live records with one max variant", async () => {
 	const restoreFetch = mockFetch(async () =>
 		new Response(

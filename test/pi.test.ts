@@ -51,6 +51,35 @@ test("keeps an unmeasured reasoning model visible without forcing effort", () =>
 	assert.equal(model.compat, undefined);
 });
 
+test("collapses Pi input to image-only beyond text and applies limit fallbacks", () => {
+	const model = toPiModel({
+		id: "cbcn/full-modality-model",
+		capabilities: {
+			vision: true,
+			audioInput: true,
+			videoInput: true,
+			pdf: true,
+			imageOutput: true,
+			audioOutput: true,
+			reasoning: true,
+		},
+	});
+	// Pi's shimmed adapter only accepts text|image input; other modality flags
+	// intentionally do not leak into this projection.
+	assert.deepEqual(model.input, ["text", "image"]);
+	// Missing numeric limits fall back to Pi-owned defaults.
+	assert.equal(model.contextWindow, 128_000);
+	assert.equal(model.maxTokens, 16_384);
+});
+
+test("passes finite limits through without falling back", () => {
+	const model = toPiModel({ id: "cx/limited", capabilities: { contextWindow: 272_000, maxOutput: 128_000 } });
+	assert.equal(model.contextWindow, 272_000);
+	assert.equal(model.maxTokens, 128_000);
+	assert.equal(model.reasoning, false);
+	assert.deepEqual(model.input, ["text"]);
+});
+
 test("registers the OpenAI Chat Completions provider with pinned fallbacks", () => {
 	const provider = registeredProvider();
 	assert.equal(provider.api, "openai-completions");
