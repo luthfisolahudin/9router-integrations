@@ -108,6 +108,23 @@ test("forces measured effort on auxiliary OpenCode turns", async () => {
 	assert.equal(output.options.reasoningEffort, "xhigh");
 });
 
+test("never touches effort for other providers or non-reasoning models", async () => {
+	const hooks = await NineRouterModels({} as never);
+	const untouched = { options: { reasoningEffort: "minimal" as const } };
+
+	await hooks["chat.params"]?.(
+		{ model: { id: "cbcn/minimax-m3", reasoning: true }, provider: { id: "other" } } as never,
+		untouched,
+	);
+	assert.equal(untouched.options.reasoningEffort, "minimal", "another provider's model must not be modified");
+
+	await hooks["chat.params"]?.(
+		{ model: { id: "cbcn/minimax-m3", reasoning: false }, provider: { id: "9router" } } as never,
+		untouched,
+	);
+	assert.equal(untouched.options.reasoningEffort, "minimal", "a non-reasoning 9router model must not be modified");
+});
+
 test("preserves user-supplied provider options while filling 9router defaults", async () => {
 	const restoreFetch = mockFetch(async () => new Response(catalogFixture({ id: "cx/gpt-5.5", capabilities: { reasoning: true } }), { status: 200 }));
 	try {
