@@ -19,6 +19,58 @@ test("preserves exact catalog membership while excluding dropped models", () => 
 test("rejects malformed and duplicate records instead of dropping them", () => {
 	assert.throws(() => parseCatalog({ data: [{ id: "cbcn/glm-5.3" }, {}] }), /usable id/);
 	assert.throws(() => parseCatalog({ data: [{ id: "same" }, { id: "same" }] }), /duplicate/);
+	assert.throws(() => parseCatalog({ data: [{ id: "cbcn/glm-5.3" }, "not-an-object"] }), /non-object/);
+	assert.throws(() => parseCatalog({ data: [{ id: "   " }] }), /usable id/);
+	assert.throws(() => parseCatalog({}), /no model records/);
+	assert.throws(() => parseCatalog({ data: "not-an-array" }), /no model records/);
+	assert.throws(() => parseCatalog("not-a-catalog"), /no model records/);
+});
+
+test("accepts every catalog envelope shape without changing membership", () => {
+	assert.deepEqual(parseCatalog({ data: [{ id: "a" }, { id: "b" }] }).map(({ id }) => id), ["a", "b"]);
+	assert.deepEqual(parseCatalog({ models: [{ id: "a" }, { id: "b" }] }).map(({ id }) => id), ["a", "b"]);
+	assert.deepEqual(parseCatalog([{ id: "a" }, { id: "b" }]).map(({ id }) => id), ["a", "b"]);
+	assert.deepEqual(parseCatalog({ id: "single" }).map(({ id }) => id), ["single"]);
+});
+
+test("trims ids while keeping the rest of the record intact", () => {
+	const [record] = parseCatalog({ data: [{ id: "  cx/gpt-5.5  ", capabilities: { reasoning: true } }] });
+	assert.equal(record.id, "cx/gpt-5.5");
+	assert.deepEqual(record.capabilities, { reasoning: true });
+});
+
+test("fails discovery with distinct errors for HTTP, JSON, and network failures", async () => {
+	const cases: Array<[typeof globalThis.fetch, RegExp]> = [
+		[async () => new Response("nope", { status: 503 }), /HTTP 503/],
+		[async () => new Response("<html>not json</html>", { status: 200 }), /invalid JSON/],
+		[
+			async () => {
+				throw new Error("connection refused");
+			},
+			/discovery request failed/,
+		],
+	];
+	for (const [handler, pattern] of cases) {
+		const restore = mockFetch(handler);
+		try {
+			await assert.rejects(fetchCatalog({ baseUrl: "http://127.0.0.1:20128" }), pattern);
+		} finally {
+			restore();
+		}
+	}
+});
+
+test("honors an external abort even when the network error is generic", async () => {
+	const controller = new AbortController();
+	const restore = mockFetch(async () => {
+		throw new Error("socket hang up");
+	});
+	try {
+		controller.abort();
+		await assert.rejects(fetchCatalog({ baseUrl: "http://127.0.0.1:20128", signal: controller.signal }), /discovery was aborted/);
+	} finally {
+		restore();
+	}
 });
 
 test("normalizes root and v1 URLs for discovery and OpenAI API calls", async () => {
