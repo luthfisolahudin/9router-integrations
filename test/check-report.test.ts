@@ -87,3 +87,16 @@ test("lists curated models absent from the catalog as informational", () => {
 	assert.ok(report.absentInvariants.includes("cbcn/deepseek-v4.1-flash"));
 	assert.ok(!report.capabilityViolations.some((line) => line.startsWith("cbcn/deepseek-v4.1-flash")));
 });
+
+test("flags curated display names for retired models without failing the report", () => {
+	const report = buildCatalogReport(recordsFrom({ id: "cx/gpt-5.5", capabilities: { reasoning: true } }));
+	assert.ok(report.staleDisplayNameEntries.length > 0);
+	assert.ok(report.staleDisplayNameEntries.every((id) => id !== "cx/gpt-5.5"));
+	// Informational only: staleness must not show up as a hard failure.
+	assert.ok(!report.capabilityViolations.some((line) => line.startsWith("ag/gemini-3.8-flash-high")));
+});
+
+test("reports no stale display names for the full live-shaped catalog", () => {
+	const report = buildCatalogReport(recordsFrom(...LIVE_CATALOG));
+	assert.deepEqual(report.staleDisplayNameEntries, []);
+});

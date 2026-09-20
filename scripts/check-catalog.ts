@@ -11,6 +11,7 @@ const {
 	staleEffortEntries,
 	unmeasuredReasoningModels,
 	absentInvariants,
+	staleDisplayNameEntries,
 } = buildCatalogReport(records);
 
 if (projectionFailures.length > 0) {
@@ -46,6 +47,12 @@ if (absentInvariants.length > 0) {
 	console.error("Note: curated capability invariants reference models absent from the live catalog:");
 	for (const modelId of absentInvariants) console.error(`- ${modelId}`);
 	console.error("Remove the invariant if the retirement is intentional.");
+}
+
+if (staleDisplayNameEntries.length > 0) {
+	console.error("Note: curated display names reference models absent from the live catalog:");
+	for (const modelId of staleDisplayNameEntries) console.error(`- ${modelId}`);
+	console.error("Remove the entry if the retirement is intentional.");
 }
 
 const failed =

@@ -1,4 +1,4 @@
-import { catalogCapabilities, type CatalogRecord } from "./catalog.ts";
+import { catalogCapabilities, KNOWN_MODEL_NAMES, type CatalogRecord } from "./catalog.ts";
 import { measuredWireEffort, MEASURED_WIRE_EFFORT } from "./effort.ts";
 import { checkCapabilityInvariants } from "./invariants.ts";
 import { toOpenCodeModel } from "../plugins/opencode.ts";
@@ -16,6 +16,8 @@ export interface CatalogCheckReport {
 	readonly unmeasuredReasoningModels: readonly string[];
 	/** Curated invariants whose model is absent from the catalog (informational). */
 	readonly absentInvariants: readonly string[];
+	/** Curated display names for models the router no longer serves (informational). */
+	readonly staleDisplayNameEntries: readonly string[];
 }
 
 function formatError(error: unknown): string {
@@ -54,6 +56,9 @@ export function buildCatalogReport(records: readonly CatalogRecord[]): CatalogCh
 	// it silently survives catalog changes and implies coverage that no longer exists.
 	const liveIds = new Set(records.map((record) => record.id));
 	const staleEffortEntries = Object.keys(MEASURED_WIRE_EFFORT).filter((modelId) => !liveIds.has(modelId));
+	// Same drift risk for curated display names: an entry for a retired model
+	// keeps rendering a picker label nothing will ever use.
+	const staleDisplayNameEntries = Object.keys(KNOWN_MODEL_NAMES).filter((modelId) => !liveIds.has(modelId));
 
 	return {
 		projectionFailures,
@@ -61,5 +66,6 @@ export function buildCatalogReport(records: readonly CatalogRecord[]): CatalogCh
 		staleEffortEntries,
 		unmeasuredReasoningModels,
 		absentInvariants,
+		staleDisplayNameEntries,
 	};
 }

@@ -89,7 +89,7 @@ export function parseCatalog(payload: unknown): CatalogRecord[] {
 }
 
 // Brand and owner casing is not derivable from slugs, so both are curated.
-const KNOWN_BRANDS: Record<string, string> = {
+export const KNOWN_BRANDS: Record<string, string> = {
 	deepseek: "DeepSeek",
 	gemini: "Gemini",
 	glm: "GLM",
@@ -103,7 +103,8 @@ const KNOWN_OWNERS: Record<string, string> = {
 	cbcn: "CodeBuddy CN",
 	cx: "OpenAI Codex",
 };
-const KNOWN_MODEL_NAMES: Record<string, string> = {
+// Full-id overrides for labels the slug alone cannot render.
+export const KNOWN_MODEL_NAMES: Record<string, string> = {
 	"ag/claude-opus-4-6-thinking": "Claude Opus 4.6",
 	"ag/claude-sonnet-4-6": "Claude Sonnet 4.6",
 	"ag/gemini-3.8-flash-high": "Gemini 3.8 Flash",
