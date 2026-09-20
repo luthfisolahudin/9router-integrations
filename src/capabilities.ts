@@ -33,9 +33,10 @@ export interface CapabilityView {
 /**
  * Reads one catalog record's capabilities into a normalized view.
  *
- * Numeric limits accept finite numbers only: `typeof NaN === "number"`, so a
- * broken router payload would otherwise reach OpenCode's `limit` as
- * `NaN`. Client-specific defaults stay in each projection.
+ * Numeric limits accept positive finite numbers only: `typeof NaN === "number"`
+ * and `Infinity > 0`, so a broken router payload would otherwise reach
+ * OpenCode's `limit` as `NaN`/`Infinity` or a useless `0`. Client-specific
+ * defaults stay in each projection.
  */
 export function capabilityView(record: CatalogRecord): CapabilityView {
 	const capabilities = catalogCapabilities(record);
@@ -51,7 +52,11 @@ export function capabilityView(record: CatalogRecord): CapabilityView {
 		imageOutput: capabilities.imageOutput === true,
 		audioOutput: capabilities.audioOutput === true,
 		tools: typeof capabilities.tools === "boolean" ? capabilities.tools : undefined,
-		contextWindow: Number.isFinite(capabilities.contextWindow) ? (capabilities.contextWindow as number) : undefined,
-		maxOutput: Number.isFinite(capabilities.maxOutput) ? (capabilities.maxOutput as number) : undefined,
+		contextWindow: positiveFinite(capabilities.contextWindow),
+		maxOutput: positiveFinite(capabilities.maxOutput),
 	};
+}
+
+function positiveFinite(value: unknown): number | undefined {
+	return typeof value === "number" && Number.isFinite(value) && value > 0 ? value : undefined;
 }

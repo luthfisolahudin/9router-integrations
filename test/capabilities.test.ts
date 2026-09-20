@@ -62,3 +62,11 @@ test("drops non-number and non-finite limits instead of inventing defaults", () 
 		undefined,
 	);
 });
+
+test("drops non-positive limits that are otherwise finite", () => {
+	// A zero or negative limit is a broken router value, not a real budget.
+	const view = capabilityView({ id: "m", capabilities: { contextWindow: 0, maxOutput: -5 } });
+	assert.equal(view.contextWindow, undefined);
+	assert.equal(view.maxOutput, undefined);
+	assert.equal(capabilityView({ id: "m", capabilities: { contextWindow: 1 } }).contextWindow, 1);
+});
