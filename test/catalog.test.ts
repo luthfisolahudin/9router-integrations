@@ -73,6 +73,48 @@ test("honors an external abort even when the network error is generic", async ()
 	}
 });
 
+test("passes a combined signal so either an external abort or the timeout fires", async () => {
+	const controller = new AbortController();
+	let seen: AbortSignal | null | undefined;
+	const restore = mockFetch(async (_input, init) => {
+		seen = init?.signal;
+		// Simulate a hung server: settle only when the combined signal fires
+		// (either leg), so the test does not leak a pending promise.
+		return await new Promise<Response>((_resolve, reject) => {
+			init?.signal?.addEventListener("abort", () => reject(new Error("signaled")), { once: true });
+		});
+	});
+	try {
+		const pending = fetchCatalog({
+			baseUrl: "http://127.0.0.1:20128",
+			signal: controller.signal,
+			timeoutMs: 20,
+		});
+		assert.equal(seen instanceof AbortSignal, true);
+		// The timeout leg must reject the hung fetch on its own while the
+		// external controller stays live the whole time.
+		await assert.rejects(pending, /discovery request failed/);
+		assert.equal(controller.signal.aborted, false);
+		// Aborting after settle must not throw from any lingering listener.
+		controller.abort();
+	} finally {
+		restore();
+	}
+});
+
+test("rejects immediately when the external signal is already aborted", async () => {
+	const controller = new AbortController();
+	controller.abort();
+	const restore = mockFetch(async () => {
+		throw new Error("fetch must not be reached");
+	});
+	try {
+		await assert.rejects(fetchCatalog({ baseUrl: "http://127.0.0.1:20128", signal: controller.signal }), /discovery was aborted/);
+	} finally {
+		restore();
+	}
+});
+
 test("normalizes root and v1 URLs for discovery and OpenAI API calls", async () => {
 	assert.equal(resolveBaseUrl("http://127.0.0.1:20128/v1/"), "http://127.0.0.1:20128");
 	assert.equal(resolveApiBaseUrl("http://127.0.0.1:20128"), "http://127.0.0.1:20128/v1");
