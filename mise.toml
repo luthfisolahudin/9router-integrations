@@ -1,0 +1,5 @@
+[tools]
+task = "3.54.0"
+
+[settings]
+idiomatic_version_file_enable_tools = ["node", "pnpm"]

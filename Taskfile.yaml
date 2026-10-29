@@ -1,0 +1,12 @@
+version: '3'
+
+tasks:
+  setup:
+    desc: Install dependencies from the lockfile
+    cmds:
+      - pnpm install --frozen-lockfile
+
+  check:
+    desc: Typecheck and run the test suite
+    cmds:
+      - pnpm check
