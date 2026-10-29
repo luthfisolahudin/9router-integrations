@@ -1,52 +1,5 @@
-// Minimal ambient shims so the typecheck runs without @opencode-ai/plugin and
-// @earendil-works/pi-coding-agent installed. The repo has no runtime
-// dependencies; these mirror the only members the code touches.
-
-// Keep typechecking portable without coupling the repo to local tool paths.
-declare module "@earendil-works/pi-coding-agent" {
-	export interface ProviderModelConfig {
-		id: string;
-		name: string;
-		reasoning: boolean;
-		input: Array<"text" | "image">;
-		cost: { input: number; output: number; cacheRead: number; cacheWrite: number };
-		contextWindow: number;
-		maxTokens: number;
-		thinkingLevelMap?: Record<string, string | null>;
-		compat?: {
-			requiresReasoningContentOnAssistantMessages?: boolean;
-			supportsReasoningEffort?: boolean;
-			// Mirror @earendil-works/pi-ai's ThinkingFormat union (types.d.ts) so
-			// this shim does not silently narrow real values the adapter accepts.
-			thinkingFormat?:
-				| "openai"
-				| "openrouter"
-				| "together"
-				| "baseten"
-				| "deepseek"
-				| "zai"
-				| "qwen"
-				| "chat-template"
-				| "qwen-chat-template"
-				| "string-thinking"
-				| "ant-ling";
-		};
-	}
-
-	export interface ProviderConfig {
-		name: string;
-		baseUrl: string;
-		apiKey: string;
-		authHeader: boolean;
-		api: "openai-completions";
-		models: ProviderModelConfig[];
-		refreshModels?: (options: { allowNetwork: boolean; signal: AbortSignal }) => Promise<ProviderModelConfig[]>;
-	}
-
-	export interface ExtensionAPI {
-		registerProvider(name: string, provider: ProviderConfig): void;
-	}
-}
+// Minimal ambient shim so the typecheck runs without @opencode-ai/plugin installed.
+// The repo has no runtime dependencies; this mirrors the only members the code touches.
 
 declare module "@opencode-ai/plugin" {
 	interface ProviderOptions {

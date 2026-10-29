@@ -1,1 +1,5 @@
 minimumReleaseAge: 10080
+
+allowBuilds:
+  "@google/genai": true
+  protobufjs: true

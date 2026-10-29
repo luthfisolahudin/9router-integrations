@@ -5,6 +5,7 @@ import { displayName, fetchCatalog, resolveApiBaseUrl, resolveApiKey, type Catal
 import { STARTUP_FALLBACK } from "../src/fallback.ts";
 
 const ZERO_COST = { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 };
+type ChatProviderModelConfig = Extract<ProviderModelConfig, { type?: "chat" }>;
 const HIDDEN_THINKING_LEVELS = {
 	off: null,
 	minimal: null,
@@ -12,7 +13,7 @@ const HIDDEN_THINKING_LEVELS = {
 	medium: null,
 	high: null,
 	xhigh: null,
-} satisfies NonNullable<ProviderModelConfig["thinkingLevelMap"]>;
+} satisfies NonNullable<ChatProviderModelConfig["thinkingLevelMap"]>;
 
 function positiveNumber(value: unknown, fallback: number): number {
 	return typeof value === "number" && Number.isFinite(value) && value > 0 ? value : fallback;
@@ -22,7 +23,7 @@ function positiveNumber(value: unknown, fallback: number): number {
  * Projects one live 9Router record into Pi's provider model format.
  * @see ../docs/EFFORT_MATRIX.md
  */
-export function toPiModel(record: CatalogRecord): ProviderModelConfig {
+export function toPiModel(record: CatalogRecord): ChatProviderModelConfig {
 	const capabilities = capabilityView(record);
 	const effort = capabilities.effort;
 
