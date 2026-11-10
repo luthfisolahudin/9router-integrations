@@ -17,10 +17,21 @@ const ROOT = process.cwd();
 const LOCK_PATH = join(ROOT, "template.lock.json");
 const apply = process.argv.includes("--apply");
 const confirmed = process.argv.includes("--yes");
-const version = process.argv[process.argv.indexOf("--version") + 1];
+const version = argument("version");
+
+function argument(name: string): string | undefined {
+	const index = process.argv.indexOf(`--${name}`);
+	if (index < 0) return undefined;
+	const value = process.argv[index + 1];
+	return value === undefined || value.startsWith("--") ? undefined : value;
+}
 
 function git(args: string[]): string {
 	return execFileSync("git", args, { cwd: ROOT, encoding: "utf8" }).trim();
+}
+
+function inMerge(): boolean {
+	return existsSync(join(ROOT, ".git", "MERGE_HEAD"));
 }
 
 if (!existsSync(LOCK_PATH)) {
@@ -44,11 +55,10 @@ if (dirty.length > 0) {
 
 if (!apply) {
 	console.log("\nDry run. Re-run with `--apply --yes --version <tag>` to merge a template tag.");
-	process.stdout.write("");
 	process.exit(0);
 }
 
-if (version === undefined || version.startsWith("--")) {
+if (version === undefined) {
 	console.error("--apply requires --version <tag>");
 	process.exit(2);
 }
@@ -58,12 +68,27 @@ if (!confirmed) {
 }
 
 console.log(`\nfetching template tags...`);
-git(["fetch", "template", "--tags"]);
-console.log(`merging template@${version}...`);
+git(["fetch", "template", "--tags", "--force"]);
+
+// Resolve the tag to a commit explicitly. `template@v1.2.3` is not a git
+// refspec, and a silent failure there used to bump the lock without merging.
+let target: string;
 try {
-	execFileSync("git", ["merge", "--no-commit", `template@${version}`], { cwd: ROOT, stdio: "inherit" });
+	target = git(["rev-parse", "--verify", `refs/tags/${version}^{commit}`]);
 } catch {
-	// Conflicts are expected; resolution below is deterministic for owned paths.
+	console.error(`tag ${version} is not present after fetching; nothing merged.`);
+	process.exit(2);
+}
+console.log(`merging ${version} (${target.slice(0, 12)})...`);
+
+try {
+	execFileSync("git", ["merge", "--no-commit", target], { cwd: ROOT, stdio: "inherit" });
+} catch {
+	if (!inMerge()) {
+		console.error("git merge failed before it could start; nothing merged, nothing committed.");
+		process.exit(2);
+	}
+	// A conflict is expected; resolution below is deterministic for owned paths.
 }
 
 const conflicts = git(["diff", "--name-only", "--diff-filter=U"])
@@ -91,16 +116,27 @@ if (remaining.length > 0) {
 	process.exit(2);
 }
 
-console.log("\nrunning `pnpm check` before committing...");
-execFileSync("pnpm", ["check"], { cwd: ROOT, stdio: "inherit" });
+const staged = git(["diff", "--cached", "--name-only"]).split("\n").filter((line) => line.length > 0);
+console.log(`\n${staged.length} path(s) changed by the merge`);
 
-const updated = { ...lock, version };
-writeFileSyncSafe(LOCK_PATH, `${JSON.stringify(updated, null, 2)}\n`);
+console.log("\nrunning `pnpm check` before committing...");
+execFileSync(process.platform === "win32" ? "pnpm.cmd" : "pnpm", ["check"], { cwd: ROOT, stdio: "inherit" });
+
+writeFileSync(LOCK_PATH, `${JSON.stringify({ ...lock, version, commit: target }, null, 2)}\n`);
 git(["add", "template.lock.json"]);
-execFileSync("git", ["commit", "-m", `Sync template ${lock.template}@${version}`, "-m", `Template-Source: ${lock.template}@${version}`], {
-	cwd: ROOT,
-	stdio: "inherit",
-});
+execFileSync(
+	"git",
+	[
+		"commit",
+		"-m",
+		`Sync template ${lock.template}@${version}`,
+		"-m",
+		`Template-Source: ${lock.template}@${version}`,
+		"-m",
+		`Merged ${target.slice(0, 12)}; ${staged.length} path(s) changed by the template.`,
+	],
+	{ cwd: ROOT, stdio: "inherit" },
+);
 console.log(`\nsynced to ${version}.`);
 
 function matches(pattern: string, path: string): boolean {
@@ -111,8 +147,4 @@ function matches(pattern: string, path: string): boolean {
 
 function escapeRegExp(value: string): string {
 	return value.replace(/[.+^${}()|[\]\\]/g, "\\$&").replace(/\*/g, "[^/]*");
-}
-
-function writeFileSyncSafe(path: string, content: string): void {
-	writeFileSync(path, content);
 }

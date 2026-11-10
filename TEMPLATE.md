@@ -18,7 +18,7 @@ engine improvements.
 ```sh
 git remote add template git@github.com:luthfisolahudin/ai-provider-integrations-template.git
 git fetch template --tags
-git merge --allow-unrelated-histories --no-commit template@v0.1.0
+git merge --allow-unrelated-histories --no-commit v0.1.0
 ```
 
 Then keep your identity files, take the engine paths, move your provider code

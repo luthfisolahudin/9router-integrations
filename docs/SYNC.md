@@ -9,10 +9,10 @@ template. Your vendor lives in `packages/provider`.
 ```sh
 git remote add template git@github.com:luthfisolahudin/ai-provider-integrations-template.git
 git fetch template --tags
-git merge --allow-unrelated-histories --no-commit template@v0.1.0
+git merge --allow-unrelated-histories --no-commit v0.1.0
 # keep your identity files, take the engine
 git checkout HEAD -- README.md LICENSE package.json
-git checkout template@v0.1.0 -- packages adapters examples docs tsconfig.json \
+git checkout v0.1.0 -- packages adapters examples docs tsconfig.json \
   Taskfile.yaml mise.toml .node-version .editorconfig .gitignore .gitattributes \
   renovate.json pnpm-workspace.yaml .github .agents AGENTS.md CLAUDE.md .claude
 pnpm install && task check
