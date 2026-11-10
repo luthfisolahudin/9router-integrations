@@ -1,0 +1,61 @@
+{
+  "object": "list",
+  "data": [
+    {
+      "id": "example-chat-1",
+      "object": "model",
+      "owned_by": "Example",
+      "capabilities": {
+        "vision": true,
+        "pdf": false,
+        "audioInput": false,
+        "videoInput": false,
+        "imageOutput": false,
+        "audioOutput": false,
+        "tools": true,
+        "reasoning": true,
+        "thinkingFormat": "openai",
+        "thinkingCanDisable": true,
+        "contextWindow": 1000000,
+        "maxOutput": 131072
+      }
+    },
+    {
+      "id": "example-chat-cheap",
+      "object": "model",
+      "owned_by": "Example",
+      "capabilities": {
+        "vision": false,
+        "pdf": false,
+        "audioInput": false,
+        "videoInput": false,
+        "imageOutput": false,
+        "audioOutput": false,
+        "tools": true,
+        "reasoning": false,
+        "thinkingCanDisable": true,
+        "contextWindow": 262144,
+        "maxOutput": 32768
+      }
+    },
+    {
+      "id": "example-reason-kimi",
+      "object": "model",
+      "owned_by": "Example",
+      "capabilities": {
+        "vision": true,
+        "pdf": false,
+        "audioInput": false,
+        "videoInput": false,
+        "imageOutput": false,
+        "audioOutput": false,
+        "tools": true,
+        "reasoning": true,
+        "thinkingFormat": "kimi",
+        "thinkingCanDisable": false,
+        "contextWindow": 262144,
+        "maxOutput": 262144
+      }
+    }
+  ]
+}

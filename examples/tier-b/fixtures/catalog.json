@@ -1,0 +1,27 @@
+{
+  "object": "list",
+  "data": [
+    {
+      "id": "tier-b-chat",
+      "object": "model",
+      "owned_by": "tier-b",
+      "provider": "Example Lab",
+      "supports_vision": true,
+      "supports_reasoning": true,
+      "input_modalities": ["text", "image", "file"],
+      "status": "ok",
+      "price_per_1m": 500
+    },
+    {
+      "id": "tier-b-offline",
+      "object": "model",
+      "owned_by": "tier-b",
+      "provider": "Example Lab",
+      "supports_vision": false,
+      "supports_reasoning": true,
+      "input_modalities": ["text"],
+      "status": "offline",
+      "price_per_1m": 700
+    }
+  ]
+}

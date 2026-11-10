@@ -1,0 +1,59 @@
+{
+  "compilerOptions": {
+    "target": "ES2023",
+    "lib": [
+      "ES2023"
+    ],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "erasableSyntaxOnly": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "types": [
+      "node"
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@repo/contract": [
+        "packages/contract/src/index.ts"
+      ],
+      "@repo/catalog": [
+        "packages/catalog/src/index.ts"
+      ],
+      "@repo/provider": [
+        "packages/provider/src/index.ts"
+      ],
+      "@repo/cli": [
+        "packages/cli/src/index.ts"
+      ],
+      "@repo/adapter-pi": [
+        "adapters/pi/src/index.ts"
+      ],
+      "@repo/adapter-opencode": [
+        "adapters/opencode/src/index.ts"
+      ],
+      "@repo/example-tier-b": [
+        "examples/tier-b/src/index.ts"
+      ],
+      "@repo/example-tier-c": [
+        "examples/tier-c/src/index.ts"
+      ],
+      "@repo/adapter-pi/model": [
+        "adapters/pi/src/model.ts"
+      ],
+      "@repo/adapter-opencode/model": [
+        "adapters/opencode/src/model.ts"
+      ]
+    }
+  },
+  "include": [
+    "packages/**/*.ts",
+    "adapters/**/*.ts",
+    "examples/**/*.ts"
+  ]
+}

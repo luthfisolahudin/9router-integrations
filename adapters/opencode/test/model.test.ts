@@ -1,0 +1,71 @@
+import assert from "node:assert/strict";
+import { test } from "node:test";
+
+import type { NormalizedModel } from "@repo/contract";
+
+import { effortLevels, toOpencodeModel, toOpencodeModels } from "../src/model.ts";
+
+function model(overrides: Partial<NormalizedModel> = {}): NormalizedModel {
+	return {
+		providerId: "example",
+		id: "model-1",
+		name: "Model 1",
+		contextWindow: 1_000_000,
+		maxOutput: 131_072,
+		input: ["text", "image", "pdf"],
+		output: ["text"],
+		tools: true,
+		reasoning: true,
+		thinking: { format: "qwen", canDisable: true },
+		availability: "ok",
+		provenance: {
+			limits: { context: "catalog", maxOutput: "catalog" },
+			modalities: "catalog",
+			reasoning: "catalog",
+			pricing: "default",
+			effort: "default",
+		},
+		...overrides,
+	};
+}
+
+test("capabilities and limits pass through", () => {
+	const projected = toOpencodeModel(model());
+	assert.ok(projected);
+	assert.equal(projected.limit.context, 1_000_000);
+	assert.equal(projected.limit.output, 131_072);
+	assert.deepEqual(projected.capabilities.input, ["text", "image", "pdf"]);
+	assert.equal(projected.capabilities.tools, true);
+});
+
+test("excluded models are not registered", () => {
+	assert.equal(toOpencodeModel(model({ excluded: { reason: "non-chat" } })), undefined);
+});
+
+test("a measured effort is advertised; an unmeasured one is not", () => {
+	assert.deepEqual(toOpencodeModel(model(), "max")?.capabilities.reasoning, { supported: true, effort: ["max"] });
+	assert.deepEqual(toOpencodeModel(model())?.capabilities.reasoning, { supported: true });
+});
+
+test("an unmapped thinking format advertises no effort even when measured", () => {
+	const projected = toOpencodeModel(model({ thinking: { format: "gemini-level", canDisable: true } }), "max");
+	assert.deepEqual(projected?.capabilities.reasoning, { supported: true });
+});
+
+test("effort levels never include the off level", () => {
+	assert.deepEqual(effortLevels("max", true), ["max"]);
+	assert.equal(effortLevels(undefined, true), undefined);
+});
+
+test("a non-reasoning model has no reasoning capability block", () => {
+	const projected = toOpencodeModel(model({ reasoning: false, thinking: {} }), "max");
+	assert.equal(projected?.capabilities.reasoning, undefined);
+});
+
+test("the list projection drops exclusions", () => {
+	const projected = toOpencodeModels(
+		[model({ id: "a" }), model({ id: "b", excluded: { reason: "offline" } })],
+		{ a: "max" },
+	);
+	assert.deepEqual(projected.map((entry) => entry.id), ["a"]);
+});

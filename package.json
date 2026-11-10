@@ -1,0 +1,34 @@
+{
+  "name": "ai-provider-integrations-template",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "description": "Template for OpenAI Chat Completions provider integrations with live model discovery for Pi and OpenCode",
+  "engines": {
+    "node": ">=24"
+  },
+  "packageManager": "pnpm@12.18.0",
+  "scripts": {
+    "check": "pnpm run typecheck && pnpm run test:packages && pnpm run check:boundaries && pnpm run doctor",
+    "typecheck": "tsc -p tsconfig.json",
+    "test:packages": "pnpm -r test",
+    "check:boundaries": "node packages/cli/src/commands/boundaries.ts",
+    "check:catalog": "node packages/cli/src/commands/check-catalog.ts",
+    "conformance": "pnpm --filter @repo/conformance test",
+    "report": "node packages/cli/src/commands/report.ts",
+    "doctor": "node packages/cli/src/commands/doctor.ts",
+    "probe:effort": "node packages/cli/src/commands/probe-effort.ts",
+    "probe:routes": "node packages/cli/src/commands/probe-routes.ts",
+    "sync:template": "node packages/cli/src/commands/sync-template.ts",
+    "init": "node packages/cli/src/commands/init.ts"
+  },
+  "devDependencies": {
+    "@earendil-works/pi-ai": "1.5.2",
+    "@earendil-works/pi-coding-agent": "1.5.2",
+    "@opencode/ai": "2.2.7",
+    "@opencode/plugin": "2.2.7",
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3"
+  }
+}

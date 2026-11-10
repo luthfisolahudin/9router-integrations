@@ -1,0 +1,7 @@
+{
+  "object": "list",
+  "data": [
+    { "id": "tier-c-chat", "object": "model", "created": 1794327321, "owned_by": "tier-c" },
+    { "id": "tier-c-small", "object": "model", "created": 1794327321, "owned_by": "tier-c" }
+  ]
+}

@@ -1,0 +1,174 @@
+import type { ModelFacts, NormalizedModel, RawRecord } from "./record.ts";
+
+/** Bump when a pack needs new fields or renamed hooks. `provider-doctor` checks it. */
+export const PACK_SCHEMA_VERSION = 1;
+
+/**
+ * Dotted-path aliases: where this provider puts each fact, most specific first.
+ * A missing key means "this provider never declares it", which is different from
+ * "declared empty" and is what keeps unknown facts unknown.
+ */
+export interface FieldAliases {
+	contextWindow?: string[];
+	maxOutput?: string[];
+	vision?: string[];
+	pdf?: string[];
+	audioInput?: string[];
+	videoInput?: string[];
+	imageOutput?: string[];
+	audioOutput?: string[];
+	inputModalities?: string[];
+	tools?: string[];
+	reasoning?: string[];
+	thinkingFormat?: string[];
+	thinkingCanDisable?: string[];
+	availability?: string[];
+	priceBlended?: string[];
+	displayName?: string[];
+}
+
+export interface DiscoverySpec {
+	/** Path appended to `baseUrl`, usually `/models`. */
+	path: string;
+	/**
+	 * `auto` accepts `{data:[]}`, `{models:[]}`, `[]`, or a single record, and
+	 * rejects anything else. Providers with a bespoke envelope use `hooks.discover`.
+	 */
+	parser?: "auto";
+	timeoutMs?: number;
+	headers?: Record<string, string>;
+	/** Send `If-None-Match` and accept a 304 when a snapshot exists. */
+	etag?: boolean;
+	userAgent?: string;
+}
+
+export interface FilterSpec {
+	/** Always dropped, recorded with a reason. */
+	excludeIds?: string[];
+	/** Ids matching this regex are treated as non-chat (embeddings, rerankers). */
+	nonChatPattern?: string;
+	/** Drop models the provider reports as offline. Defaults to true. */
+	dropOffline?: boolean;
+}
+
+export interface PricingSpec {
+	/** Alias that carries the price. Defaults to `fields.priceBlended`. */
+	field?: string;
+	currency: "IDR" | "USD";
+	/** Unit the number is expressed in, e.g. 1_000_000 for "per 1M tokens". */
+	per: number;
+	/** The catalog gives one blended price, not separate input/output. */
+	blended: boolean;
+	/** Emit a USD cost into hosts. Off by default: see docs/DESIGN.md §13. */
+	emitUsd?: boolean;
+	/** Pinned, dated IDR->USD rate used only when `emitUsd` is true. */
+	usdRate?: { rate: number; asOf: string };
+}
+
+export interface HookContext {
+	baseUrl: string;
+	apiKey?: string;
+	headers: Record<string, string>;
+	signal: AbortSignal;
+}
+
+/**
+ * Escape hatches for endpoints the declarative path cannot express. A hook may
+ * describe what it needs, but it never owns network or cache behaviour: those
+ * stay in `catalog` so both hosts benefit.
+ */
+export interface PackHooks {
+	/** Replace discovery entirely (multi-endpoint merge, catalogVersion, paging). */
+	discover?: (context: HookContext) => Promise<RawRecord[]>;
+	/** Facts the declarative aliases cannot express. Return `undefined` to drop. */
+	normalize?: (record: RawRecord) => Partial<ModelFacts> | undefined;
+	/** Per-model wire API when a provider mixes routes. */
+	route?: (facts: ModelFacts) => string;
+	/** Display name, grouping, ordering. Must not invent membership. */
+	decorate?: (model: NormalizedModel) => NormalizedModel;
+	/** Request-time parameters for a thinking level. */
+	requestParams?: (input: { level: string; effort: string }) => Record<string, unknown>;
+}
+
+export interface HostHints {
+	pi?: {
+		compat?: Record<string, unknown>;
+		smallModel?: string;
+	};
+	opencode?: {
+		package?: string;
+		smallModel?: string;
+	};
+}
+
+export interface Pack {
+	schemaVersion: number;
+	id: string;
+	name: string;
+	baseUrl: string;
+	/** Wire API for every model unless `hooks.route` says otherwise. */
+	api?: string;
+	auth?: {
+		kind: "bearer" | "none";
+		apiKeyEnv?: string;
+		apiKey?: string;
+	};
+	discovery: DiscoverySpec;
+	fields?: FieldAliases;
+	filter?: FilterSpec;
+	/** Membership served before the first successful discovery. Keep it minimal. */
+	fallback?: { id: string }[];
+	defaults?: { contextWindow?: number; maxOutput?: number };
+	pricing?: PricingSpec;
+	/** Curated overrides keyed by model id. */
+	curated?: Record<string, Partial<ModelFacts>>;
+	brands?: Record<string, string>;
+	owners?: Record<string, string>;
+	names?: Record<string, string>;
+	hooks?: PackHooks;
+	hosts?: HostHints;
+}
+
+/** Validates at import time so a broken pack fails before it reaches a picker. */
+export function definePack(pack: Pack): Pack {
+	validatePack(pack);
+	return pack;
+}
+
+/** @throws When a required field is missing or malformed. */
+export function validatePack(pack: Pack): void {
+	if (pack.schemaVersion !== PACK_SCHEMA_VERSION) {
+		throw new Error(
+			`pack "${pack.id}": schemaVersion ${pack.schemaVersion} does not match PACK_SCHEMA_VERSION ${PACK_SCHEMA_VERSION}`,
+		);
+	}
+	if (!pack.id.trim()) throw new Error("pack: id is required");
+	if (!pack.name.trim()) throw new Error(`pack "${pack.id}": name is required`);
+	if (!/^https?:\/\//.test(pack.baseUrl)) {
+		throw new Error(`pack "${pack.id}": baseUrl must be an http(s) URL`);
+	}
+	if (!pack.discovery.path.startsWith("/")) {
+		throw new Error(`pack "${pack.id}": discovery.path must start with "/"`);
+	}
+	if (pack.discovery.timeoutMs !== undefined && pack.discovery.timeoutMs <= 0) {
+		throw new Error(`pack "${pack.id}": discovery.timeoutMs must be positive`);
+	}
+	if (pack.pricing?.emitUsd === true && pack.pricing.usdRate === undefined) {
+		throw new Error(`pack "${pack.id}": pricing.emitUsd requires usdRate`);
+	}
+	if (pack.pricing?.emitUsd === true && !pack.pricing.blended) {
+		throw new Error(`pack "${pack.id}": split pricing is not supported by the blended mapper`);
+	}
+	for (const [modelId, facts] of Object.entries(pack.curated ?? {})) {
+		if (facts.id !== undefined && facts.id !== modelId) {
+			throw new Error(`pack "${pack.id}": curated key "${modelId}" disagrees with its id "${facts.id}"`);
+		}
+	}
+	if (pack.filter?.nonChatPattern !== undefined) {
+		try {
+			new RegExp(pack.filter.nonChatPattern);
+		} catch {
+			throw new Error(`pack "${pack.id}": filter.nonChatPattern is not a valid regex`);
+		}
+	}
+}

@@ -1,0 +1,159 @@
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+
+import { buildModels, buildLimitIndex, discover, type DiscoverOptions } from "@repo/catalog";
+import { capabilityView, inputModalities, type NormalizedModel, type Pack, type RawRecord } from "@repo/contract";
+import { MEASURED_WIRE_EFFORT, invariants, measuredIds, packs } from "@repo/provider";
+
+export interface LoadedPack {
+	pack: Pack;
+	fixture?: RawRecord[];
+	models: NormalizedModel[];
+	source: "fixture" | "network" | "fallback";
+}
+
+/** The vendor surface has exactly one fixture: this repo's provider payload. */
+function fixturePath(root: string): string {
+	return join(root, "packages", "provider", "fixtures", "catalog.json");
+}
+
+export function loadFixture(root: string, pack: Pack): RawRecord[] | undefined {
+	const path = fixturePath(root);
+	if (!existsSync(path)) return undefined;
+	const payload = JSON.parse(readFileSync(path, "utf8")) as unknown;
+	const body = payload as { data?: unknown; models?: unknown } | unknown[];
+	const entries = Array.isArray(body) ? body : Array.isArray(body.data) ? body.data : Array.isArray(body.models) ? body.models : [];
+	return entries.filter((entry): entry is RawRecord => typeof entry === "object" && entry !== null && !Array.isArray(entry) && typeof (entry as RawRecord).id === "string");
+}
+
+export function loadAll(root: string, options: { live?: boolean } & DiscoverOptions = {}): LoadedPack[] {
+	const loaded: LoadedPack[] = [];
+	for (const pack of packs) {
+		const fixture = loadFixture(root, pack);
+		if (options.live === true) {
+			// The caller awaits the network path separately.
+			loaded.push({
+				pack,
+				...(fixture === undefined ? {} : { fixture }),
+				models: buildModels(pack, fixture ?? [], { measuredIds }),
+				source: fixture === undefined ? "fallback" : "fixture",
+			});
+			continue;
+		}
+		loaded.push({
+			pack,
+			...(fixture === undefined ? {} : { fixture }),
+			models: buildModels(pack, fixture ?? [], { measuredIds }),
+			source: fixture === undefined ? "fallback" : "fixture",
+		});
+	}
+	return loaded;
+}
+
+export async function loadLivePack(pack: Pack, options: DiscoverOptions = {}): Promise<LoadedPack> {
+	const result = await discover(pack, options);
+	return {
+		pack,
+		fixture: result.raw,
+		models: buildModels(pack, result.raw, { measuredIds }),
+		source: "network",
+	};
+}
+
+export interface InvariantFailure {
+	model: string;
+	key: string;
+	expected: unknown;
+	actual: unknown;
+}
+
+/** Compares curated ground truth against projected models, not raw payloads. */
+export function checkInvariants(loaded: readonly LoadedPack[]): InvariantFailure[] {
+	const failures: InvariantFailure[] = [];
+	for (const entry of loaded) {
+		const byId = new Map(entry.models.map((model) => [model.id, model]));
+		for (const invariant of invariants) {
+			const model = byId.get(invariant.id);
+			if (model === undefined) continue;
+			for (const [key, expected] of Object.entries(invariant.expected)) {
+				const actual = invariantValue(model, key);
+				if (actual !== expected) failures.push({ model: invariant.id, key, expected, actual });
+			}
+		}
+	}
+	return failures;
+}
+
+export function invariantValue(model: NormalizedModel, key: string): unknown {
+	switch (key) {
+		case "vision":
+			return model.input.includes("image");
+		case "pdf":
+			return model.input.includes("pdf");
+		case "videoInput":
+			return model.input.includes("video");
+		case "audioInput":
+			return model.input.includes("audio");
+		case "contextWindow":
+			return model.contextWindow;
+		case "maxOutput":
+			return model.maxOutput;
+		case "reasoning":
+			return model.reasoning;
+		case "tools":
+			return model.tools;
+		default:
+			return (model as unknown as Record<string, unknown>)[key];
+	}
+}
+
+/** Reasoning models with no measured effort: visible, but no menu. */
+export function unmeasured(models: readonly NormalizedModel[]): string[] {
+	return models
+		.filter((model) => model.reasoning && MEASURED_WIRE_EFFORT[model.id] === undefined && model.excluded === undefined)
+		.map((model) => model.id);
+}
+
+export function excluded(models: readonly NormalizedModel[]): { id: string; reason: string }[] {
+	return models
+		.filter((model) => model.excluded !== undefined)
+		.map((model) => ({ id: model.id, reason: model.excluded?.reason ?? "unknown" }));
+}
+
+export function inventoryRows(models: readonly NormalizedModel[]): string[][] {
+	return models
+		.filter((model) => model.excluded === undefined)
+		.sort((a, b) => a.id.localeCompare(b.id))
+		.map((model) => [
+			model.id,
+			model.name,
+			`${Math.round(model.contextWindow / 1000)}K`,
+			`${Math.round(model.maxOutput / 1000)}K`,
+			model.input.join("+"),
+			model.reasoning ? "yes" : "no",
+			model.thinking.format ?? "-",
+			MEASURED_WIRE_EFFORT[model.id] ?? "-",
+			`${model.provenance.limits.context}/${model.provenance.limits.maxOutput}`,
+			model.provenance.effort,
+		]);
+}
+
+export const INVENTORY_HEADER = [
+	"id",
+	"name",
+	"context",
+	"max-out",
+	"input",
+	"reasoning",
+	"format",
+	"wire-effort",
+	"limits-src",
+	"effort-src",
+];
+
+/** Reads a raw record's declared reasoning format, for the "unmapped" report. */
+export function declaredFormat(pack: Pack, record: RawRecord): string | undefined {
+	return capabilityView(record, pack.fields).thinkingFormat;
+}
+
+export { buildLimitIndex, inputModalities };

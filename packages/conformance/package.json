@@ -1,0 +1,19 @@
+{
+  "name": "@repo/conformance",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/"
+  },
+  "dependencies": {
+    "@repo/adapter-opencode": "workspace:*",
+    "@repo/adapter-pi": "workspace:*",
+    "@repo/catalog": "workspace:*",
+    "@repo/cli": "workspace:*",
+    "@repo/contract": "workspace:*",
+    "@repo/example-tier-b": "workspace:*",
+    "@repo/example-tier-c": "workspace:*",
+    "@repo/provider": "workspace:*"
+  }
+}

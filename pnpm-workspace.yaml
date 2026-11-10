@@ -1,0 +1,15 @@
+packages:
+  - "packages/*"
+  - "adapters/*"
+  - "examples/*"
+
+# Host SDKs are pinned to the versions the local harnesses run, and their
+# releases are often younger than pnpm's default cooldown. Everything else
+# respects it; long-term upgrades are gated by Renovate's 7-day cooldown.
+minimumReleaseAgeExclude:
+  - "@earendil-works/*"
+  - "@opencode/*"
+
+allowBuilds:
+  "@google/genai": false
+  protobufjs: false
