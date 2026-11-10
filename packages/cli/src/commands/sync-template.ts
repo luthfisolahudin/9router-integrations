@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { execFileSync } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 interface Lock {
@@ -114,7 +114,5 @@ function escapeRegExp(value: string): string {
 }
 
 function writeFileSyncSafe(path: string, content: string): void {
-	// Imported lazily so `--check` never writes.
-	const { writeFileSync } = require("node:fs") as typeof import("node:fs");
 	writeFileSync(path, content);
 }

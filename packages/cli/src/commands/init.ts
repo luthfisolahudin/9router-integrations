@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { execFileSync } from "node:child_process";
 import { cpSync, existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -39,7 +40,7 @@ const providerPackage = JSON.parse(readFileSync(join(ROOT, "packages/provider/pa
 const rootPackage = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8")) as { name: string; description?: string };
 
 const plan = [
-	`rename packages/provider → ${providerPackage.name.replace(/^@repo\//, "provider-")}`,
+	`rename packages/provider → @repo/provider-${id}`,
 	`set root name → ${id}-integrations`,
 	`seed the tier-${tier} pack into packages/provider/src/pack.ts`,
 	"render README.md",
@@ -141,7 +142,6 @@ console.log("\ninitialised. Next: task check, then capture a real payload into p
 
 function currentVersion(): string {
 	try {
-		const { execFileSync } = require("node:child_process") as typeof import("node:child_process");
 		return execFileSync("git", ["describe", "--tags", "--always"], { cwd: ROOT, encoding: "utf8" }).trim();
 	} catch {
 		return "0.1.0";
