@@ -1,4 +1,4 @@
-import { effortMenu, mapThinkingFormat, type NormalizedModel } from "@repo/contract";
+import { effortMenu, mapThinkingFormat, type NormalizedModel } from "@luthfisolahudin/ai-provider-integrations-template-contract";
 
 /** Pi's chat-model shape, kept structural so projection tests need no host SDK. */
 export interface PiModel {

@@ -10,7 +10,7 @@ import {
 	type Pack,
 	type RawRecord,
 	type Source,
-} from "@repo/contract";
+} from "@luthfisolahudin/ai-provider-integrations-template-contract";
 
 import { exclusionReason } from "./availability.ts";
 import type { LimitIndex } from "./modelsdev.ts";

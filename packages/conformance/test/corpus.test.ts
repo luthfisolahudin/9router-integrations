@@ -3,13 +3,13 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
 
-import { toOpencodeModels } from "@repo/adapter-opencode/model";
-import { toPiModels } from "@repo/adapter-pi/model";
-import { buildModels } from "@repo/catalog";
-import { PACK_SCHEMA_VERSION, type Pack, type RawRecord } from "@repo/contract";
-import { packs as tierB } from "@repo/example-tier-b";
-import { packs as tierC } from "@repo/example-tier-c";
-import { MEASURED_WIRE_EFFORT, measuredIds, packs as provider } from "@repo/provider";
+import { toOpencodeModels } from "@luthfisolahudin/ai-provider-integrations-template-opencode/model";
+import { toPiModels } from "@luthfisolahudin/ai-provider-integrations-template-pi/model";
+import { buildModels } from "@luthfisolahudin/ai-provider-integrations-template-catalog";
+import { PACK_SCHEMA_VERSION, type Pack, type RawRecord } from "@luthfisolahudin/ai-provider-integrations-template-contract";
+import { packs as tierB } from "@luthfisolahudin/ai-provider-integrations-template-tier-b";
+import { packs as tierC } from "@luthfisolahudin/ai-provider-integrations-template-tier-c";
+import { MEASURED_WIRE_EFFORT, measuredIds, packs as provider } from "@luthfisolahudin/ai-provider-integrations-template-provider";
 
 /**
  * Template-only corpus. `provider-init` deletes this file together with

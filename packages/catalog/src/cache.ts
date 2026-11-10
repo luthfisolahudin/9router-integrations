@@ -2,7 +2,7 @@ import { mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 
-import type { RawRecord } from "@repo/contract";
+import type { RawRecord } from "@luthfisolahudin/ai-provider-integrations-template-contract";
 
 export const CACHE_ROOT = "ai-provider-integrations";
 

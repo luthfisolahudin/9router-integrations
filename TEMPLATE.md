@@ -44,3 +44,23 @@ engine and arrives through the merge.
 The template must stay vendor-free: no provider URLs, ids, or quirks outside
 `examples/`. If a change only makes sense for one vendor, it belongs in that
 vendor's repo as a pack hook, not here. See `CONTRIBUTING.md`.
+
+## Package names
+
+Every workspace package is `<scope>/<repo>-<suffix>`:
+
+| Directory | Package |
+|---|---|
+| `packages/contract` | `@luthfisolahudin/ai-provider-integrations-template-contract` |
+| `packages/catalog` | `…-catalog` |
+| `packages/provider` | `…-provider` |
+| `packages/cli` | `…-cli` |
+| `packages/conformance` | `…-conformance` |
+| `adapters/pi` | `…-pi` |
+| `adapters/opencode` | `…-opencode` |
+| `examples/tier-b`, `examples/tier-c` | `…-tier-b`, `…-tier-c` |
+
+`task init` rewrites that prefix for your repo — package `name` fields, import
+specifiers, and the `tsconfig.json` path map — so a downstream repo ends up with
+`@luthfisolahudin/cosmoshub-integrations-catalog` and friends. The rewrite is
+idempotent: running it twice changes nothing.

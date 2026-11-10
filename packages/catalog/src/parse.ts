@@ -1,4 +1,4 @@
-import type { RawRecord } from "@repo/contract";
+import type { RawRecord } from "@luthfisolahudin/ai-provider-integrations-template-contract";
 
 function isRecord(value: unknown): value is RawRecord {
 	return typeof value === "object" && value !== null && !Array.isArray(value);

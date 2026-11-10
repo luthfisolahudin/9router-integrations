@@ -1,6 +1,6 @@
-import { buildModels, readSnapshot, refreshCatalog, snapshotPath, writeSnapshot } from "@repo/catalog";
-import type { Pack } from "@repo/contract";
-import { MEASURED_WIRE_EFFORT, measuredIds, packs } from "@repo/provider";
+import { buildModels, readSnapshot, refreshCatalog, snapshotPath, writeSnapshot } from "@luthfisolahudin/ai-provider-integrations-template-catalog";
+import type { Pack } from "@luthfisolahudin/ai-provider-integrations-template-contract";
+import { MEASURED_WIRE_EFFORT, measuredIds, packs } from "@luthfisolahudin/ai-provider-integrations-template-provider";
 import { Plugin } from "@opencode/plugin";
 
 import { DEFAULT_PACKAGE, toOpencodeModels, type OpencodeModel, type OpencodeProviderInfo } from "./model.ts";

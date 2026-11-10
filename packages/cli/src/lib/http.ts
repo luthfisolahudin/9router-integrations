@@ -1,4 +1,4 @@
-import type { Pack } from "@repo/contract";
+import type { Pack } from "@luthfisolahudin/ai-provider-integrations-template-contract";
 
 /** Resolves the key for a live call without ever logging it. */
 export function resolveKey(pack: Pack, env: NodeJS.ProcessEnv = process.env): string | undefined {

@@ -46,6 +46,9 @@ Import rules, enforced by `workspace:*` deps and `task check:boundaries`:
 - an adapter may not import another adapter.
 - `packages/cli` may not import an adapter.
 - `packages/conformance` may import everything, and is the only package that does.
+- Import across packages by package name (`<scope>/<repo>-<suffix>`), never by
+  relative path. `task init` renames the prefix, and relative paths silently
+  survive the rename.
 
 ## Commands
 

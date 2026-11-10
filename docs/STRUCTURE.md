@@ -60,20 +60,20 @@ Applied to the real ambiguities:
 
 ```
 packages/                       engine + tools (no host SDK peers)
-  contract/      @repo/contract      zero deps, zero I/O, zero node builtins
+  contract/      @<scope>/<repo>-contract      zero deps, zero I/O, zero node builtins
                  record, pack (definePack + validation + packSchemaVersion),
                  capabilities, naming, thinking, limits policy, effort policy,
                  provenance types
-  catalog/       @repo/catalog       depends: contract
+  catalog/       @<scope>/<repo>-catalog       depends: contract
                  envelope parse, discover (fetch), cache (fs), provenance
                  assembly, availability filter, refresh orchestration
-  provider/      @repo/provider      depends: contract        [repo-owned]
+  provider/      @<scope>/<repo>-provider      depends: contract        [repo-owned]
                  pack.ts (wire + hooks), curated, invariants,
                  effort (measurements), fallback, fixtures
-  cli/           @repo/cli           depends: contract, catalog, provider
+  cli/           @<scope>/<repo>-cli           depends: contract, catalog, provider
                  bin: provider-check, provider-probe, provider-report,
                  provider-doctor, provider-init, provider-sync, provider-boundaries
-  conformance/   @repo/conformance   dev-only, depends on everything, and the only
+  conformance/   @<scope>/<repo>-conformance   dev-only, depends on everything, and the only
                  package allowed to import adapters
 adapters/                       harness entrypoints (peer-dep on a host SDK)
   pi/            pi-provider-<id>    depends: contract, catalog, provider
@@ -365,7 +365,7 @@ ai-provider-integrations-template/
 │  ├─ ADDING-A-PROVIDER.md              # the long form of the add-provider skill
 │  └─ THINKING.md                       # format mapping table + evidence format
 ├─ packages/
-│  ├─ contract/                         # @repo/contract — policy, zero I/O
+│  ├─ contract/                         # @<scope>/<repo>-contract — policy, zero I/O
 │  │  ├─ package.json  tsconfig.json
 │  │  ├─ src/
 │  │  │  ├─ record.ts                   # NormalizedModel, Provenance, Source
@@ -381,7 +381,7 @@ ai-provider-integrations-template/
 │  │  └─ test/                          # pure unit tests, no mocks at all
 │  │     ├─ capabilities.test.ts  naming.test.ts  pack.test.ts
 │  │     └─ thinking.test.ts  limits.test.ts  effort.test.ts
-│  ├─ catalog/                          # @repo/catalog — mechanics
+│  ├─ catalog/                          # @<scope>/<repo>-catalog — mechanics
 │  │  ├─ package.json  tsconfig.json
 │  │  ├─ src/
 │  │  │  ├─ parse.ts                    # data[] / models[] / array / single
@@ -393,18 +393,18 @@ ai-provider-integrations-template/
 │  │  └─ test/                          # mocked fetch/fs only
 │  │     ├─ parse.test.ts  cache.test.ts  provenance.test.ts
 │  │     └─ discover.test.ts  availability.test.ts
-│  ├─ provider/                         # @repo/provider — FACTS, repo-owned downstream
+│  ├─ provider/                         # @<scope>/<repo>-provider — FACTS, repo-owned downstream
 │  │  ├─ package.json  tsconfig.json
 │  │  ├─ src/{pack,curated,invariants,effort,fallback,index}.ts
 │  │  ├─ fixtures/{catalog.json,chat-max.json,chat-low.json}
 │  │  └─ test/{pack,invariants}.test.ts
-│  ├─ cli/                              # @repo/cli — tools, never imports a host
+│  ├─ cli/                              # @<scope>/<repo>-cli — tools, never imports a host
 │  │  ├─ package.json                   # bin: provider-{check,probe,report,
 │  │  │                                #      doctor,init,sync,boundaries}
 │  │  └─ src/commands/
 │  │     ├─ check-catalog.ts  probe-effort.ts  probe-routes.ts
 │  │     ├─ report.ts  doctor.ts  init.ts  sync-template.ts  boundaries.ts
-│  └─ conformance/                      # @repo/conformance — dev-only
+│  └─ conformance/                      # @<scope>/<repo>-conformance — dev-only
 │     ├─ package.json                   # the only package allowed to import
 │     │                                 #   everything, including adapters
 │     └─ test/
@@ -585,4 +585,4 @@ Renaming later is cheap and does not touch the engine: one `git mv`, one glob in
 `pnpm-workspace.yaml`, one word in `AGENTS.md`, and the two install paths per
 machine (Pi `settings.json`, OpenCode `plugins`). Nothing inside `packages/`
 changes, because its packages reference the adapters only through
-`@repo/conformance`.
+`@<scope>/<repo>-conformance`.

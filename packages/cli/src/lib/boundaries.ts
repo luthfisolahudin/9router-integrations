@@ -1,18 +1,18 @@
-import type { NormalizedModel, Pack } from "@repo/contract";
+import type { NormalizedModel, Pack } from "@luthfisolahudin/ai-provider-integrations-template-contract";
 
 /** Layer of a workspace package id, or `undefined` for an external dependency. */
 export type Layer = "contract" | "catalog" | "provider" | "adapter" | "example" | "cli" | "conformance";
 
 export const PACKAGE_LAYER: Readonly<Record<string, Layer>> = {
-	"@repo/contract": "contract",
-	"@repo/catalog": "catalog",
-	"@repo/provider": "provider",
-	"@repo/adapter-pi": "adapter",
-	"@repo/adapter-opencode": "adapter",
-	"@repo/cli": "cli",
-	"@repo/conformance": "conformance",
-	"@repo/example-tier-b": "example",
-	"@repo/example-tier-c": "example",
+	"@luthfisolahudin/ai-provider-integrations-template-contract": "contract",
+	"@luthfisolahudin/ai-provider-integrations-template-catalog": "catalog",
+	"@luthfisolahudin/ai-provider-integrations-template-provider": "provider",
+	"@luthfisolahudin/ai-provider-integrations-template-pi": "adapter",
+	"@luthfisolahudin/ai-provider-integrations-template-opencode": "adapter",
+	"@luthfisolahudin/ai-provider-integrations-template-cli": "cli",
+	"@luthfisolahudin/ai-provider-integrations-template-conformance": "conformance",
+	"@luthfisolahudin/ai-provider-integrations-template-tier-b": "example",
+	"@luthfisolahudin/ai-provider-integrations-template-tier-c": "example",
 };
 
 /** Forbidden import directions. Absence means "allowed". */

@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
 
-import { capabilityView, type RawRecord } from "@repo/contract";
+import { capabilityView, type RawRecord } from "@luthfisolahudin/ai-provider-integrations-template-contract";
 
 import { invariants, packs } from "../src/index.ts";
 

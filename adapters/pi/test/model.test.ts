@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import type { NormalizedModel } from "@repo/contract";
+import type { NormalizedModel } from "@luthfisolahudin/ai-provider-integrations-template-contract";
 
 import { toPiModel, toPiModels } from "../src/model.ts";
 

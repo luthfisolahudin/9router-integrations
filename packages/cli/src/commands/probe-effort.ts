@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import { decideEffort, PI_LEVELS, type ProbeSample } from "@repo/contract";
-import { MEASURED_WIRE_EFFORT, packs } from "@repo/provider";
+import { decideEffort, PI_LEVELS, type ProbeSample } from "@luthfisolahudin/ai-provider-integrations-template-contract";
+import { MEASURED_WIRE_EFFORT, packs } from "@luthfisolahudin/ai-provider-integrations-template-provider";
 
 import { resolveKey } from "../lib/http.ts";
 

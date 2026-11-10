@@ -3,11 +3,11 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
 
-import { toOpencodeModels } from "@repo/adapter-opencode/model";
-import { toPiModels } from "@repo/adapter-pi/model";
-import { buildModels } from "@repo/catalog";
-import type { RawRecord } from "@repo/contract";
-import { MEASURED_WIRE_EFFORT, measuredIds, packs } from "@repo/provider";
+import { toOpencodeModels } from "@luthfisolahudin/ai-provider-integrations-template-opencode/model";
+import { toPiModels } from "@luthfisolahudin/ai-provider-integrations-template-pi/model";
+import { buildModels } from "@luthfisolahudin/ai-provider-integrations-template-catalog";
+import type { RawRecord } from "@luthfisolahudin/ai-provider-integrations-template-contract";
+import { MEASURED_WIRE_EFFORT, measuredIds, packs } from "@luthfisolahudin/ai-provider-integrations-template-provider";
 
 const ROOT = join(import.meta.dirname, "../../..");
 const FIXTURE = join(ROOT, "packages/provider/fixtures/catalog.json");

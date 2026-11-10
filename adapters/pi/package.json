@@ -1,5 +1,5 @@
 {
-  "name": "@repo/adapter-pi",
+  "name": "@luthfisolahudin/ai-provider-integrations-template-pi",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -17,16 +17,16 @@
     "test": "node --test \"test/**/*.test.ts\""
   },
   "dependencies": {
-    "@repo/catalog": "workspace:*",
-    "@repo/contract": "workspace:*",
-    "@repo/provider": "workspace:*"
+    "@luthfisolahudin/ai-provider-integrations-template-catalog": "workspace:*",
+    "@luthfisolahudin/ai-provider-integrations-template-contract": "workspace:*",
+    "@luthfisolahudin/ai-provider-integrations-template-provider": "workspace:*"
   },
   "peerDependencies": {
     "@earendil-works/pi-ai": "*",
     "@earendil-works/pi-coding-agent": "*"
   },
   "devDependencies": {
-    "@earendil-works/pi-ai": "1.5.2",
-    "@earendil-works/pi-coding-agent": "1.5.2"
+    "@earendil-works/pi-ai": "^1.5.2",
+    "@earendil-works/pi-coding-agent": "^1.5.2"
   }
 }

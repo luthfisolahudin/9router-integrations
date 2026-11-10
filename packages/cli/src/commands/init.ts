@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { execFileSync } from "node:child_process";
-import { cpSync, existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 /**
@@ -34,13 +34,15 @@ if (!["a", "b", "c"].includes(tier)) {
 	process.exit(2);
 }
 
-const providerPackage = JSON.parse(readFileSync(join(ROOT, "packages/provider/package.json"), "utf8")) as {
-	name: string;
-};
-const rootPackage = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8")) as { name: string; description?: string };
+const rootManifestPath = join(ROOT, "package.json");
+const rootManifest = JSON.parse(readFileSync(rootManifestPath, "utf8")) as { name?: string; description?: string };
+const currentName = rootManifest.name ?? "";
+const [scope, oldRoot] = currentName.includes("/") ? (currentName.split("/") as [string, string]) : ["@repo", currentName];
+const newRoot = `${id}-integrations`;
 
 const plan = [
-	`set root name → ${id}-integrations`,
+	`rename workspace packages → ${scope}/${newRoot}-*`,
+	`set root name → ${scope}/${newRoot}`,
 	`seed the tier-${tier} pack into packages/provider/src/pack.ts`,
 	"render README.md",
 	"delete examples/ and the template-only corpus test",
@@ -57,19 +59,17 @@ if (!execute) {
 	process.exit(0);
 }
 
-const readme = `# ${id}-integrations\n\nLive model discovery and OpenAI Chat Completions for ${name}, shared by Pi and OpenCode.\n\n- base URL: \`${baseUrl}\`\n- API key: \`${apiKeyEnv ?? "(none)"}\`\n\n## Install\n\n\`\`\`\nPi        → ${join(ROOT, "adapters/pi/src/index.ts")}\nOpenCode  → ${join(ROOT, "adapters/opencode/src/index.ts")}\n\`\`\`\n\n## Verify\n\n\`\`\`sh\ntask check\ntask check:catalog\ntask report --write\n\`\`\`\n`;
-writeFileSync(join(ROOT, "README.md"), readme);
+const renamed = renameWorkspacePackages(scope, oldRoot, newRoot);
+console.log(`renamed ${renamed} file(s) to ${scope}/${newRoot}-*`);
 
-const providerPackagePath = join(ROOT, "packages/provider/package.json");
-const providerManifest = JSON.parse(readFileSync(providerPackagePath, "utf8")) as { name?: string };
-providerManifest.name = `@repo/provider-${id}`;
-writeFileSync(providerPackagePath, `${JSON.stringify(providerManifest, null, 2)}\n`);
-
-const rootManifestPath = join(ROOT, "package.json");
-const rootManifest = JSON.parse(readFileSync(rootManifestPath, "utf8")) as { name?: string; description?: string };
-rootManifest.name = `${id}-integrations`;
+rootManifest.name = `${scope}/${newRoot}`;
 rootManifest.description = `Live model discovery and OpenAI Chat Completions for ${name}`;
 writeFileSync(rootManifestPath, `${JSON.stringify(rootManifest, null, 2)}\n`);
+
+writeFileSync(
+	join(ROOT, "README.md"),
+	`# ${newRoot}\n\nLive model discovery and OpenAI Chat Completions for ${name}, shared by Pi and OpenCode.\n\n- base URL: \`${baseUrl}\`\n- API key: \`${apiKeyEnv ?? "(none)"}\`\n\n## Install\n\n\`\`\`\nPi        → ${join(ROOT, "adapters/pi/src/index.ts")}\nOpenCode  → ${join(ROOT, "adapters/opencode/src/index.ts")}\n\`\`\`\n\n## Verify\n\n\`\`\`sh\ntask check\ntask check:catalog\ntask report --write\n\`\`\`\n`,
+);
 
 if (tier !== "a") {
 	const source = join(ROOT, "examples", `tier-${tier}`, "src", "pack.ts");
@@ -92,8 +92,8 @@ const conformancePackage = JSON.parse(readFileSync(conformancePackagePath, "utf8
 	dependencies?: Record<string, string>;
 };
 const dependencies = conformancePackage.dependencies ?? {};
-for (const name of Object.keys(dependencies)) {
-	if (name.startsWith("@repo/example-")) delete dependencies[name];
+for (const dependency of Object.keys(dependencies)) {
+	if (dependency.includes("-tier-")) delete dependencies[dependency];
 }
 writeFileSync(conformancePackagePath, `${JSON.stringify(conformancePackage, null, 2)}\n`);
 
@@ -102,8 +102,8 @@ const tsconfigPath = join(ROOT, "tsconfig.json");
 const tsconfig = JSON.parse(readFileSync(tsconfigPath, "utf8")) as {
 	compilerOptions: { paths?: Record<string, string[]> };
 };
-for (const name of Object.keys(tsconfig.compilerOptions.paths ?? {})) {
-	if (name.startsWith("@repo/example-")) delete tsconfig.compilerOptions.paths?.[name];
+for (const specifier of Object.keys(tsconfig.compilerOptions.paths ?? {})) {
+	if (specifier.includes("-tier-")) delete tsconfig.compilerOptions.paths?.[specifier];
 }
 writeFileSync(tsconfigPath, `${JSON.stringify(tsconfig, null, 2)}\n`);
 
@@ -118,7 +118,7 @@ writeFileSync(
 			template: "luthfisolahudin/ai-provider-integrations-template",
 			version: currentVersion(),
 			packSchemaVersion: 1,
-			identity: { name: `${id}-integrations`, description: rootPackage.description },
+			identity: { name: newRoot, description: rootManifest.description },
 			owned: [
 				"README.md",
 				"LICENSE",
@@ -138,6 +138,47 @@ writeFileSync(
 );
 
 console.log("\ninitialised. Next: task check, then capture a real payload into packages/provider/fixtures/.");
+
+/**
+ * Renames every workspace package from the template's name to this repo's.
+ *
+ * The convention is `<scope>/<repo>-<suffix>`, so the rename is one string
+ * substitution applied to package names, import specifiers, and the tsconfig
+ * path map. It is idempotent: a repo already using the new prefix changes
+ * nothing.
+ */
+function renameWorkspacePackages(scopePrefix: string, from: string, to: string): number {
+	const needle = `${scopePrefix}/${from}-`;
+	const replacement = `${scopePrefix}/${to}-`;
+	let changed = 0;
+	const files = [
+		...walk(join(ROOT, "packages")),
+		...walk(join(ROOT, "adapters")),
+		...walk(join(ROOT, "examples")),
+		join(ROOT, "tsconfig.json"),
+	];
+	for (const file of files) {
+		const before = readFileSync(file, "utf8");
+		if (!before.includes(needle)) continue;
+		writeFileSync(file, before.split(needle).join(replacement));
+		changed += 1;
+	}
+	return changed;
+}
+
+function walk(directory: string, files: string[] = []): string[] {
+	if (!existsSync(directory)) return files;
+	for (const entry of readdirSync(directory, { withFileTypes: true })) {
+		const path = join(directory, entry.name);
+		if (entry.isDirectory()) {
+			if (entry.name === "node_modules" || entry.name === "dist") continue;
+			walk(path, files);
+		} else if (entry.isFile() && /\.(ts|json)$/.test(entry.name)) {
+			files.push(path);
+		}
+	}
+	return files;
+}
 
 function currentVersion(): string {
 	try {

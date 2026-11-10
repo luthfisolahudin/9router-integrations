@@ -1,5 +1,5 @@
 {
-  "name": "@repo/cli",
+  "name": "@luthfisolahudin/ai-provider-integrations-template-cli",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -7,8 +7,8 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@repo/catalog": "workspace:*",
-    "@repo/contract": "workspace:*",
-    "@repo/provider": "workspace:*"
+    "@luthfisolahudin/ai-provider-integrations-template-catalog": "workspace:*",
+    "@luthfisolahudin/ai-provider-integrations-template-contract": "workspace:*",
+    "@luthfisolahudin/ai-provider-integrations-template-provider": "workspace:*"
   }
 }

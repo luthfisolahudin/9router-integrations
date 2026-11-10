@@ -1,5 +1,5 @@
 {
-  "name": "@repo/adapter-opencode",
+  "name": "@luthfisolahudin/ai-provider-integrations-template-opencode",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -12,14 +12,14 @@
     "test": "node --test \"test/**/*.test.ts\""
   },
   "dependencies": {
-    "@repo/catalog": "workspace:*",
-    "@repo/contract": "workspace:*",
-    "@repo/provider": "workspace:*"
+    "@luthfisolahudin/ai-provider-integrations-template-catalog": "workspace:*",
+    "@luthfisolahudin/ai-provider-integrations-template-contract": "workspace:*",
+    "@luthfisolahudin/ai-provider-integrations-template-provider": "workspace:*"
   },
   "peerDependencies": {
     "@opencode/plugin": "*"
   },
   "devDependencies": {
-    "@opencode/plugin": "2.2.7"
+    "@opencode/plugin": "^2.2.7"
   }
 }

@@ -3,9 +3,9 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
 
-import { checkAgentFiles, checkProviderShape, checkSkills } from "@repo/cli";
-import { PACK_SCHEMA_VERSION, validatePack } from "@repo/contract";
-import { packs } from "@repo/provider";
+import { checkAgentFiles, checkProviderShape, checkSkills } from "@luthfisolahudin/ai-provider-integrations-template-cli";
+import { PACK_SCHEMA_VERSION, validatePack } from "@luthfisolahudin/ai-provider-integrations-template-contract";
+import { packs } from "@luthfisolahudin/ai-provider-integrations-template-provider";
 
 const ROOT = join(import.meta.dirname, "../../..");
 

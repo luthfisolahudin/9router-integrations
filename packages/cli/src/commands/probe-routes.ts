@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { packs } from "@repo/provider";
+import { packs } from "@luthfisolahudin/ai-provider-integrations-template-provider";
 
 import { resolveKey } from "../lib/http.ts";
 

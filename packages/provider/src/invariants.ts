@@ -1,4 +1,4 @@
-import type { ModelFacts } from "@repo/contract";
+import type { ModelFacts } from "@luthfisolahudin/ai-provider-integrations-template-contract";
 
 export interface CapabilityInvariant {
 	readonly id: string;

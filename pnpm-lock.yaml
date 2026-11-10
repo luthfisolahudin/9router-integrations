@@ -7,7 +7,7 @@ importers:
     configDependencies: {}
     packageManagerDependencies:
       pnpm:
-        specifier: 12.18.0
+        specifier: 12.18.0+sha512.9d7882d5dc82147ecfc4e062aa34834e0ad0296710a1837a1115ae012127d36b7109e321ac1598a1dd0a65597681b1e99917e12ed0d749eae91187943363beb3
         version: 12.18.0
 
 packages:
@@ -167,16 +167,16 @@ importers:
   .:
     devDependencies:
       '@earendil-works/pi-ai':
-        specifier: 1.5.2
+        specifier: ^1.5.2
         version: 1.5.2(@aws-sdk/credential-provider-node@3.972.94)(@smithy/signature-v4@5.7.5)(undici@8.12.4)(ws@8.22.2)
       '@earendil-works/pi-coding-agent':
-        specifier: 1.5.2
+        specifier: ^1.5.2
         version: 1.5.2(@aws-sdk/credential-provider-node@3.972.94)(@smithy/signature-v4@5.7.5)(ws@8.22.2)
       '@opencode/ai':
-        specifier: 2.2.7
+        specifier: ^2.2.7
         version: 2.2.7
       '@opencode/plugin':
-        specifier: 2.2.7
+        specifier: ^2.2.7
         version: 2.2.7(@opentelemetry/semantic-conventions@1.45.0)(redis@6.3.1(@opentelemetry/api@1.9.0))
       '@types/node':
         specifier: ^24.10.1
@@ -187,101 +187,101 @@ importers:
 
   adapters/opencode:
     dependencies:
-      '@repo/catalog':
+      '@luthfisolahudin/ai-provider-integrations-template-catalog':
         specifier: workspace:*
         version: link:../../packages/catalog
-      '@repo/contract':
+      '@luthfisolahudin/ai-provider-integrations-template-contract':
         specifier: workspace:*
         version: link:../../packages/contract
-      '@repo/provider':
+      '@luthfisolahudin/ai-provider-integrations-template-provider':
         specifier: workspace:*
         version: link:../../packages/provider
     devDependencies:
       '@opencode/plugin':
-        specifier: 2.2.7
+        specifier: ^2.2.7
         version: 2.2.7(@opentelemetry/semantic-conventions@1.45.0)(redis@6.3.1(@opentelemetry/api@1.9.0))
 
   adapters/pi:
     dependencies:
-      '@repo/catalog':
+      '@luthfisolahudin/ai-provider-integrations-template-catalog':
         specifier: workspace:*
         version: link:../../packages/catalog
-      '@repo/contract':
+      '@luthfisolahudin/ai-provider-integrations-template-contract':
         specifier: workspace:*
         version: link:../../packages/contract
-      '@repo/provider':
+      '@luthfisolahudin/ai-provider-integrations-template-provider':
         specifier: workspace:*
         version: link:../../packages/provider
     devDependencies:
       '@earendil-works/pi-ai':
-        specifier: 1.5.2
+        specifier: ^1.5.2
         version: 1.5.2(@aws-sdk/credential-provider-node@3.972.94)(@smithy/signature-v4@5.7.5)(undici@8.12.4)(ws@8.22.2)
       '@earendil-works/pi-coding-agent':
-        specifier: 1.5.2
+        specifier: ^1.5.2
         version: 1.5.2(@aws-sdk/credential-provider-node@3.972.94)(@smithy/signature-v4@5.7.5)(ws@8.22.2)
 
   examples/tier-b:
     dependencies:
-      '@repo/contract':
+      '@luthfisolahudin/ai-provider-integrations-template-contract':
         specifier: workspace:*
         version: link:../../packages/contract
 
   examples/tier-c:
     dependencies:
-      '@repo/contract':
+      '@luthfisolahudin/ai-provider-integrations-template-contract':
         specifier: workspace:*
         version: link:../../packages/contract
 
   packages/catalog:
     dependencies:
-      '@repo/contract':
+      '@luthfisolahudin/ai-provider-integrations-template-contract':
         specifier: workspace:*
         version: link:../contract
 
   packages/cli:
     dependencies:
-      '@repo/catalog':
+      '@luthfisolahudin/ai-provider-integrations-template-catalog':
         specifier: workspace:*
         version: link:../catalog
-      '@repo/contract':
+      '@luthfisolahudin/ai-provider-integrations-template-contract':
         specifier: workspace:*
         version: link:../contract
-      '@repo/provider':
+      '@luthfisolahudin/ai-provider-integrations-template-provider':
         specifier: workspace:*
         version: link:../provider
 
   packages/conformance:
     dependencies:
-      '@repo/adapter-opencode':
-        specifier: workspace:*
-        version: link:../../adapters/opencode
-      '@repo/adapter-pi':
-        specifier: workspace:*
-        version: link:../../adapters/pi
-      '@repo/catalog':
+      '@luthfisolahudin/ai-provider-integrations-template-catalog':
         specifier: workspace:*
         version: link:../catalog
-      '@repo/cli':
+      '@luthfisolahudin/ai-provider-integrations-template-cli':
         specifier: workspace:*
         version: link:../cli
-      '@repo/contract':
+      '@luthfisolahudin/ai-provider-integrations-template-contract':
         specifier: workspace:*
         version: link:../contract
-      '@repo/example-tier-b':
+      '@luthfisolahudin/ai-provider-integrations-template-opencode':
         specifier: workspace:*
-        version: link:../../examples/tier-b
-      '@repo/example-tier-c':
+        version: link:../../adapters/opencode
+      '@luthfisolahudin/ai-provider-integrations-template-pi':
         specifier: workspace:*
-        version: link:../../examples/tier-c
-      '@repo/provider':
+        version: link:../../adapters/pi
+      '@luthfisolahudin/ai-provider-integrations-template-provider':
         specifier: workspace:*
         version: link:../provider
+      '@luthfisolahudin/ai-provider-integrations-template-tier-b':
+        specifier: workspace:*
+        version: link:../../examples/tier-b
+      '@luthfisolahudin/ai-provider-integrations-template-tier-c':
+        specifier: workspace:*
+        version: link:../../examples/tier-c
 
   packages/contract: {}
 
   packages/provider:
     dependencies:
-      '@repo/contract':
+      '@luthfisolahudin/ai-provider-integrations-template-contract':
         specifier: workspace:*
         version: link:../contract
 

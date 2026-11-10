@@ -1,5 +1,5 @@
 {
-  "name": "@repo/conformance",
+  "name": "@luthfisolahudin/ai-provider-integrations-template-conformance",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -7,13 +7,13 @@
     "test": "node --test \"test/**/*.test.ts\""
   },
   "dependencies": {
-    "@repo/adapter-opencode": "workspace:*",
-    "@repo/adapter-pi": "workspace:*",
-    "@repo/catalog": "workspace:*",
-    "@repo/cli": "workspace:*",
-    "@repo/contract": "workspace:*",
-    "@repo/example-tier-b": "workspace:*",
-    "@repo/example-tier-c": "workspace:*",
-    "@repo/provider": "workspace:*"
+    "@luthfisolahudin/ai-provider-integrations-template-opencode": "workspace:*",
+    "@luthfisolahudin/ai-provider-integrations-template-pi": "workspace:*",
+    "@luthfisolahudin/ai-provider-integrations-template-catalog": "workspace:*",
+    "@luthfisolahudin/ai-provider-integrations-template-cli": "workspace:*",
+    "@luthfisolahudin/ai-provider-integrations-template-contract": "workspace:*",
+    "@luthfisolahudin/ai-provider-integrations-template-tier-b": "workspace:*",
+    "@luthfisolahudin/ai-provider-integrations-template-tier-c": "workspace:*",
+    "@luthfisolahudin/ai-provider-integrations-template-provider": "workspace:*"
   }
 }

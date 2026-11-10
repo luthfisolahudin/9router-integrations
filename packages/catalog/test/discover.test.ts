@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { PACK_SCHEMA_VERSION, definePack, type Pack } from "@repo/contract";
+import { PACK_SCHEMA_VERSION, definePack, type Pack } from "@luthfisolahudin/ai-provider-integrations-template-contract";
 
 import { authHeaders, discover, resolveApiKey } from "../src/index.ts";
 

@@ -1,4 +1,4 @@
-import { PACK_SCHEMA_VERSION, definePack } from "@repo/contract";
+import { PACK_SCHEMA_VERSION, definePack } from "@luthfisolahudin/ai-provider-integrations-template-contract";
 
 import { curated } from "./curated.ts";
 import { FALLBACK } from "./fallback.ts";

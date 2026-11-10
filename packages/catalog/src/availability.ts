@@ -1,4 +1,4 @@
-import type { NormalizedModel, Pack } from "@repo/contract";
+import type { NormalizedModel, Pack } from "@luthfisolahudin/ai-provider-integrations-template-contract";
 
 /** Reasons a model is dropped from pickers. Recorded so nothing vanishes silently. */
 export type ExclusionReason = "excluded-id" | "non-chat" | "offline";

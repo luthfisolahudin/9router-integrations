@@ -1,5 +1,5 @@
 {
-  "name": "@repo/example-tier-b",
+  "name": "@luthfisolahudin/ai-provider-integrations-template-tier-b",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -7,6 +7,6 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@repo/contract": "workspace:*"
+    "@luthfisolahudin/ai-provider-integrations-template-contract": "workspace:*"
   }
 }

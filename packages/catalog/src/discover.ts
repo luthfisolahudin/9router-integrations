@@ -1,4 +1,4 @@
-import type { HookContext, Pack, RawRecord } from "@repo/contract";
+import type { HookContext, Pack, RawRecord } from "@luthfisolahudin/ai-provider-integrations-template-contract";
 
 import { parseEnvelope } from "./parse.ts";
 

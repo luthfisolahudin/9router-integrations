@@ -1,4 +1,4 @@
-import type { Pack } from "@repo/contract";
+import type { Pack } from "@luthfisolahudin/ai-provider-integrations-template-contract";
 
 import { MEASURED_WIRE_EFFORT } from "./effort.ts";
 import { CAPABILITY_INVARIANTS, type CapabilityInvariant } from "./invariants.ts";

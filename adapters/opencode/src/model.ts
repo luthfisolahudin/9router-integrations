@@ -1,4 +1,4 @@
-import { mapThinkingFormat, PI_LEVELS, type NormalizedModel } from "@repo/contract";
+import { mapThinkingFormat, PI_LEVELS, type NormalizedModel } from "@luthfisolahudin/ai-provider-integrations-template-contract";
 
 /**
  * OpenCode's model shape, kept structural on purpose.

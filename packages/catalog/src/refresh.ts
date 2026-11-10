@@ -1,4 +1,4 @@
-import type { NormalizedModel, Pack, RawRecord } from "@repo/contract";
+import type { NormalizedModel, Pack, RawRecord } from "@luthfisolahudin/ai-provider-integrations-template-contract";
 
 import { isFresh, type Snapshot } from "./cache.ts";
 import { discover, type DiscoverOptions } from "./discover.ts";

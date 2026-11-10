@@ -1,9 +1,9 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { buildModels, buildLimitIndex, discover, type DiscoverOptions } from "@repo/catalog";
-import { capabilityView, inputModalities, type NormalizedModel, type Pack, type RawRecord } from "@repo/contract";
-import { MEASURED_WIRE_EFFORT, invariants, measuredIds, packs } from "@repo/provider";
+import { buildModels, buildLimitIndex, discover, type DiscoverOptions } from "@luthfisolahudin/ai-provider-integrations-template-catalog";
+import { capabilityView, inputModalities, type NormalizedModel, type Pack, type RawRecord } from "@luthfisolahudin/ai-provider-integrations-template-contract";
+import { MEASURED_WIRE_EFFORT, invariants, measuredIds, packs } from "@luthfisolahudin/ai-provider-integrations-template-provider";
 
 export interface LoadedPack {
 	pack: Pack;

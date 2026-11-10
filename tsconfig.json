@@ -19,34 +19,34 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@repo/contract": [
+      "@luthfisolahudin/ai-provider-integrations-template-contract": [
         "packages/contract/src/index.ts"
       ],
-      "@repo/catalog": [
+      "@luthfisolahudin/ai-provider-integrations-template-catalog": [
         "packages/catalog/src/index.ts"
       ],
-      "@repo/provider": [
+      "@luthfisolahudin/ai-provider-integrations-template-provider": [
         "packages/provider/src/index.ts"
       ],
-      "@repo/cli": [
+      "@luthfisolahudin/ai-provider-integrations-template-cli": [
         "packages/cli/src/index.ts"
       ],
-      "@repo/adapter-pi": [
+      "@luthfisolahudin/ai-provider-integrations-template-pi": [
         "adapters/pi/src/index.ts"
       ],
-      "@repo/adapter-opencode": [
+      "@luthfisolahudin/ai-provider-integrations-template-opencode": [
         "adapters/opencode/src/index.ts"
       ],
-      "@repo/example-tier-b": [
+      "@luthfisolahudin/ai-provider-integrations-template-tier-b": [
         "examples/tier-b/src/index.ts"
       ],
-      "@repo/example-tier-c": [
+      "@luthfisolahudin/ai-provider-integrations-template-tier-c": [
         "examples/tier-c/src/index.ts"
       ],
-      "@repo/adapter-pi/model": [
+      "@luthfisolahudin/ai-provider-integrations-template-pi/model": [
         "adapters/pi/src/model.ts"
       ],
-      "@repo/adapter-opencode/model": [
+      "@luthfisolahudin/ai-provider-integrations-template-opencode/model": [
         "adapters/opencode/src/model.ts"
       ]
     }

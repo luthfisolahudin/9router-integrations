@@ -1,5 +1,5 @@
 {
-  "name": "ai-provider-integrations-template",
+  "name": "@luthfisolahudin/ai-provider-integrations-template",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -24,11 +24,18 @@
     "init": "node packages/cli/src/commands/init.ts"
   },
   "devDependencies": {
-    "@earendil-works/pi-ai": "1.5.2",
-    "@earendil-works/pi-coding-agent": "1.5.2",
-    "@opencode/ai": "2.2.7",
-    "@opencode/plugin": "2.2.7",
+    "@earendil-works/pi-ai": "^1.5.2",
+    "@earendil-works/pi-coding-agent": "^1.5.2",
+    "@opencode/ai": "^2.2.7",
+    "@opencode/plugin": "^2.2.7",
     "@types/node": "^24.10.1",
     "typescript": "^5.9.3"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "12.18.0+sha512.9d7882d5dc82147ecfc4e062aa34834e0ad0296710a1837a1115ae012127d36b7109e321ac1598a1dd0a65597681b1e99917e12ed0d749eae91187943363beb3",
+      "onFail": "error"
+    }
   }
 }

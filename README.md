@@ -61,6 +61,8 @@ the template lock. Then follow `docs/ADDING-A-PROVIDER.md`.
 | `packages/conformance` | projections, invariants, secrets, skills, AGENTS checks |
 | `examples/` | Tier A/B/C catalogs used as a conformance corpus |
 
+Workspace packages are named `<scope>/<repo>-<suffix>`; `task init` rewrites that prefix for your repo. See `TEMPLATE.md`.
+
 The import matrix (enforced, not documented-only) lives in `docs/STRUCTURE.md`.
 Agent instructions live in `AGENTS.md` (`CLAUDE.md` is a symlink to it), and the
 three skills live in `.agents/skills/`.
