@@ -6,78 +6,82 @@ import { test } from "node:test";
 import { toOpencodeModels } from "@repo/adapter-opencode/model";
 import { toPiModels } from "@repo/adapter-pi/model";
 import { buildModels } from "@repo/catalog";
-import type { Pack, RawRecord } from "@repo/contract";
-import { packs as tierB } from "@repo/example-tier-b";
-import { packs as tierC } from "@repo/example-tier-c";
-import { MEASURED_WIRE_EFFORT, measuredIds, packs as provider } from "@repo/provider";
+import type { RawRecord } from "@repo/contract";
+import { MEASURED_WIRE_EFFORT, measuredIds, packs } from "@repo/provider";
 
 const ROOT = join(import.meta.dirname, "../../..");
+const FIXTURE = join(ROOT, "packages/provider/fixtures/catalog.json");
 
-interface CorpusEntry {
-	pack: Pack;
-	fixture: string;
-}
-
-const CORPUS: CorpusEntry[] = [
-	{ pack: provider[0]!, fixture: "packages/provider/fixtures/catalog.json" },
-	{ pack: tierB[0]!, fixture: "examples/tier-b/fixtures/catalog.json" },
-	{ pack: tierC[0]!, fixture: "examples/tier-c/fixtures/catalog.json" },
-];
-
-function records(path: string): RawRecord[] {
-	const payload = JSON.parse(readFileSync(join(ROOT, path), "utf8")) as { data?: RawRecord[] };
-	assert.ok(Array.isArray(payload.data), `${path} has no data[]`);
+function records(): RawRecord[] {
+	const payload = JSON.parse(readFileSync(FIXTURE, "utf8")) as { data?: RawRecord[] };
+	assert.ok(Array.isArray(payload.data), "packages/provider/fixtures/catalog.json has no data[]");
 	return payload.data;
 }
 
-for (const entry of CORPUS) {
-	test(`${entry.pack.id}: both hosts project the corpus fixture`, () => {
-		const models = buildModels(entry.pack, records(entry.fixture), { measuredIds });
+/**
+ * Host-agnostic contract: whatever pack this repo ships must project through
+ * both adapters, with identical membership, and never crash on a real payload.
+ * Tier-specific assertions live in `corpus.test.ts`, which `provider-init`
+ * deletes along with `examples/`.
+ */
+for (const pack of packs) {
+	test(`${pack.id}: both adapters project the fixture with identical membership`, () => {
+		const models = buildModels(pack, records(), { measuredIds });
 		assert.ok(models.length > 0, "no models projected");
 
-		const host = { providerId: entry.pack.id, baseUrl: entry.pack.baseUrl };
+		const host = { providerId: pack.id, baseUrl: pack.baseUrl };
 		const pi = toPiModels(models, MEASURED_WIRE_EFFORT, host);
 		const opencode = toOpencodeModels(models, MEASURED_WIRE_EFFORT);
 
-		const expected = models.filter((model) => model.excluded === undefined).map((model) => model.id).sort();
-		assert.deepEqual(pi.map((model) => model.id).sort(), expected, `${entry.pack.id} pi membership`);
-		assert.deepEqual(opencode.map((model) => model.id).sort(), expected, `${entry.pack.id} opencode membership`);
+		const expected = models
+			.filter((model) => model.excluded === undefined)
+			.map((model) => model.id)
+			.sort();
+		assert.deepEqual(pi.map((model) => model.id).sort(), expected, `${pack.id} pi membership`);
+		assert.deepEqual(opencode.map((model) => model.id).sort(), expected, `${pack.id} opencode membership`);
 
 		for (const model of pi) {
-			assert.equal(model.provider, entry.pack.id);
-			assert.equal(model.baseUrl, entry.pack.baseUrl);
-			assert.ok(model.contextWindow > 0);
-			assert.ok(model.maxTokens > 0);
+			assert.equal(model.provider, pack.id);
+			assert.equal(model.baseUrl, pack.baseUrl);
+			assert.equal(model.api, "openai-completions");
+			assert.ok(model.contextWindow > 0, `${model.id} context`);
+			assert.ok(model.maxTokens > 0, `${model.id} maxTokens`);
+			assert.ok(model.maxTokens <= model.contextWindow, `${model.id} output exceeds context`);
+		}
+	});
+
+	test(`${pack.id}: an effort menu exists only where a measurement does`, () => {
+		const models = buildModels(pack, records(), { measuredIds });
+		const host = { providerId: pack.id, baseUrl: pack.baseUrl };
+		const pi = new Map(toPiModels(models, MEASURED_WIRE_EFFORT, host).map((model) => [model.id, model]));
+		const opencode = new Map(toOpencodeModels(models, MEASURED_WIRE_EFFORT).map((model) => [model.id, model]));
+
+		for (const model of models) {
+			if (model.excluded !== undefined || !model.reasoning) continue;
+			const measured = MEASURED_WIRE_EFFORT[model.id];
+			const piModel = pi.get(model.id);
+			const opencodeModel = opencode.get(model.id);
+			assert.ok(piModel, `${model.id} missing from pi`);
+			assert.ok(opencodeModel, `${model.id} missing from opencode`);
+
+			if (measured === undefined) {
+				assert.equal(piModel.thinkingLevelMap, undefined, `${model.id} pi must offer no menu`);
+				assert.equal(opencodeModel.capabilities.reasoning?.effort, undefined, `${model.id} opencode must offer no menu`);
+			} else {
+				assert.equal(piModel.thinkingLevelMap?.max, measured, `${model.id} pi menu value`);
+				assert.deepEqual(opencodeModel.capabilities.reasoning?.effort, [measured], `${model.id} opencode effort`);
+			}
+		}
+	});
+
+	test(`${pack.id}: no model claims image input the model cannot take`, () => {
+		const models = buildModels(pack, records(), { measuredIds });
+		for (const model of models) {
+			// A pdf/audio/video declaration must not leak into Pi's text|image union.
+			const projected = toPiModels([model], MEASURED_WIRE_EFFORT, { providerId: pack.id, baseUrl: pack.baseUrl });
+			for (const entry of projected) {
+				for (const modality of entry.input) assert.ok(modality === "text" || modality === "image");
+			}
 		}
 	});
 }
-
-test("tier a keeps an unmapped thinking format out of the effort menu", () => {
-	const entry = CORPUS[0]!;
-	const models = buildModels(entry.pack, records(entry.fixture), { measuredIds });
-	const kimi = models.find((model) => model.id === "example-reason-kimi");
-	assert.ok(kimi);
-	const projected = toPiModels(models, MEASURED_WIRE_EFFORT, { providerId: entry.pack.id, baseUrl: entry.pack.baseUrl });
-	const kimiProjected = projected.find((model) => model.id === "example-reason-kimi");
-	assert.equal(kimiProjected?.thinkingLevelMap, undefined);
-	assert.notEqual(kimiProjected?.compat?.thinkingFormat, "kimi");
-});
-
-test("tier b hides the offline model but keeps it in the model list", () => {
-	const entry = CORPUS[1]!;
-	const models = buildModels(entry.pack, records(entry.fixture), { measuredIds });
-	const offline = models.find((model) => model.id === "tier-b-offline");
-	assert.equal(offline?.excluded?.reason, "offline");
-	const projected = toOpencodeModels(models, MEASURED_WIRE_EFFORT);
-	assert.equal(projected.some((model) => model.id === "tier-b-offline"), false);
-});
-
-test("tier c reports curated and default provenance separately", () => {
-	const entry = CORPUS[2]!;
-	const models = buildModels(entry.pack, records(entry.fixture), { measuredIds });
-	const curated = models.find((model) => model.id === "tier-c-chat");
-	const defaulted = models.find((model) => model.id === "tier-c-small");
-	assert.equal(curated?.provenance.limits.context, "curated");
-	assert.equal(defaulted?.provenance.limits.context, "default");
-	assert.equal(defaulted?.provenance.effort, "default");
-});

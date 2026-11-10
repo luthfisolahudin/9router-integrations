@@ -43,7 +43,7 @@ const plan = [
 	`set root name → ${id}-integrations`,
 	`seed the tier-${tier} pack into packages/provider/src/pack.ts`,
 	"render README.md",
-	"delete examples/ and drop it from pnpm-workspace.yaml",
+	"delete examples/ and the template-only corpus test",
 	`write template.lock.json (version ${currentVersion()})`,
 ];
 
@@ -72,6 +72,30 @@ if (tier !== "a") {
 }
 
 rmSync(join(ROOT, "examples"), { recursive: true, force: true });
+// The corpus test imports the example packs, so it goes with them.
+rmSync(join(ROOT, "packages/conformance/test/corpus.test.ts"), { force: true });
+
+// Drop the example dependencies so `pnpm install` still resolves.
+const conformancePackagePath = join(ROOT, "packages/conformance/package.json");
+const conformancePackage = JSON.parse(readFileSync(conformancePackagePath, "utf8")) as {
+	dependencies?: Record<string, string>;
+};
+const dependencies = conformancePackage.dependencies ?? {};
+for (const name of Object.keys(dependencies)) {
+	if (name.startsWith("@repo/example-")) delete dependencies[name];
+}
+writeFileSync(conformancePackagePath, `${JSON.stringify(conformancePackage, null, 2)}\n`);
+
+// Same for the typecheck path map.
+const tsconfigPath = join(ROOT, "tsconfig.json");
+const tsconfig = JSON.parse(readFileSync(tsconfigPath, "utf8")) as {
+	compilerOptions: { paths?: Record<string, string[]> };
+};
+for (const name of Object.keys(tsconfig.compilerOptions.paths ?? {})) {
+	if (name.startsWith("@repo/example-")) delete tsconfig.compilerOptions.paths?.[name];
+}
+writeFileSync(tsconfigPath, `${JSON.stringify(tsconfig, null, 2)}\n`);
+
 const workspacePath = join(ROOT, "pnpm-workspace.yaml");
 const workspace = readFileSync(workspacePath, "utf8").replace(/\n\s*- "examples\/\*"/, "");
 writeFileSync(workspacePath, workspace);
