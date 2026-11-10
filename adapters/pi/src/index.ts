@@ -1,4 +1,4 @@
-import { buildModels, readSnapshot, refreshCatalog, snapshotPath } from "@repo/catalog";
+import { buildModels, readSnapshot, refreshCatalog, snapshotPath, writeSnapshot } from "@repo/catalog";
 import type { Pack } from "@repo/contract";
 import { MEASURED_WIRE_EFFORT, measuredIds, packs } from "@repo/provider";
 import { createProvider, openAICompletionsApi } from "@earendil-works/pi-ai/compat";
@@ -39,8 +39,7 @@ function apiKeyAuth(pack: Pack) {
 	};
 }
 
-/** Registers every pack this repo ships as a native Pi provider. */
-export default function registerExampleProvider(pi: ExtensionAPI): void {
+/** Registers every pack this repo ships as a native Pi provider. */export default function registerExampleProvider(pi: ExtensionAPI): void {
 	for (const pack of packs) {
 		pi.registerProvider(
 			createProvider({
@@ -58,6 +57,14 @@ export default function registerExampleProvider(pi: ExtensionAPI): void {
 							signal: context.signal,
 							measuredIds,
 						});
+						if (outcome.source === "network" && outcome.models.length > 0) {
+							// Keep our own snapshot so both hosts start warm, not just Pi.
+							writeSnapshot(snapshotPath({ providerId: pack.id }), {
+								checkedAt: outcome.checkedAt,
+								...(outcome.etag === undefined ? {} : { etag: outcome.etag }),
+								raw: outcome.raw ?? [],
+							});
+						}
 						return toPiModels(outcome.models, MEASURED_WIRE_EFFORT, hostOptions(pack));
 					} catch {
 						// A network failure must never empty the provider.

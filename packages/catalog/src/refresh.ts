@@ -12,6 +12,8 @@ export interface RefreshOutcome {
 	checkedAt: number;
 	etag?: string;
 	notModified: boolean;
+	/** Raw provider records, present only for a network refresh; used to persist a snapshot. */
+	raw?: RawRecord[];
 }
 
 export interface RefreshOptions extends DiscoverOptions {
@@ -69,6 +71,7 @@ export async function refreshCatalog(pack: Pack, options: RefreshOptions = {}): 
 		source: "network",
 		checkedAt: result.checkedAt,
 		notModified: false,
+		raw: result.raw,
 		...(result.etag === undefined ? {} : { etag: result.etag }),
 	};
 	options.onModels?.(outcome);

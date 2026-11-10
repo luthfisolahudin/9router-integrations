@@ -1,4 +1,4 @@
-import { buildModels, readSnapshot, refreshCatalog, snapshotPath } from "@repo/catalog";
+import { buildModels, readSnapshot, refreshCatalog, snapshotPath, writeSnapshot } from "@repo/catalog";
 import type { Pack } from "@repo/contract";
 import { MEASURED_WIRE_EFFORT, measuredIds, packs } from "@repo/provider";
 import { Plugin } from "@opencode/plugin";
@@ -88,6 +88,13 @@ export default Plugin.define({
 					if (models.length > 0) {
 						inventory.set(pack.id, models);
 						changed = true;
+						if (outcome.source === "network") {
+							writeSnapshot(snapshotPath({ providerId: pack.id }), {
+								checkedAt: outcome.checkedAt,
+								...(outcome.etag === undefined ? {} : { etag: outcome.etag }),
+								raw: outcome.raw ?? [],
+							});
+						}
 					}
 				} catch (error) {
 					console.error(
