@@ -1,3 +1,5 @@
+> Implementation note: §2 and §7 below are the shipped layout. Older sections of this document still use the working names (`core`, `hosts`) from the analysis that led here.
+
 # Design: package layering, agent skills, and agent instructions
 
 Companion to `DESIGN.md` (engine), `TEMPLATE.md` (sync), `APPROACHES.md`

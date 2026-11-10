@@ -1,3 +1,5 @@
+> Implementation note: the shipped engine splits this design into `packages/contract` (policy) and `packages/catalog` (mechanics), and the host adapters live in `adapters/`. Where this document says `src/core`, `hosts/`, or `packages/pi`, read the current layout in `README.md` and `docs/STRUCTURE.md` §7.
+
 # Design: `openai-compatible-integrations`
 
 Generic OpenAI Chat Completions provider integrations for OpenCode and Pi, with
