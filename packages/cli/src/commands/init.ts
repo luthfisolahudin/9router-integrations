@@ -60,6 +60,17 @@ if (!execute) {
 const readme = `# ${id}-integrations\n\nLive model discovery and OpenAI Chat Completions for ${name}, shared by Pi and OpenCode.\n\n- base URL: \`${baseUrl}\`\n- API key: \`${apiKeyEnv ?? "(none)"}\`\n\n## Install\n\n\`\`\`\nPi        → ${join(ROOT, "adapters/pi/src/index.ts")}\nOpenCode  → ${join(ROOT, "adapters/opencode/src/index.ts")}\n\`\`\`\n\n## Verify\n\n\`\`\`sh\ntask check\ntask check:catalog\ntask report --write\n\`\`\`\n`;
 writeFileSync(join(ROOT, "README.md"), readme);
 
+const providerPackagePath = join(ROOT, "packages/provider/package.json");
+const providerManifest = JSON.parse(readFileSync(providerPackagePath, "utf8")) as { name?: string };
+providerManifest.name = `@repo/provider-${id}`;
+writeFileSync(providerPackagePath, `${JSON.stringify(providerManifest, null, 2)}\n`);
+
+const rootManifestPath = join(ROOT, "package.json");
+const rootManifest = JSON.parse(readFileSync(rootManifestPath, "utf8")) as { name?: string; description?: string };
+rootManifest.name = `${id}-integrations`;
+rootManifest.description = `Live model discovery and OpenAI Chat Completions for ${name}`;
+writeFileSync(rootManifestPath, `${JSON.stringify(rootManifest, null, 2)}\n`);
+
 if (tier !== "a") {
 	const source = join(ROOT, "examples", `tier-${tier}`, "src", "pack.ts");
 	const fixture = join(ROOT, "examples", `tier-${tier}`, "fixtures", "catalog.json");
