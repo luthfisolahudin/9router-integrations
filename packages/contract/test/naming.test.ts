@@ -30,3 +30,14 @@ test("a slug-less id degrades to the raw id", () => {
 test("vendor brands override defaults", () => {
 	assert.equal(displayName("mimo-v2.6-pro", { brands: { mimo: "MiMo" } }), "MiMo V2.6 Pro");
 });
+
+test("a pack's brand map extends the shared table instead of replacing it", () => {
+	const name = displayName("deepseek-v4.1-flash", { brands: { hy: "HY" } });
+	assert.equal(name, "DeepSeek V4.1 Flash");
+	assert.equal(displayName("glm-5.3", { brands: { hy: "HY" } }), "GLM 5.3");
+	assert.equal(displayName("gpt-6.1-terra", { brands: { hy: "HY" } }), "GPT 6.1 Terra");
+});
+
+test("a pack can still override a default brand", () => {
+	assert.equal(displayName("gpt-6.1-terra", { brands: { gpt: "GPT-OpenAI" } }), "GPT-OpenAI 6.1 Terra");
+});

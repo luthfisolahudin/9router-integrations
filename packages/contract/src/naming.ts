@@ -19,6 +19,11 @@ export const DEFAULT_BRANDS: Readonly<Record<string, string>> = {
 };
 
 export interface NamingOptions {
+	/**
+	 * Extra brands, merged **over** `DEFAULT_BRANDS`. A pack that adds one brand
+	 * must not lose the shared table: `brands: { hy: "HY" }` once turned every
+	 * DeepSeek, GLM and GPT label into `Deepseek`, `Glm`, `Gpt`.
+	 */
 	brands?: Readonly<Record<string, string>>;
 	owners?: Readonly<Record<string, string>>;
 	/** Full-id overrides for labels a slug alone cannot render. */
@@ -48,7 +53,7 @@ export function displayName(id: string, options: NamingOptions = {}): string {
 	const slug = (slash === -1 ? id : id.slice(slash + 1)).trim();
 	if (slug.length === 0) return id;
 
-	const brands = options.brands ?? DEFAULT_BRANDS;
+	const brands = { ...DEFAULT_BRANDS, ...options.brands };
 	const tokens = slug.split(/[-_]+/).filter((token) => token.length > 0);
 	if (tokens.length === 0) return id;
 	const pretty = tokens.map((token) => prettifyToken(token, brands)).join(" ");
