@@ -3,55 +3,63 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
 
-import { capabilityView, inputModalities, type RawRecord } from "@repo/contract";
+import { capabilityView, type RawRecord } from "@repo/contract";
 
-import { examplePack, invariants, packs } from "../src/index.ts";
+import { invariants, packs } from "../src/index.ts";
 
-const payload = JSON.parse(readFileSync(join(import.meta.dirname, "../fixtures/catalog.json"), "utf8")) as {
-	data: RawRecord[];
-};
+/**
+ * Sanity gate for the vendor surface. It stays contract-only on purpose: the
+ * provider package may not import the catalog, so value assertions against
+ * projected models live in `task check:catalog` and the conformance suite.
+ */
+const payload = JSON.parse(readFileSync(join(import.meta.dirname, "../fixtures/catalog.json"), "utf8")) as
+	| RawRecord[]
+	| { data?: RawRecord[]; models?: RawRecord[] };
 
-test("the fixture is shaped as the pack expects", () => {
-	assert.ok(Array.isArray(payload.data));
-	assert.deepEqual(payload.data.map((record) => record.id).sort(), [
-		"example-chat-1",
-		"example-chat-cheap",
-		"example-reason-kimi",
-	]);
+const pack = packs[0]!;
+const records: RawRecord[] = Array.isArray(payload) ? payload : (payload.data ?? payload.models ?? []);
+const fixtureIds = new Set(records.map((record) => String(record.id)));
+
+test("the fixture is a catalog the pack can read", () => {
+	assert.ok(records.length > 0, "packages/provider/fixtures/catalog.json has no records");
+	assert.ok(fixtureIds.size === records.length, "the fixture contains duplicate ids");
 });
 
-test("every declared pack is exposed to the adapters", () => {
-	assert.equal(packs.length, 1);
-	assert.equal(packs[0], examplePack);
-});
-
-test("the pack keeps a minimal pinned fallback so the provider is never empty", () => {
-	assert.ok((examplePack.fallback ?? []).length > 0);
-	assert.ok((examplePack.fallback ?? []).length <= 3);
-});
-
-test("invariants reference existing models and hold against the fixture", () => {
-	const byId = new Map(payload.data.map((record) => [String(record.id), record]));
-	for (const invariant of invariants) {
-		const record = byId.get(invariant.id);
-		assert.ok(record, `invariant references a missing model: ${invariant.id}`);
-		const view = capabilityView(record, examplePack.fields);
-		for (const [key, expected] of Object.entries(invariant.expected)) {
-			if (key === "vision") assert.equal(inputModalities(view).includes("image"), expected, `${invariant.id} vision`);
-			else if (key === "pdf") assert.equal(inputModalities(view).includes("pdf"), expected, `${invariant.id} pdf`);
-			else if (key === "videoInput") {
-				assert.equal(inputModalities(view).includes("video"), expected, `${invariant.id} videoInput`);
-			} else if (key === "contextWindow") assert.equal(view.contextWindow, expected, `${invariant.id} contextWindow`);
-			else if (key === "maxOutput") assert.equal(view.maxOutput, expected, `${invariant.id} maxOutput`);
-			else if (key === "reasoning") assert.equal(view.reasoning, expected, `${invariant.id} reasoning`);
-			else if (key === "tools") assert.equal(view.tools, expected, `${invariant.id} tools`);
-			else assert.fail(`unhandled invariant key: ${key}`);
-		}
+test("every curated id exists in the fixture", () => {
+	for (const id of Object.keys(pack.curated ?? {})) {
+		assert.ok(fixtureIds.has(id), `curated entry "${id}" is not in the fixture (typo or retired model)`);
 	}
 });
 
-test("the provider declares where its facts live, not what they are", () => {
-	assert.ok(examplePack.fields?.contextWindow?.length);
-	assert.ok(examplePack.fields?.reasoning?.length);
-	assert.equal(examplePack.auth?.apiKeyEnv, "EXAMPLE_API_KEY");
+test("every pinned fallback id exists in the fixture", () => {
+	for (const entry of pack.fallback ?? []) {
+		assert.ok(fixtureIds.has(entry.id), `fallback "${entry.id}" is not in the fixture`);
+	}
+	assert.ok((pack.fallback ?? []).length <= 3, "keep the fallback minimal; it is a floor, not a catalog");
+});
+
+test("every invariant id exists in the fixture", () => {
+	for (const invariant of invariants) {
+		assert.ok(fixtureIds.has(invariant.id), `invariant references a missing model: ${invariant.id}`);
+	}
+});
+
+test("the pack declares where its facts live", () => {
+	assert.ok(pack.fields?.contextWindow?.length, "fields.contextWindow is required");
+	assert.ok(pack.fields?.reasoning?.length, "fields.reasoning is required");
+});
+
+test("the pack names its credential source or is explicitly keyless", () => {
+	const auth = pack.auth;
+	assert.ok(auth?.apiKeyEnv !== undefined || auth?.apiKey !== undefined || auth?.kind === "none");
+});
+
+test("capability reads never throw on the real payload", () => {
+	for (const record of records) {
+		assert.doesNotThrow(() => capabilityView(record, pack.fields), String(record.id));
+	}
+});
+
+test("the repo declares at least one pack", () => {
+	assert.ok(packs.length >= 1);
 });

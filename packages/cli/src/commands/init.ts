@@ -40,7 +40,6 @@ const providerPackage = JSON.parse(readFileSync(join(ROOT, "packages/provider/pa
 const rootPackage = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8")) as { name: string; description?: string };
 
 const plan = [
-	`rename packages/provider → @repo/provider-${id}`,
 	`set root name → ${id}-integrations`,
 	`seed the tier-${tier} pack into packages/provider/src/pack.ts`,
 	"render README.md",
