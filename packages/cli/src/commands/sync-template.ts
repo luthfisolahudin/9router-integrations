@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { execFileSync } from "node:child_process";
+import { execFileSync, execSync } from "node:child_process";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -120,7 +120,9 @@ const staged = git(["diff", "--cached", "--name-only"]).split("\n").filter((line
 console.log(`\n${staged.length} path(s) changed by the merge`);
 
 console.log("\nrunning `pnpm check` before committing...");
-execFileSync(process.platform === "win32" ? "pnpm.cmd" : "pnpm", ["check"], { cwd: ROOT, stdio: "inherit" });
+// A shell resolves the pnpm shim on every platform; execFile does not find the
+// Windows .cmd wrapper. The command is a literal, so no input is interpolated.
+execSync("pnpm check", { cwd: ROOT, stdio: "inherit" });
 
 writeFileSync(LOCK_PATH, `${JSON.stringify({ ...lock, version, commit: target }, null, 2)}\n`);
 git(["add", "template.lock.json"]);
