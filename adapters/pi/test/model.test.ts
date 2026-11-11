@@ -140,3 +140,9 @@ test("without the override the same model stays closed", () => {
 	const projected = toPiModel(model({ thinking: { format: "gemini-budget", canDisable: true, efforts: ["low", "high"] } }), HOST);
 	assert.equal(projected?.thinkingLevelMap, undefined);
 });
+
+test("a routed model api overrides the host default", () => {
+	const projected = toPiModel(model({ api: "anthropic-messages" }), HOST);
+	assert.equal(projected?.api, "anthropic-messages");
+	assert.equal(toPiModel(model(), HOST)?.api, "openai-completions");
+});

@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { homedir } from "node:os";
+
 import type { HookContext, Pack, RawRecord } from "@luthfisolahudin/9router-integrations-contract";
 
 import { parseEnvelope } from "./parse.ts";
@@ -22,12 +25,42 @@ export interface DiscoverResult {
 
 export const DEFAULT_TIMEOUT_MS = 5_000;
 
-/** Resolves the key from the pack's environment, then any explicit override. */
+/**
+ * Resolves the key: environment, then the pack's default, then the declared files.
+ *
+ * The file fallback exists for CLIs that store their own credential (CommandCode
+ * does), and it never throws: a missing or malformed file is just a miss.
+ */
 export function resolveApiKey(pack: Pack, env: NodeJS.ProcessEnv = process.env): string | undefined {
-	const fromEnv = pack.auth?.apiKeyEnv === undefined ? undefined : env[pack.auth.apiKeyEnv];
-	const explicit = pack.auth?.apiKey;
-	const value = explicit ?? fromEnv;
-	return value === undefined || value.trim().length === 0 ? undefined : value.trim();
+	for (const candidate of [
+		pack.auth?.apiKeyEnv === undefined ? undefined : env[pack.auth.apiKeyEnv],
+		pack.auth?.apiKey,
+	]) {
+		if (candidate !== undefined && candidate.trim().length > 0) return candidate.trim();
+	}
+	for (const file of pack.auth?.keyFiles ?? []) {
+		const key = readKeyFile(file.path, file.keys);
+		if (key !== undefined) return key;
+	}
+	return undefined;
+}
+
+function readKeyFile(path: string, keys: readonly string[]): string | undefined {
+	const resolved = path.startsWith("~") ? `${homedir()}${path.slice(1)}` : path;
+	try {
+		const body = JSON.parse(readFileSync(resolved, "utf8")) as Record<string, unknown>;
+		for (const key of keys) {
+			const value = body[key];
+			if (typeof value === "string" && value.trim().length > 0) return value.trim();
+			if (Array.isArray(value)) {
+				const first = value.find((entry): entry is string => typeof entry === "string" && entry.trim().length > 0);
+				if (first !== undefined) return first.trim();
+			}
+		}
+	} catch {
+		// A missing credential file is a miss, not an error.
+	}
+	return undefined;
 }
 
 export function authHeaders(pack: Pack, apiKey: string | undefined): Record<string, string> {

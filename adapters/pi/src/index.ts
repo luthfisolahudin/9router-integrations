@@ -10,7 +10,12 @@ import {
 } from "@luthfisolahudin/9router-integrations-catalog";
 import type { Pack } from "@luthfisolahudin/9router-integrations-contract";
 import { MEASURED_WIRE_EFFORT, measuredIds, packs } from "@luthfisolahudin/9router-integrations-provider";
-import { createProvider, openAICompletionsApi } from "@earendil-works/pi-ai/compat";
+import {
+	anthropicMessagesApi,
+	createProvider,
+	openAICompletionsApi,
+	openAIResponsesApi,
+} from "@earendil-works/pi-ai/compat";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 import { toPiModels, type HostOptions } from "./model.ts";
@@ -87,7 +92,13 @@ function apiKeyAuth(pack: Pack) {
 						return baseline(pack);
 					}
 				},
-				api: openAICompletionsApi(),
+				// Pi picks per model through `model.api`, so every api the pack can route
+				// to has to be registered here.
+				api: {
+					"openai-completions": openAICompletionsApi(),
+					"anthropic-messages": anthropicMessagesApi(),
+					"openai-responses": openAIResponsesApi(),
+				},
 			}),
 		);
 	}

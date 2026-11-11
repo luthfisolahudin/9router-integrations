@@ -10,6 +10,8 @@ import { mapThinkingFormat, PI_LEVELS, type NormalizedModel } from "@luthfisolah
 export interface OpencodeModel {
 	id: string;
 	name: string;
+	/** Per-model host package when a provider mixes wire protocols. */
+	package?: string;
 	capabilities: {
 		tools: boolean;
 		input: string[];
@@ -29,6 +31,13 @@ export interface OpencodeProviderInfo {
 
 export const DEFAULT_PACKAGE = "@opencode/ai/providers/openai-compatible";
 
+/** Maps a wire api to the OpenCode package that speaks it. */
+export const PACKAGE_BY_API: Readonly<Record<string, string>> = {
+	"openai-completions": DEFAULT_PACKAGE,
+	"anthropic-messages": "@opencode/ai/providers/anthropic-compatible",
+	"openai-responses": "@opencode/ai/providers/openai-compatible/responses",
+};
+
 /**
  * Effort levels OpenCode may offer. Only measured levels are advertised, so a
  * model with no probe gets no effort list at all.
@@ -47,6 +56,9 @@ export function toOpencodeModel(
 
 	const projected: OpencodeModel = {
 		id: model.id,
+		...(model.api === undefined || PACKAGE_BY_API[model.api] === undefined
+			? {}
+			: { package: PACKAGE_BY_API[model.api] }),
 		name: model.name,
 		capabilities: {
 			tools: model.tools ?? true,

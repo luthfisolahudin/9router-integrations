@@ -23,6 +23,7 @@ export interface FieldAliases {
 	reasoning?: string[];
 	thinkingFormat?: string[];
 	thinkingCanDisable?: string[];
+	efforts?: string[];
 	availability?: string[];
 	displayName?: string[];
 }
@@ -98,6 +99,11 @@ export interface Pack {
 		kind: "bearer" | "none";
 		apiKeyEnv?: string;
 		apiKey?: string;
+		/**
+		 * JSON files to read a key from when the environment has none, in order.
+		 * Each file is read as `{ apiKey }` or `{ apiKeys: [first] }`.
+		 */
+		keyFiles?: { path: string; keys: ("apiKey" | "apiKeys")[] }[];
 	};
 	discovery: DiscoverySpec;
 	fields?: FieldAliases;
@@ -117,6 +123,11 @@ export interface Pack {
 	 * effort matrix or evidence log.
 	 */
 	thinkingFormatOverrides?: Record<string, string>;
+	/**
+	 * Thinking format to assume when a model declares none. Only for providers whose
+	 * route is known to take `reasoning_effort`, with evidence in the repo.
+	 */
+	defaultThinkingFormat?: string;
 	/** Curated overrides keyed by model id. `cost` here beats models.dev. */
 	curated?: Record<string, Partial<ModelFacts>>;
 	brands?: Record<string, string>;
@@ -159,6 +170,13 @@ export function validatePack(pack: Pack): void {
 		if (facts.id !== undefined && facts.id !== modelId) {
 			throw new Error(`pack "${pack.id}": curated key "${modelId}" disagrees with its id "${facts.id}"`);
 		}
+	}
+	for (const file of pack.auth?.keyFiles ?? []) {
+		if (file.path.trim().length === 0) throw new Error(`pack "${pack.id}": auth.keyFiles needs a path`);
+		if (file.keys.length === 0) throw new Error(`pack "${pack.id}": auth.keyFiles needs at least one key field`);
+	}
+	if (pack.defaultThinkingFormat !== undefined && !PI_THINKING_FORMATS.has(pack.defaultThinkingFormat)) {
+		throw new Error(`pack "${pack.id}": defaultThinkingFormat "${pack.defaultThinkingFormat}" is not a Pi format`);
 	}
 	for (const [declared, mapped] of Object.entries(pack.thinkingFormatOverrides ?? {})) {
 		if (declared.trim().length === 0) {

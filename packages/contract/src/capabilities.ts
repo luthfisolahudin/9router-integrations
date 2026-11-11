@@ -91,6 +91,7 @@ export interface CapabilityView {
 	readonly thinkingCanDisable: boolean | undefined;
 	readonly availability: Availability | undefined;
 	readonly declaredInput: string[] | undefined;
+	readonly declaredEfforts: string[] | undefined;
 }
 
 export function capabilityView(record: RawRecord, fields: FieldAliases = {}): CapabilityView {
@@ -110,6 +111,7 @@ export function capabilityView(record: RawRecord, fields: FieldAliases = {}): Ca
 		thinkingCanDisable: firstBoolean(record, fields.thinkingCanDisable),
 		availability: availabilityOf(record, fields.availability),
 		declaredInput: firstStringArray(record, fields.inputModalities),
+		declaredEfforts: firstStringArray(record, fields.efforts),
 	};
 }
 

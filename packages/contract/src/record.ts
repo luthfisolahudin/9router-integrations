@@ -23,6 +23,10 @@ export interface ModelFacts {
 	thinkingFormat?: string;
 	thinkingCanDisable?: boolean;
 	availability?: Availability;
+	/** Wire api for this model when the provider mixes protocols. */
+	api?: string;
+	/** Effort levels the provider's own catalog declares. */
+	efforts?: string[];
 	/** Explicit USD per 1M override; beats the models.dev hint. */
 	cost?: Partial<ModelCost>;
 }
@@ -65,6 +69,8 @@ export interface NormalizedModel {
 	tools?: boolean;
 	reasoning: boolean;
 	thinking: ThinkingFacts;
+	/** Wire API for this model when the provider mixes routes. */
+	api?: string;
 	cost: ModelCost;
 	availability: Availability;
 	provenance: Provenance;
