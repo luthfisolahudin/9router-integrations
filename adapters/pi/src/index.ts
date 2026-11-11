@@ -22,6 +22,9 @@ function hostOptions(pack: Pack): HostOptions {
 		providerId: pack.id,
 		baseUrl: pack.baseUrl,
 		...(pack.hosts?.pi?.compat === undefined ? {} : { compat: pack.hosts.pi.compat }),
+		...(pack.thinkingFormatOverrides === undefined
+			? {}
+			: { thinkingFormatOverrides: pack.thinkingFormatOverrides }),
 	};
 }
 
