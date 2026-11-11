@@ -37,8 +37,9 @@ whose picker shows 128 K context as if the vendor said so; provenance marks it
 
 Assert facts the pack itself provides — the catalog fields or a `curated` entry.
 A limit that only models.dev knows cannot be checked offline, so an invariant on
-it would fail in CI for the wrong reason. `task check:catalog` verifies the
-projected model; CI has no models.dev index by design.
+it would fail in CI for the wrong reason. `task check:catalog` verifies the projected model and `task check` runs it, so an
+invariant is enforced on every push. An invariant naming a model that is currently
+absent is reported, not failed.
 
 ## Fixtures
 

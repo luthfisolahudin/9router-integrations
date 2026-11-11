@@ -31,16 +31,23 @@ test("every curated id exists in the fixture", () => {
 	}
 });
 
-test("every pinned fallback id exists in the fixture", () => {
+test("every pinned fallback is known: in the fixture or curated", () => {
 	for (const entry of pack.fallback ?? []) {
-		assert.ok(fixtureIds.has(entry.id), `fallback "${entry.id}" is not in the fixture`);
+		// A router's membership follows its connection set, so a pinned fallback may
+		// currently be absent from the catalog. What it cannot be is unknown: an
+		// offline start still has to describe the model it offers.
+		const known = fixtureIds.has(entry.id) || pack.curated?.[entry.id] !== undefined;
+		assert.ok(known, `fallback "${entry.id}" is neither in the fixture nor curated`);
 	}
 	assert.ok((pack.fallback ?? []).length <= 3, "keep the fallback minimal; it is a floor, not a catalog");
 });
 
-test("every invariant id exists in the fixture", () => {
+// An invariant may name a model that is currently absent: curation waits for it to
+// come back, and `task check:catalog` reports those instead of failing. That check
+// runs inside `task check`, so a typo is still caught on every push.
+test("invariants carry a note explaining where the fact came from", () => {
 	for (const invariant of invariants) {
-		assert.ok(fixtureIds.has(invariant.id), `invariant references a missing model: ${invariant.id}`);
+		assert.ok(invariant.note.trim().length > 10, `${invariant.id} needs a note`);
 	}
 });
 

@@ -19,7 +19,7 @@
   },
   "packageManager": "pnpm@12.18.0",
   "scripts": {
-    "check": "pnpm run typecheck && pnpm run test:packages && pnpm run check:boundaries && pnpm run doctor",
+    "check": "pnpm run typecheck && pnpm run test:packages && pnpm run check:boundaries && pnpm run check:catalog && pnpm run doctor",
     "typecheck": "tsc -p tsconfig.json",
     "test:packages": "pnpm -r test",
     "check:boundaries": "node packages/cli/src/commands/boundaries.ts",
