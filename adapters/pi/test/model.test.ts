@@ -101,3 +101,28 @@ test("the list projection drops excluded entries and keeps order", () => {
 	assert.deepEqual(projected.map((entry) => entry.id), ["a", "c"]);
 	assert.equal(projected[0]?.thinkingLevelMap?.max, "max");
 });
+
+test("declared levels provide a menu when nothing was measured", () => {
+	const projected = toPiModel(model({ thinking: { format: "openai", canDisable: true, efforts: ["low", "high"] } }), HOST);
+	assert.equal(projected?.thinkingLevelMap?.low, "low");
+	assert.equal(projected?.thinkingLevelMap?.high, "high");
+	assert.equal(projected?.thinkingLevelMap?.max, null);
+	// The flag says the parameter is accepted, not that the route honours it. The
+	// difference between a declared and a measured menu lives in provenance.
+	assert.equal(projected?.compat?.supportsReasoningEffort, true);
+});
+
+test("a measured value still wins over a declaration", () => {
+	const projected = toPiModel(
+		model({ thinking: { format: "openai", canDisable: true, efforts: ["low", "high"] } }),
+		{ ...HOST, wireEffort: "xhigh" },
+	);
+	assert.equal(projected?.thinkingLevelMap?.max, "xhigh");
+	assert.equal(projected?.thinkingLevelMap?.low, null);
+	assert.equal(projected?.compat?.supportsReasoningEffort, true);
+});
+
+test("declared levels on an unmapped format are not advertised", () => {
+	const projected = toPiModel(model({ thinking: { format: "kimi", canDisable: true, efforts: ["low", "high"] } }), HOST);
+	assert.equal(projected?.thinkingLevelMap, undefined);
+});

@@ -53,3 +53,38 @@ export function hasEffortMenu(menu: Record<PiLevel, string | null> | undefined):
 	if (menu === undefined) return false;
 	return PI_LEVELS.some((level) => menu[level] !== null);
 }
+
+/**
+ * Builds a menu from levels a provider *declares* rather than from a measurement.
+ *
+ * models.dev publishes `reasoning_options: [{type:"effort", values:[...]}]`. That
+ * is the vendor's own enum, so each declared level maps to itself. It is still a
+ * declaration: if a probe later measures a different wire value, the measured
+ * menu wins. `none` and `off` are treated as the disabled state.
+ */
+export function declaredEffortMenu(
+	declared: readonly string[],
+	canDisable: boolean | undefined,
+): Record<PiLevel, string | null> | undefined {
+	const values = declared.map((value) => value.trim().toLowerCase()).filter((value) => value.length > 0);
+	if (values.length === 0) return undefined;
+	const synonyms: Record<string, PiLevel> = { none: "off", off: "off", disable: "off", disabled: "off" };
+	const byLevel = new Map<PiLevel, string>();
+	for (const value of values) {
+		const level = (synonyms[value] ?? value) as PiLevel;
+		if (!PI_LEVELS.includes(level)) continue;
+		byLevel.set(level, value);
+	}
+	if (byLevel.size === 0) return undefined;
+
+	const disabled = canDisable === true || byLevel.has("off");
+	const menu = {} as Record<PiLevel, string | null>;
+	for (const level of PI_LEVELS) {
+		if (level === "off") {
+			menu.off = disabled ? (byLevel.get("off") ?? "off") : null;
+			continue;
+		}
+		menu[level] = byLevel.get(level) ?? null;
+	}
+	return menu;
+}

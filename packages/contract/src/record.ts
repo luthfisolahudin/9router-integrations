@@ -50,6 +50,8 @@ export interface ThinkingFacts {
 	canDisable?: boolean;
 	/** Only set when a probe recorded evidence. See `docs/THINKING.md`. */
 	wireEffort?: string;
+	/** Levels the provider (via models.dev) declares. A declaration, not a measurement. */
+	efforts?: string[];
 }
 
 export interface NormalizedModel {

@@ -55,10 +55,20 @@ export function toOpencodeModel(model: NormalizedModel, forcedEffort?: string): 
 	if (!model.reasoning) return projected;
 
 	const mapping = mapThinkingFormat(model.thinking.format);
-	const levels = effortLevels(forcedEffort, model.thinking.canDisable);
+	const mappable = mapping.pi !== undefined;
+	const measured = effortLevels(forcedEffort, model.thinking.canDisable);
+	// Measured levels win; otherwise advertise the provider's declared ones. Both
+	// require a format this integration can actually send.
+	const declared =
+		model.thinking.efforts === undefined
+			? undefined
+			: model.thinking.efforts.filter((level) => !/^(none|off|disabled?)$/i.test(level));
+	const levels = !mappable
+		? undefined
+		: (measured ?? (declared !== undefined && declared.length > 0 ? declared : undefined));
 	projected.capabilities.reasoning = {
 		supported: true,
-		...(mapping.pi === undefined || levels === undefined ? {} : { effort: levels }),
+		...(levels === undefined ? {} : { effort: levels }),
 	};
 	return projected;
 }

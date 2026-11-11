@@ -18,6 +18,10 @@ export interface ModelMetadata {
 	tools?: boolean;
 	/** USD per 1M tokens from models.dev, or absent when it publishes none. */
 	cost?: Partial<ModelCost>;
+	/** Effort levels the provider declares through `reasoning_options`. */
+	efforts?: string[];
+	/** Whether thinking can be turned off entirely. */
+	toggle?: boolean;
 	size: number;
 }
 
@@ -96,6 +100,8 @@ interface Sample {
 	image?: boolean;
 	reasoning?: boolean;
 	tools?: boolean;
+	efforts?: string[];
+	toggle?: boolean;
 	cost: Partial<ModelCost>;
 }
 
@@ -108,6 +114,7 @@ function sampleOf(entry: unknown): Sample | undefined {
 		tool_call?: unknown;
 		modalities?: { input?: unknown };
 		cost?: { input?: unknown; output?: unknown; cache_read?: unknown; cache_write?: unknown };
+		reasoning_options?: unknown;
 	};
 	const modalities = Array.isArray(model.modalities?.input)
 		? model.modalities.input.filter((item): item is string => typeof item === "string")
@@ -128,6 +135,16 @@ function sampleOf(entry: unknown): Sample | undefined {
 	else if (modalities.includes("image")) sample.image = true;
 	if (typeof model.reasoning === "boolean") sample.reasoning = model.reasoning;
 	if (typeof model.tool_call === "boolean") sample.tools = model.tool_call;
+	const options = Array.isArray(model.reasoning_options) ? model.reasoning_options : [];
+	for (const option of options) {
+		if (typeof option !== "object" || option === null) continue;
+		const entry = option as { type?: unknown; values?: unknown };
+		if (entry.type === "toggle") sample.toggle = true;
+		if (entry.type === "effort" && Array.isArray(entry.values)) {
+			const values = entry.values.filter((value): value is string => typeof value === "string");
+			if (values.length > 0) sample.efforts = values;
+		}
+	}
 	// A record that says nothing useful must not create an index entry: an entry
 	// means "models.dev knows this model", and silence is not knowledge.
 	const facts = Object.keys(sample).filter((key) => key !== "cost");
@@ -193,6 +210,10 @@ export function buildModelIndex(catalog: unknown): ModelIndex {
 		if (cacheRead !== undefined) cost.cacheRead = cacheRead;
 		if (cacheWrite !== undefined) cost.cacheWrite = cacheWrite;
 		if (Object.keys(cost).length > 0) metadata.cost = cost;
+		const efforts = majority(samples.map((sample) => sample.efforts?.join(",")));
+		if (efforts !== undefined) metadata.efforts = efforts.split(",");
+		const toggle = majority(samples.map((sample) => sample.toggle), true);
+		if (toggle !== undefined) metadata.toggle = toggle;
 		index.set(key, metadata);
 	}
 

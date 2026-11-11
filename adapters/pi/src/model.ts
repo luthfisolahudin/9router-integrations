@@ -1,4 +1,4 @@
-import { effortMenu, mapThinkingFormat, type NormalizedModel } from "@luthfisolahudin/ai-provider-integrations-template-contract";
+import { declaredEffortMenu, effortMenu, mapThinkingFormat, type NormalizedModel } from "@luthfisolahudin/ai-provider-integrations-template-contract";
 
 /** Pi's chat-model shape, kept structural so projection tests need no host SDK. */
 export interface PiModel {
@@ -62,10 +62,15 @@ export function toPiModel(model: NormalizedModel, options: ProjectOptions): PiMo
 	if (!model.reasoning) return projected;
 
 	const mapping = mapThinkingFormat(model.thinking.format);
+	// A measurement wins. Without one, the levels the provider declares are used,
+	// but only when Pi can send that format: an effort menu on an unmapped format
+	// would advertise behaviour this integration cannot ask for.
 	const menu =
-		options.wireEffort === undefined
-			? undefined
-			: effortMenu({ wireEffort: options.wireEffort, canDisable: model.thinking.canDisable });
+		options.wireEffort !== undefined
+			? effortMenu({ wireEffort: options.wireEffort, canDisable: model.thinking.canDisable })
+			: mapping.pi === undefined || model.thinking.efforts === undefined
+				? undefined
+				: declaredEffortMenu(model.thinking.efforts, model.thinking.canDisable);
 	const compat: Record<string, unknown> = { ...options.compat };
 
 	if (mapping.pi !== undefined) {

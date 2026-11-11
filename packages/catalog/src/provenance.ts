@@ -148,6 +148,14 @@ export function buildModel(pack: Pack, merged: MergedFacts, options: BuildOption
 	const tools = declared.tools ? effective.tools : firstDefined(effective.tools, hint?.tools);
 
 	// Curated price > models.dev > zero. A price the provider declares is never used.
+	// A measured wire value always wins. Otherwise the levels the provider declares
+	// (via models.dev) are used, and recorded as a declaration, not a measurement.
+	const measured = options.measuredIds?.has(effective.id) === true;
+	const declaredEfforts = !measured && hint?.efforts !== undefined ? hint.efforts : undefined;
+	const canDisable =
+		effective.thinkingCanDisable ??
+		(declaredEfforts === undefined || hint?.toggle !== true ? undefined : true);
+
 	const costSource: Source = curated.cost !== undefined ? "curated" : hint?.cost === undefined ? "default" : "models.dev";
 	const cost: ModelCost = {
 		input: curated.cost?.input ?? hint?.cost?.input ?? ZERO_COST.input,
@@ -167,7 +175,8 @@ export function buildModel(pack: Pack, merged: MergedFacts, options: BuildOption
 		reasoning,
 		thinking: {
 			...(effective.thinkingFormat === undefined ? {} : { format: effective.thinkingFormat }),
-			...(effective.thinkingCanDisable === undefined ? {} : { canDisable: effective.thinkingCanDisable }),
+			...(canDisable === undefined ? {} : { canDisable }),
+			...(declaredEfforts === undefined ? {} : { efforts: declaredEfforts }),
 		},
 		cost,
 		availability: effective.availability ?? "unknown",
@@ -176,7 +185,7 @@ export function buildModel(pack: Pack, merged: MergedFacts, options: BuildOption
 			modalities: modalitiesSource,
 			reasoning: reasoningDeclared ? (curated.reasoning === true ? "curated" : "catalog") : hint?.reasoning === undefined ? "default" : "models.dev",
 			pricing: costSource,
-			effort: options.measuredIds?.has(effective.id) === true ? "measured" : "default",
+			effort: measured ? "measured" : declaredEfforts === undefined ? "default" : "models.dev",
 		},
 	};
 	if (tools !== undefined) model.tools = tools;

@@ -97,3 +97,21 @@ test("a non-object catalog yields an empty index instead of throwing", () => {
 	assert.equal(buildModelIndex(null).size, 0);
 	assert.equal(buildModelIndex([]).size, 0);
 });
+
+test("declared reasoning options become effort levels and a toggle flag", () => {
+	const index = buildModelIndex({
+		a: {
+			models: {
+				"deepseek-v4-pro": {
+					reasoning: true,
+					reasoning_options: [{ type: "toggle" }, { type: "effort", values: ["high", "max"] }],
+				},
+				"glm-5.2": { reasoning: true, reasoning_options: [{ type: "effort", values: ["none", "high"] }] },
+			},
+		},
+	});
+	assert.deepEqual(index.get("deepseek-v4-pro")?.efforts, ["high", "max"]);
+	assert.equal(index.get("deepseek-v4-pro")?.toggle, true);
+	assert.deepEqual(index.get("glm-5.2")?.efforts, ["none", "high"]);
+	assert.equal(index.get("glm-5.2")?.toggle, undefined);
+});

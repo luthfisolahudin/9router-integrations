@@ -70,3 +70,13 @@ test("the list projection drops exclusions", () => {
 	);
 	assert.deepEqual(projected.map((entry) => entry.id), ["a"]);
 });
+
+test("declared levels are advertised when nothing was measured", () => {
+	const projected = toOpencodeModel(model({ thinking: { format: "qwen", canDisable: true, efforts: ["low", "medium"] } }));
+	assert.deepEqual(projected?.capabilities.reasoning?.effort, ["low", "medium"]);
+});
+
+test("a none declaration is not advertised as an effort level", () => {
+	const projected = toOpencodeModel(model({ thinking: { format: "qwen", canDisable: true, efforts: ["none", "high"] } }));
+	assert.deepEqual(projected?.capabilities.reasoning?.effort, ["high"]);
+});
