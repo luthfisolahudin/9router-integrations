@@ -2,10 +2,13 @@
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
 
+import { modelsDevCachePath, readCachedModelIndex } from "@luthfisolahudin/ai-provider-integrations-template-catalog";
+
 import { excluded, inventoryRows, loadAll, unmeasured } from "../lib/packs.ts";
 
 const write = process.argv.includes("--write");
-const loaded = loadAll(process.cwd());
+const cached = readCachedModelIndex(modelsDevCachePath());
+const loaded = loadAll(process.cwd(), cached === undefined ? {} : { modelsDev: cached });
 const lines: string[] = [
 	"# Provider inventory",
 	"",

@@ -26,8 +26,12 @@ export function loadFixture(root: string, pack: Pack): RawRecord[] | undefined {
 	return entries.filter((entry): entry is RawRecord => typeof entry === "object" && entry !== null && !Array.isArray(entry) && typeof (entry as RawRecord).id === "string");
 }
 
-export function loadAll(root: string, options: { live?: boolean } & DiscoverOptions = {}): LoadedPack[] {
+export function loadAll(
+	root: string,
+	options: { live?: boolean; modelsDev?: ReturnType<typeof buildModelIndex> } & DiscoverOptions = {},
+): LoadedPack[] {
 	const loaded: LoadedPack[] = [];
+	const hint = options.modelsDev === undefined ? {} : { modelsDev: options.modelsDev };
 	for (const pack of packs) {
 		const fixture = loadFixture(root, pack);
 		if (options.live === true) {
@@ -35,7 +39,7 @@ export function loadAll(root: string, options: { live?: boolean } & DiscoverOpti
 			loaded.push({
 				pack,
 				...(fixture === undefined ? {} : { fixture }),
-				models: buildModels(pack, fixture ?? [], { measuredIds }),
+				models: buildModels(pack, fixture ?? [], { measuredIds, ...hint }),
 				source: fixture === undefined ? "fallback" : "fixture",
 			});
 			continue;
@@ -43,7 +47,7 @@ export function loadAll(root: string, options: { live?: boolean } & DiscoverOpti
 		loaded.push({
 			pack,
 			...(fixture === undefined ? {} : { fixture }),
-			models: buildModels(pack, fixture ?? [], { measuredIds }),
+			models: buildModels(pack, fixture ?? [], { measuredIds, ...hint }),
 			source: fixture === undefined ? "fallback" : "fixture",
 		});
 	}

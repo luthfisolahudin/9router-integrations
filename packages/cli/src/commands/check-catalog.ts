@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { loadModelIndex, modelsDevCachePath } from "@luthfisolahudin/ai-provider-integrations-template-catalog";
+import { loadModelIndex, modelsDevCachePath, readCachedModelIndex } from "@luthfisolahudin/ai-provider-integrations-template-catalog";
 import {
 	checkInvariants,
 	excluded,
@@ -32,7 +32,9 @@ if (live) {
 		}
 	}
 } else {
-	loaded.push(...loadAll(process.cwd()));
+	// Cache only: an offline check must not wait on the network.
+	const cached = readCachedModelIndex(modelsDevCachePath());
+	loaded.push(...loadAll(process.cwd(), cached === undefined ? {} : { modelsDev: cached }));
 }
 
 for (const entry of loaded) {

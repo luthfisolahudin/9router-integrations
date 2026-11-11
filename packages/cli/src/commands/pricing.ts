@@ -31,7 +31,7 @@ const settingsPath = t3SettingsPath(process.env, homedir());
 const modelsDev = await loadModelIndex({ cachePath: modelsDevCachePath() });
 
 const loaded = [];
-for (const entry of loadAll(process.cwd())) {
+for (const entry of loadAll(process.cwd(), { modelsDev })) {
 	if (live) {
 		try {
 			loaded.push(await loadLivePack(entry.pack, {}, modelsDev));
