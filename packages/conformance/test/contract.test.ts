@@ -13,7 +13,15 @@ test("the repo's packs validate and match the current schema", () => {
 	for (const pack of packs) {
 		assert.doesNotThrow(() => validatePack(pack), pack.id);
 		assert.equal(pack.schemaVersion, PACK_SCHEMA_VERSION, pack.id);
-		assert.match(pack.baseUrl, /^https:\/\//, pack.id);
+		assert.match(pack.baseUrl, /^https?:\/\//, pack.id);
+		// A local router is a legitimate provider; anything off the loopback must be TLS.
+		if (pack.baseUrl.startsWith("http://")) {
+			assert.match(
+				pack.baseUrl,
+				/^http:\/\/(127\.0\.0\.1|localhost|\[::1\])(:|\/)/,
+				`${pack.id} must use https unless it is loopback`,
+			);
+		}
 	}
 });
 
