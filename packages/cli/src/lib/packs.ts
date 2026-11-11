@@ -115,10 +115,20 @@ export function invariantValue(model: NormalizedModel, key: string): unknown {
 	}
 }
 
-/** Reasoning models with no measured effort: visible, but no menu. */
+/**
+ * Reasoning models with no effort information at all: neither measured nor
+ * declared by models.dev. They stay visible without a menu.
+ */
 export function unmeasured(models: readonly NormalizedModel[]): string[] {
 	return models
-		.filter((model) => model.reasoning && MEASURED_WIRE_EFFORT[model.id] === undefined && model.excluded === undefined)
+		.filter((model) => model.reasoning && model.excluded === undefined && model.provenance.effort === "default")
+		.map((model) => model.id);
+}
+
+/** Reasoning models whose menu comes from a models.dev declaration, not a probe. */
+export function declaredOnly(models: readonly NormalizedModel[]): string[] {
+	return models
+		.filter((model) => model.reasoning && model.excluded === undefined && model.provenance.effort === "models.dev")
 		.map((model) => model.id);
 }
 

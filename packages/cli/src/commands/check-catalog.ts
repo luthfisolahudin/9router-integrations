@@ -2,6 +2,7 @@
 import { loadModelIndex, modelsDevCachePath, readCachedModelIndex } from "@luthfisolahudin/ai-provider-integrations-template-catalog";
 import {
 	checkInvariants,
+	declaredOnly,
 	excluded,
 	INVENTORY_HEADER,
 	inventoryRows,
@@ -45,9 +46,11 @@ for (const entry of loaded) {
 	const hidden = excluded(entry.models);
 	if (hidden.length > 0) console.log(`  excluded: ${hidden.map((item) => `${item.id} (${item.reason})`).join(", ")}`);
 
+	const declaredIds = declaredOnly(entry.models);
+	if (declaredIds.length > 0) console.log(`  declared effort (models.dev, unprobed): ${declaredIds.length} model(s)`);
 	const unmeasuredIds = unmeasured(entry.models);
 	if (unmeasuredIds.length > 0) {
-		console.log(`  unmeasured reasoning models (no effort menu): ${unmeasuredIds.join(", ")}`);
+		console.log(`  reasoning models with no effort information: ${unmeasuredIds.join(", ")}`);
 	}
 }
 
@@ -63,7 +66,7 @@ if (invariantFailures.length > 0) {
 const unmeasuredCount = loaded.flatMap((entry) => unmeasured(entry.models)).length;
 if (unmeasuredCount > 0) {
 	console.log(
-		`\nnote: ${unmeasuredCount} reasoning model(s) have no measured effort. They stay visible without an effort menu. See docs/THINKING.md.`,
+		`\nnote: ${unmeasuredCount} reasoning model(s) have no effort information at all. They stay visible without an effort menu. See docs/THINKING.md.`,
 	);
 }
 
