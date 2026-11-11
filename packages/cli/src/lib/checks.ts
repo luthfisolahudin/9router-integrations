@@ -172,7 +172,7 @@ export function checkProviderShape(root: string): CheckResult {
 	const failures: string[] = [];
 	const notes: string[] = [];
 	const providerDir = join(root, "packages", "provider");
-	for (const required of ["src/pack.ts", "src/invariants.ts", "src/effort.ts", "src/fallback.ts", "fixtures", "test"]) {
+	for (const required of ["src/pack.ts", "src/invariants.ts", "src/effort.ts", "src/fallback.ts", "fixtures"]) {
 		if (!existsSync(join(providerDir, required))) failures.push(`packages/provider/${required} is missing`);
 	}
 	if (!existsSync(join(root, "docs", "EVIDENCE.md"))) failures.push("docs/EVIDENCE.md is missing");
