@@ -77,6 +77,6 @@ Two consequences for this repo:
    for that exact id; add an override in T3 Code, or curate it in the pack when
    the price is stable and known.
 
-The settings file is authoritative and is applied without a restart of the
-harness. There is a Settings UI that edits the same values, but the file is the
-source of truth when in doubt.
+The settings file is the source of truth. T3 Code applies it without restarting
+the harness, and any settings panel in the app writes the same keys. Edit the
+file when you want a change that survives a reinstall of the app.
