@@ -17,8 +17,13 @@ export interface CapabilityInvariant {
  * just stop offering image input. These assertions turn that class of regression
  * into a failing `task check:catalog`.
  *
- * Assert only externally verifiable facts (vendor docs, model cards), never
- * whatever the catalog happens to report today.
+ * Two rules:
+ * - assert only externally verifiable facts (vendor docs, model cards), never
+ *   whatever the catalog happens to report today;
+ * - assert only facts this pack itself provides (catalog or curated). A value that
+ *   comes from models.dev cannot be verified offline, so `task check:catalog` in CI
+ *   would compare against nothing and the assertion would test models.dev instead
+ *   of this integration.
  */
 export const CAPABILITY_INVARIANTS: readonly CapabilityInvariant[] = [
 	{

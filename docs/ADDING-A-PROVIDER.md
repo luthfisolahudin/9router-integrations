@@ -33,6 +33,13 @@ whose picker shows 128 K context as if the vendor said so; provenance marks it
 | measured effort | `effort.ts` | a measurement, not a guess |
 | ground truth | `invariants.ts` | independent of the catalog |
 
+## Invariants
+
+Assert facts the pack itself provides — the catalog fields or a `curated` entry.
+A limit that only models.dev knows cannot be checked offline, so an invariant on
+it would fail in CI for the wrong reason. `task check:catalog` verifies the
+projected model; CI has no models.dev index by design.
+
 ## Fixtures
 
 One sanitised `/models` payload per provider is enough. Refresh it deliberately:

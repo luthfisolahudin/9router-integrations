@@ -45,8 +45,11 @@ test("every invariant id exists in the fixture", () => {
 });
 
 test("the pack declares where its facts live", () => {
-	assert.ok(pack.fields?.contextWindow?.length, "fields.contextWindow is required");
-	assert.ok(pack.fields?.reasoning?.length, "fields.reasoning is required");
+	const fields = Object.entries(pack.fields ?? {});
+	assert.ok(fields.length > 0, "fields must alias at least one fact");
+	for (const [name, paths] of fields) {
+		assert.ok(Array.isArray(paths) && paths.length > 0, `fields.${name} must list at least one path`);
+	}
 });
 
 test("the pack names its credential source or is explicitly keyless", () => {
