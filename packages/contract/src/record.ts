@@ -23,6 +23,8 @@ export interface ModelFacts {
 	thinkingFormat?: string;
 	thinkingCanDisable?: boolean;
 	availability?: Availability;
+	/** Explicit USD per 1M override; beats the models.dev hint. */
+	cost?: Partial<ModelCost>;
 }
 
 export interface ModelCost {

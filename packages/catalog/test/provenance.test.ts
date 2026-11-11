@@ -180,3 +180,42 @@ test("the decorate hook can rename without inventing membership", () => {
 	assert.ok(models.every((model) => model.name.startsWith("X ")));
 	assert.deepEqual(models.map((model) => model.id), ["chat-plain", "chat-vision", "pinned-offline"]);
 });
+
+test("an alias redirects the metadata lookup without adding membership", () => {
+	const index = buildModelIndex({
+		p: {
+			models: {
+				"kimi-k3": {
+					limit: { context: 1_048_576, output: 131_072 },
+					attachment: true,
+					reasoning: true,
+					cost: { input: 3, output: 15 },
+				},
+			},
+		},
+	});
+	const pack = definePack({ ...tierA(), aliases: { "chat-plain": "kimi-k3" } });
+	const models = buildModels(pack, RECORDS, { modelsDev: index });
+	const aliased = models.find((entry) => entry.id === "chat-plain");
+	assert.equal(aliased?.contextWindow, 1_048_576);
+	assert.equal(aliased?.cost.input, 3);
+	assert.deepEqual(aliased?.input, ["text", "image"]);
+	assert.equal(models.some((entry) => entry.id === "kimi-k3"), false, "an alias must not add a model");
+});
+
+test("an unknown alias degrades to no hint instead of throwing", () => {
+	const pack = definePack({ ...tierA(), aliases: { "chat-plain": "not-in-models-dev" } });
+	const [model] = buildModels(pack, RECORDS, { modelsDev: buildModelIndex({}) }).filter((e) => e.id === "chat-plain");
+	assert.equal(model?.provenance.limits.context, "default");
+	assert.equal(model?.cost.output, 0);
+});
+
+test("a curated price beats the models.dev hint and says so", () => {
+	const index = buildModelIndex({ p: { models: { "chat-vision": { cost: { input: 9, output: 9 } } } } });
+	const pack = definePack({ ...tierA(), curated: { "chat-vision": { cost: { input: 0.5, output: 1.5 } } } });
+	const model = buildModels(pack, RECORDS, { modelsDev: index }).find((e) => e.id === "chat-vision");
+	assert.equal(model?.cost.input, 0.5);
+	assert.equal(model?.cost.output, 1.5);
+	assert.equal(model?.cost.cacheRead, 0, "unpublished fields stay zero rather than borrowing");
+	assert.equal(model?.provenance.pricing, "curated");
+});

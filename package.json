@@ -33,12 +33,12 @@
     "init": "node packages/cli/src/commands/init.ts"
   },
   "devDependencies": {
-    "@earendil-works/pi-ai": "^1.5.2",
-    "@earendil-works/pi-coding-agent": "^1.5.2",
-    "@opencode/ai": "^2.2.7",
-    "@opencode/plugin": "^2.2.7",
-    "@types/node": "^24.10.1",
-    "typescript": "^5.9.3"
+    "@earendil-works/pi-ai": "catalog:",
+    "@earendil-works/pi-coding-agent": "catalog:",
+    "@opencode/ai": "catalog:",
+    "@opencode/plugin": "catalog:",
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
   },
   "devEngines": {
     "packageManager": {

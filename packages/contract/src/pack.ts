@@ -104,7 +104,13 @@ export interface Pack {
 	/** Membership served before the first successful discovery. Keep it minimal. */
 	fallback?: { id: string }[];
 	defaults?: { contextWindow?: number; maxOutput?: number };
-	/** Curated overrides keyed by model id. */
+	/**
+	 * Metadata lookup indirection: model id -> the id models.dev knows it by.
+	 * Used when the provider names a model differently, or when its price and
+	 * capabilities are published under another entry.
+	 */
+	aliases?: Record<string, string>;
+	/** Curated overrides keyed by model id. `cost` here beats models.dev. */
 	curated?: Record<string, Partial<ModelFacts>>;
 	brands?: Record<string, string>;
 	owners?: Record<string, string>;
@@ -136,6 +142,11 @@ export function validatePack(pack: Pack): void {
 	}
 	if (pack.discovery.timeoutMs !== undefined && pack.discovery.timeoutMs <= 0) {
 		throw new Error(`pack "${pack.id}": discovery.timeoutMs must be positive`);
+	}
+	for (const [modelId, key] of Object.entries(pack.aliases ?? {})) {
+		if (modelId.trim().length === 0 || key.trim().length === 0) {
+			throw new Error(`pack "${pack.id}": aliases need a non-empty id and target`);
+		}
 	}
 	for (const [modelId, facts] of Object.entries(pack.curated ?? {})) {
 		if (facts.id !== undefined && facts.id !== modelId) {

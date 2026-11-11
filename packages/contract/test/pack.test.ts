@@ -52,3 +52,9 @@ test("limit ladder prefers catalog, then curated, then models.dev, then default"
 test("a limit can be capped by a dependent limit", () => {
 	assert.deepEqual(resolveLimit({ catalog: 50_000, defaultValue: 1, capBy: 8_192 }), { value: 8_192, source: "catalog" });
 });
+
+test("an alias needs a non-empty id and target", () => {
+	assert.throws(() => validatePack({ ...basePack(), aliases: { "": "x" } }), /aliases/);
+	assert.throws(() => validatePack({ ...basePack(), aliases: { a: " " } }), /aliases/);
+	assert.doesNotThrow(() => validatePack({ ...basePack(), aliases: { a: "b" } }));
+});

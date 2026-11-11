@@ -116,7 +116,9 @@ function mergeFacts(pack: Pack, record: RawRecord): MergedFacts | undefined {
 
 export function buildModel(pack: Pack, merged: MergedFacts, options: BuildOptions = {}): NormalizedModel {
 	const { catalog, curated, effective, declared } = merged;
-	const hint = options.modelsDev?.get(effective.id);
+	// An alias only redirects the lookup; membership still comes from the catalog.
+	const lookupKey = pack.aliases?.[effective.id] ?? effective.id;
+	const hint = options.modelsDev?.get(lookupKey);
 
 	const context = resolveLimit({
 		catalog: catalog.contextWindow,
@@ -145,11 +147,13 @@ export function buildModel(pack: Pack, merged: MergedFacts, options: BuildOption
 	const reasoning = reasoningDeclared ? effective.reasoning === true : (hint?.reasoning ?? effective.reasoning === true);
 	const tools = declared.tools ? effective.tools : firstDefined(effective.tools, hint?.tools);
 
+	// Curated price > models.dev > zero. A price the provider declares is never used.
+	const costSource: Source = curated.cost !== undefined ? "curated" : hint?.cost === undefined ? "default" : "models.dev";
 	const cost: ModelCost = {
-		input: hint?.cost?.input ?? ZERO_COST.input,
-		output: hint?.cost?.output ?? ZERO_COST.output,
-		cacheRead: hint?.cost?.cacheRead ?? ZERO_COST.cacheRead,
-		cacheWrite: hint?.cost?.cacheWrite ?? ZERO_COST.cacheWrite,
+		input: curated.cost?.input ?? hint?.cost?.input ?? ZERO_COST.input,
+		output: curated.cost?.output ?? hint?.cost?.output ?? ZERO_COST.output,
+		cacheRead: curated.cost?.cacheRead ?? hint?.cost?.cacheRead ?? ZERO_COST.cacheRead,
+		cacheWrite: curated.cost?.cacheWrite ?? hint?.cost?.cacheWrite ?? ZERO_COST.cacheWrite,
 	};
 
 	const model: NormalizedModel = {
@@ -171,7 +175,7 @@ export function buildModel(pack: Pack, merged: MergedFacts, options: BuildOption
 			limits: { context: context.source, maxOutput: maxOutput.source },
 			modalities: modalitiesSource,
 			reasoning: reasoningDeclared ? (curated.reasoning === true ? "curated" : "catalog") : hint?.reasoning === undefined ? "default" : "models.dev",
-			pricing: hint?.cost === undefined ? "default" : "models.dev",
+			pricing: costSource,
 			effort: options.measuredIds?.has(effective.id) === true ? "measured" : "default",
 		},
 	};

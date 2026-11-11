@@ -20,6 +20,6 @@
     "@opencode/plugin": "*"
   },
   "devDependencies": {
-    "@opencode/plugin": "^2.2.7"
+    "@opencode/plugin": "catalog:"
   }
 }

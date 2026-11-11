@@ -77,5 +77,7 @@ three skills live in `.agents/skills/`.
 - `docs/STRUCTURE.md` — the package cut, the import matrix, the alternatives.
 - `docs/THINKING.md` — format mapping, measured effort, the evidence rule.
 - `docs/SYNC.md` — how a downstream repo takes template updates as a merge.
+- `docs/PRICING.md` — where cost comes from, and how T3 Code bills it.
+- `docs/INSTALL.md` — installing in Pi and OpenCode, and the git-spec verdict.
 
 MIT.

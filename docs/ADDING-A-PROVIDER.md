@@ -26,6 +26,8 @@ whose picker shows 128 K context as if the vendor said so; provenance marks it
 | endpoint, key env, `/models` path | `packages/provider/src/pack.ts` | vendor data |
 | field aliases (`fields`) | `pack.ts` | vendor data |
 | limits the catalog omits | `curated.ts` | curated, cited in `docs/EVIDENCE.md` |
+| a price models.dev does not know | `curated.ts` (`cost`) | explicit USD, recorded as `curated` |
+| a model models.dev lists under another id | `pack.ts` (`aliases`) | redirects the metadata lookup, not membership |
 | display names | `curated.ts` / `names` | policy applied to vendor labels |
 | membership floor | `fallback.ts` | so the provider is never empty |
 | measured effort | `effort.ts` | a measurement, not a guess |
