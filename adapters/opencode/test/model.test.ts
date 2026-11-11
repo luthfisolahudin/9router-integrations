@@ -80,3 +80,9 @@ test("a none declaration is not advertised as an effort level", () => {
 	const projected = toOpencodeModel(model({ thinking: { format: "qwen", canDisable: true, efforts: ["none", "high"] } }));
 	assert.deepEqual(projected?.capabilities.reasoning?.effort, ["high"]);
 });
+
+test("a routed api selects the per-model host package", () => {
+	assert.equal(toOpencodeModel(model({ api: "anthropic-messages" }))?.package, "@opencode/ai/providers/anthropic-compatible");
+	assert.equal(toOpencodeModel(model({ api: "openai-responses" }))?.package, "@opencode/ai/providers/openai-compatible/responses");
+	assert.equal(toOpencodeModel(model())?.package, undefined);
+});

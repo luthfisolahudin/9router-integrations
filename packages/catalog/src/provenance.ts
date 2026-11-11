@@ -79,6 +79,7 @@ function mergeFacts(pack: Pack, record: RawRecord): MergedFacts | undefined {
 		...(view.tools === undefined ? {} : { tools: view.tools }),
 		...(view.thinkingFormat === undefined ? {} : { thinkingFormat: view.thinkingFormat }),
 		...(view.thinkingCanDisable === undefined ? {} : { thinkingCanDisable: view.thinkingCanDisable }),
+		...(view.declaredEfforts === undefined ? {} : { efforts: view.declaredEfforts }),
 		...(hooked ?? {}),
 		id,
 	};
@@ -94,6 +95,7 @@ function mergeFacts(pack: Pack, record: RawRecord): MergedFacts | undefined {
 		reasoning: catalog.reasoning === true || curated.reasoning === true,
 		thinkingFormat: firstDefined(catalog.thinkingFormat, curated.thinkingFormat),
 		thinkingCanDisable: firstDefined(catalog.thinkingCanDisable, curated.thinkingCanDisable),
+		efforts: firstDefined(curated.efforts, catalog.efforts),
 		availability: firstDefined(catalog.availability, curated.availability) ?? "unknown",
 	};
 	for (const key of ["name", "contextWindow", "maxOutput", "tools", "thinkingFormat", "thinkingCanDisable"] as const) {
@@ -151,7 +153,12 @@ export function buildModel(pack: Pack, merged: MergedFacts, options: BuildOption
 	// A measured wire value always wins. Otherwise the levels the provider declares
 	// (via models.dev) are used, and recorded as a declaration, not a measurement.
 	const measured = options.measuredIds?.has(effective.id) === true;
-	const declaredEfforts = !measured && hint?.efforts !== undefined ? hint.efforts : undefined;
+	// A declared enum can come from the provider's own catalog (the strongest
+	// declaration) or from models.dev.
+	const catalogEfforts = effective.efforts;
+	const declaredEfforts = measured
+		? undefined
+		: (catalogEfforts ?? hint?.efforts);
 	const canDisable =
 		effective.thinkingCanDisable ??
 		(declaredEfforts === undefined || hint?.toggle !== true ? undefined : true);
@@ -164,6 +171,7 @@ export function buildModel(pack: Pack, merged: MergedFacts, options: BuildOption
 		cacheWrite: curated.cost?.cacheWrite ?? hint?.cost?.cacheWrite ?? ZERO_COST.cacheWrite,
 	};
 
+	const routedApi = pack.hooks?.route?.(effective);
 	const model: NormalizedModel = {
 		providerId: pack.id,
 		id: effective.id,
@@ -185,10 +193,17 @@ export function buildModel(pack: Pack, merged: MergedFacts, options: BuildOption
 			modalities: modalitiesSource,
 			reasoning: reasoningDeclared ? (curated.reasoning === true ? "curated" : "catalog") : hint?.reasoning === undefined ? "default" : "models.dev",
 			pricing: costSource,
-			effort: measured ? "measured" : declaredEfforts === undefined ? "default" : "models.dev",
+			effort: measured
+				? "measured"
+				: declaredEfforts === undefined
+					? "default"
+					: catalogEfforts !== undefined
+						? "catalog"
+						: "models.dev",
 		},
 	};
 	if (tools !== undefined) model.tools = tools;
+	if (routedApi !== undefined) model.api = routedApi;
 
 	const excluded = exclusionReason({ pack, modelId: model.id, availability: model.availability });
 	if (excluded !== undefined) model.excluded = { reason: excluded };

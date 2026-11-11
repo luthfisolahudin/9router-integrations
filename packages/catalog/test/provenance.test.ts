@@ -219,3 +219,31 @@ test("a curated price beats the models.dev hint and says so", () => {
 	assert.equal(model?.cost.cacheRead, 0, "unpublished fields stay zero rather than borrowing");
 	assert.equal(model?.provenance.pricing, "curated");
 });
+
+test("efforts declared by the provider's own catalog win over models.dev", () => {
+	const pack = definePack({
+		...tierA(),
+		fields: { ...tierA().fields, efforts: ["reasoningEfforts"] },
+	});
+	const index = buildModelIndex({ p: { models: { "chat-plain": { reasoning_options: [{ type: "effort", values: ["low"] }] } } } });
+	const model = buildModels(pack, [{ id: "chat-plain", reasoningEfforts: ["high", "max"] }], { modelsDev: index }).find(
+		(entry) => entry.id === "chat-plain",
+	);
+	assert.deepEqual(model?.thinking.efforts, ["high", "max"]);
+	assert.equal(model?.provenance.effort, "catalog");
+});
+
+test("the route hook picks the wire api per model", () => {
+	const pack = definePack({
+		...tierA(),
+		hooks: { route: (facts) => (facts.id.startsWith("claude") ? "anthropic-messages" : "openai-completions") },
+	});
+	const models = buildModels(pack, [{ id: "claude-x" }, { id: "gpt-y" }]);
+	assert.equal(models.find((entry) => entry.id === "claude-x")?.api, "anthropic-messages");
+	assert.equal(models.find((entry) => entry.id === "gpt-y")?.api, "openai-completions");
+});
+
+test("a model without a routed api keeps the host default", () => {
+	const models = buildModels(tierA(), [{ id: "chat-plain" }]);
+	assert.equal(models[0]?.api, undefined);
+});

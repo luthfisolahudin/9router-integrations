@@ -101,3 +101,21 @@ test("a hook that returns nothing is a configuration error", async () => {
 		/returned no models/,
 	);
 });
+
+test("a key can come from a credential file when the environment is empty", async () => {
+	const { mkdtempSync, writeFileSync } = await import("node:fs");
+	const { tmpdir } = await import("node:os");
+	const { join } = await import("node:path");
+	const dir = mkdtempSync(join(tmpdir(), "xai-key-"));
+	const file = join(dir, "auth.json");
+	writeFileSync(file, JSON.stringify({ apiKeys: ["", "file-key"] }));
+	const configured = pack({ auth: { kind: "bearer", apiKeyEnv: "MISSING_ENV", keyFiles: [{ path: file, keys: ["apiKey", "apiKeys"] }] } });
+	assert.equal(resolveApiKey(configured, {}), "file-key");
+	assert.equal(resolveApiKey(pack({ auth: { kind: "bearer", keyFiles: [{ path: join(dir, "absent.json"), keys: ["apiKey"] }] } }), {}), undefined);
+});
+
+test("the environment wins over a literal default and over files", () => {
+	const configured = pack({ auth: { kind: "bearer", apiKeyEnv: "EXAMPLE_API_KEY", apiKey: "literal" } });
+	assert.equal(resolveApiKey(configured, { EXAMPLE_API_KEY: "from-env" }), "from-env");
+	assert.equal(resolveApiKey(configured, {}), "literal");
+});

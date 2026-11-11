@@ -23,6 +23,7 @@ export interface FieldAliases {
 	reasoning?: string[];
 	thinkingFormat?: string[];
 	thinkingCanDisable?: string[];
+	efforts?: string[];
 	availability?: string[];
 	displayName?: string[];
 }
@@ -98,6 +99,11 @@ export interface Pack {
 		kind: "bearer" | "none";
 		apiKeyEnv?: string;
 		apiKey?: string;
+		/**
+		 * JSON files to read a key from when the environment has none, in order.
+		 * Each file is read as `{ apiKey }` or `{ apiKeys: [first] }`.
+		 */
+		keyFiles?: { path: string; keys: ("apiKey" | "apiKeys")[] }[];
 	};
 	discovery: DiscoverySpec;
 	fields?: FieldAliases;
@@ -159,6 +165,10 @@ export function validatePack(pack: Pack): void {
 		if (facts.id !== undefined && facts.id !== modelId) {
 			throw new Error(`pack "${pack.id}": curated key "${modelId}" disagrees with its id "${facts.id}"`);
 		}
+	}
+	for (const file of pack.auth?.keyFiles ?? []) {
+		if (file.path.trim().length === 0) throw new Error(`pack "${pack.id}": auth.keyFiles needs a path`);
+		if (file.keys.length === 0) throw new Error(`pack "${pack.id}": auth.keyFiles needs at least one key field`);
 	}
 	for (const [declared, mapped] of Object.entries(pack.thinkingFormatOverrides ?? {})) {
 		if (declared.trim().length === 0) {

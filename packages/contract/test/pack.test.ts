@@ -64,3 +64,17 @@ test("a format override must target a Pi format", () => {
 	assert.throws(() => validatePack({ ...basePack(), thinkingFormatOverrides: { "": "openai" } }), /declared format/);
 	assert.doesNotThrow(() => validatePack({ ...basePack(), thinkingFormatOverrides: { x: "openai" } }));
 });
+
+test("key files need a path and at least one field", () => {
+	assert.throws(
+		() => validatePack({ ...basePack(), auth: { kind: "bearer", keyFiles: [{ path: " ", keys: ["apiKey"] }] } }),
+		/keyFiles/,
+	);
+	assert.throws(
+		() => validatePack({ ...basePack(), auth: { kind: "bearer", keyFiles: [{ path: "/tmp/a.json", keys: [] }] } }),
+		/keyFiles/,
+	);
+	assert.doesNotThrow(() =>
+		validatePack({ ...basePack(), auth: { kind: "bearer", keyFiles: [{ path: "/tmp/a.json", keys: ["apiKey"] }] } }),
+	);
+});

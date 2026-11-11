@@ -1,12 +1,15 @@
 import { declaredEffortMenu, effortMenu, mapThinkingFormat, type NormalizedModel } from "@luthfisolahudin/ai-provider-integrations-template-contract";
 
 /** Pi's chat-model shape, kept structural so projection tests need no host SDK. */
+/** The APIs this adapter can drive; a model picks one through the pack's route hook. */
+export type PiApi = "openai-completions" | "anthropic-messages" | "openai-responses";
+
 export interface PiModel {
 	type: "chat";
 	id: string;
 	name: string;
 	provider: string;
-	api: "openai-completions";
+	api: PiApi;
 	baseUrl: string;
 	reasoning: boolean;
 	input: ("text" | "image")[];
@@ -22,7 +25,7 @@ export const ZERO_COST = { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 } as
 export interface HostOptions {
 	providerId: string;
 	baseUrl: string;
-	api?: "openai-completions";
+	api?: PiApi;
 	/** Provider-level compatibility defaults, overridable per model. */
 	compat?: Record<string, unknown>;
 	/** Measured format equivalences declared by the pack. */
@@ -52,7 +55,7 @@ export function toPiModel(model: NormalizedModel, options: ProjectOptions): PiMo
 		id: model.id,
 		name: model.name,
 		provider: options.providerId,
-		api: options.api ?? "openai-completions",
+		api: (model.api as PiApi | undefined) ?? options.api ?? "openai-completions",
 		baseUrl: options.baseUrl,
 		reasoning: model.reasoning,
 		input: model.input.filter((m): m is "text" | "image" => m === "text" || m === "image"),
