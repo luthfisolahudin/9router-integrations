@@ -5,14 +5,14 @@ import { test } from "node:test";
 
 import { capabilityView, type RawRecord } from "@luthfisolahudin/ai-provider-integrations-template-contract";
 
-import { invariants, packs } from "../src/index.ts";
+import { invariants, packs } from "@luthfisolahudin/ai-provider-integrations-template-provider";
 
 /**
  * Sanity gate for the vendor surface. It stays contract-only on purpose: the
  * provider package may not import the catalog, so value assertions against
  * projected models live in `task check:catalog` and the conformance suite.
  */
-const payload = JSON.parse(readFileSync(join(import.meta.dirname, "../fixtures/catalog.json"), "utf8")) as
+const payload = JSON.parse(readFileSync(join(import.meta.dirname, "../../../packages/provider/fixtures/catalog.json"), "utf8")) as
 	| RawRecord[]
 	| { data?: RawRecord[]; models?: RawRecord[] };
 
