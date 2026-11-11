@@ -5,6 +5,15 @@
   "type": "module",
   "license": "MIT",
   "description": "Template for OpenAI Chat Completions provider integrations with live model discovery for Pi and OpenCode",
+  "main": "./adapters/opencode/src/index.ts",
+  "exports": {
+    ".": "./adapters/opencode/src/index.ts"
+  },
+  "pi": {
+    "extensions": [
+      "./adapters/pi/src/index.ts"
+    ]
+  },
   "engines": {
     "node": ">=24"
   },
