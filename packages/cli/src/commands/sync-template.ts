@@ -109,6 +109,14 @@ for (const path of conflicts) {
 		console.log(`kept deletion: ${path}`);
 		continue;
 	}
+	if (path === "pnpm-lock.yaml") {
+		// A lockfile is regenerated, never merged: take the template's side as a
+		// starting point and let the install below rewrite it.
+		git(["checkout", "--theirs", "--", path]);
+		git(["add", "--", path]);
+		console.log("took the template lockfile; the install below regenerates it");
+		continue;
+	}
 	if (path === "package.json") {
 		resolveRootManifest(path);
 		continue;
