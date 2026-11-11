@@ -18,6 +18,12 @@ export interface EffortEvidence {
 
 export type EffortVerdict =
 	| { verdict: "unsupported"; levels: string[] }
+	/**
+	 * The probe could not answer: a level failed for a reason that is not a
+	 * capability rejection (billing, quota, auth, outage), or too few levels were
+	 * accepted to compare. Never collapse this into "no observable difference".
+	 */
+	| { verdict: "inconclusive"; reason: "blocked" | "too-few-levels"; statuses: Record<string, number>; levels: string[] }
 	| ({ verdict: "no-observable-difference"; levels: string[] } & EffortEvidence)
 	| ({ verdict: "mapped"; level: string; wire: string } & EffortEvidence)
 	| ({ verdict: "inverted"; level: string; wire: string } & EffortEvidence);
@@ -58,12 +64,32 @@ function levelOrder(level: string): number {
  * the model ships without an effort menu. Picking a winner from noise is how a
  * picker ends up advertising a level the route ignores.
  */
+/** 400/422 mean "this level is not accepted"; anything else is not an answer. */
+function isCapabilityRejection(status: number): boolean {
+	return status === 400 || status === 422;
+}
+
 export function decideEffort(samples: readonly ProbeSample[], options: DecideOptions = {}): EffortVerdict {
 	const accepted = samples.filter((sample) => sample.status === 200);
+	const blocked = samples.filter((sample) => sample.status !== 200 && !isCapabilityRejection(sample.status));
+	if (blocked.length > 0) {
+		const statuses: Record<string, number> = {};
+		for (const sample of blocked) statuses[sample.level] = sample.status;
+		return {
+			verdict: "inconclusive",
+			reason: "blocked",
+			statuses,
+			levels: [...new Set(samples.map((sample) => sample.level))],
+		};
+	}
 	const levels = [...new Set(samples.map((sample) => sample.level))].sort(
 		(a, b) => levelOrder(a) - levelOrder(b) || a.localeCompare(b),
 	);
 	if (accepted.length === 0) return { verdict: "unsupported", levels };
+	const acceptedLevels = new Set(accepted.map((sample) => sample.level));
+	if (acceptedLevels.size < 2) {
+		return { verdict: "inconclusive", reason: "too-few-levels", statuses: {}, levels };
+	}
 
 	const signals: Record<string, number> = {};
 	for (const level of levels) {
@@ -88,7 +114,8 @@ export function decideEffort(samples: readonly ProbeSample[], options: DecideOpt
 				.filter((level) => signals[level] === max)
 				.sort((a, b) => levelOrder(b) - levelOrder(a))[0]
 		: undefined;
-	const highest = levels[levels.length - 1];
+	// Only accepted levels are in play: a rejected level cannot be "the highest one".
+	const highest = [...acceptedLevels].sort((a, b) => levelOrder(a) - levelOrder(b)).at(-1);
 	if (best === undefined || highest === undefined) {
 		return { verdict: "no-observable-difference", levels, signals, noiseFloor };
 	}

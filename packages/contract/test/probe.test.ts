@@ -59,3 +59,40 @@ test("three samples per level use the median, not the mean", () => {
 	assert.equal(verdict.verdict, "mapped");
 	if (verdict.verdict === "mapped") assert.equal(verdict.signals["max"], 100);
 });
+
+test("a billing or quota rejection makes the probe inconclusive, never 'no difference'", () => {
+	const verdict = decideEffort([
+		{ level: "minimal", status: 200, reasoningTokens: 11 },
+		{ level: "low", status: 200, reasoningTokens: 11 },
+		{ level: "max", status: 402 },
+	]);
+	assert.equal(verdict.verdict, "inconclusive");
+	if (verdict.verdict === "inconclusive") {
+		assert.equal(verdict.reason, "blocked");
+		assert.deepEqual(verdict.statuses, { max: 402 });
+	}
+});
+
+test("a validation rejection is a capability answer, so the rest still counts", () => {
+	const verdict = decideEffort([
+		{ level: "low", status: 200, reasoningTokens: 10 },
+		{ level: "high", status: 200, reasoningTokens: 40 },
+		{ level: "max", status: 400 },
+	]);
+	assert.equal(verdict.verdict, "mapped");
+});
+
+test("one accepted level is not enough to compare", () => {
+	const verdict = decideEffort([
+		{ level: "low", status: 200, reasoningTokens: 10 },
+		{ level: "max", status: 500 },
+	]);
+	assert.equal(verdict.verdict, "inconclusive");
+
+	const onlyOne = decideEffort([
+		{ level: "low", status: 200, reasoningTokens: 10 },
+		{ level: "max", status: 400 },
+	]);
+	assert.equal(onlyOne.verdict, "inconclusive");
+	if (onlyOne.verdict === "inconclusive") assert.equal(onlyOne.reason, "too-few-levels");
+});

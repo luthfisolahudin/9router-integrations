@@ -5,6 +5,12 @@ export type PiLevel = (typeof PI_LEVELS)[number];
 /** Levels that are addressable in `thinkingLevelMap`. */
 export const PI_MAPPABLE_LEVELS: readonly PiLevel[] = PI_LEVELS;
 
+/**
+ * Why a probe could not answer the question. Billing and quota are not capability
+ * answers: a 402 says the account cannot pay, not that the route ignores `max`.
+ */
+export type InconclusiveReason = "partial";
+
 export interface EffortMenuInput {
 	/** The wire value a probe measured. Absent means "not measured". */
 	wireEffort?: string;

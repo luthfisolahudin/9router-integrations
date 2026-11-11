@@ -39,7 +39,8 @@ Format:
 | `mapped` | the highest level produced the largest signal | add the entry |
 | `no-observable-difference` | signals within the noise floor | ship **no** menu |
 | `inverted` | a lower level produced more thinking | map the level that buys depth, note the inversion |
-| `unsupported` | every level rejected | no menu; record the rejection |
+| `unsupported` | every level rejected with 400/422 | no menu; record the rejection |
+| `inconclusive` | a level failed for another reason (402, 429, 5xx, auth), or fewer than two levels were accepted | fix the account/quota and re-run; **never** record a verdict |
 
 The noise floor defaults to `max(2, 10% of the largest signal)`. Reasoning-token
 counts move by a few tokens on unrelated request noise, so an unbounded

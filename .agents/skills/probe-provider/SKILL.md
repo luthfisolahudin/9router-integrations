@@ -20,7 +20,10 @@ levels the route ignores, normalises, or inverts.
 
 1. Run `task probe:effort -- --model <id> --levels minimal,low,medium,high,xhigh,max --samples 3`.
 2. Read the verdict, not just the numbers:
-   - `unsupported` — every level was rejected. The model gets no effort menu.
+   - `unsupported` — every level was rejected with 400/422. The model gets no effort menu.
+   - `inconclusive` — a level failed for another reason (402, 429, 5xx, auth)
+     or fewer than two levels were accepted. Fix the account and re-run; do not
+     record a verdict, and never read it as "no difference".
    - `no-observable-difference` — the signals are within the noise floor. Ship
      **no** menu. This is the common case and it is a correct outcome.
    - `mapped` — the highest level produced the largest signal. Record it.

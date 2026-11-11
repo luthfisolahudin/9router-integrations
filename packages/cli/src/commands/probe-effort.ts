@@ -68,12 +68,26 @@ for (const level of levels) {
 const verdict = decideEffort(samples);
 console.log(JSON.stringify({ pack: pack.id, model, verdict, samples }, null, 2));
 console.log("");
+
+const evidence = verdict.verdict === "unsupported" || verdict.verdict === "inconclusive" ? undefined : verdict;
 console.log("Evidence line for docs/EVIDENCE.md:");
 console.log(
 	`- ${new Date().toISOString().slice(0, 10)} \`${pack.id}/${model}\`: verdict \`${verdict.verdict}\`` +
 		(verdict.verdict === "mapped" || verdict.verdict === "inverted" ? `, wire \`${verdict.wire}\`` : "") +
-		`, signals ${JSON.stringify(verdict.verdict === "unsupported" ? {} : verdict.signals)}, noise floor ${verdict.verdict === "unsupported" ? "-" : verdict.noiseFloor}.`,
+		(verdict.verdict === "inconclusive" ? ` (${verdict.reason}: ${JSON.stringify(verdict.statuses)})` : "") +
+		`, signals ${JSON.stringify(evidence?.signals ?? {})}, noise floor ${evidence?.noiseFloor ?? "-"}.`,
 );
+
+if (verdict.verdict === "inconclusive") {
+	console.error("\nThis probe did not answer the question.");
+	if (verdict.reason === "blocked") {
+		console.error(`  A level was rejected for a non-capability reason: ${JSON.stringify(verdict.statuses)}`);
+		console.error("  402/429/5xx are billing, quota, or outage: fix that and re-run. Nothing was measured.");
+	} else {
+		console.error("  Fewer than two levels were accepted, so there is nothing to compare.");
+	}
+	process.exitCode = 3;
+}
 
 if (verdict.verdict === "mapped") {
 	const current = MEASURED_WIRE_EFFORT[model];
