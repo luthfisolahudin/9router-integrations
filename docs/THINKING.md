@@ -25,7 +25,7 @@ override (`{ kimi: "openai" }`) requires a measurement entry below.
 
 | Source | Meaning | Provenance |
 |---|---|---|
-| measured () | a probe compared levels on this route | `measured` |
+| measured (`effort.ts`) | a probe compared levels on this route | `measured` |
 | declared (models.dev `reasoning_options`) | the vendor publishes an effort enum | `models.dev` |
 
 A declared menu maps each level to itself (that is the vendor enum), and it only
