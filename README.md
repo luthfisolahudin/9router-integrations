@@ -1,63 +1,82 @@
 # 9Router integrations
 
-Canonical local integrations for the 9Router model catalog and thinking-effort
-policy shared by OpenCode, standalone Pi, and tt Pi.
+Live model discovery and OpenAI Chat Completions for [9Router](https://github.com/luthfisolahudin/9router),
+shared by Pi and OpenCode. The catalog is read from the router at
+`http://127.0.0.1:20128/v1/models`; no model list is maintained by hand.
 
-## Entrypoints
+Built on [`ai-provider-integrations-template`](https://github.com/luthfisolahudin/ai-provider-integrations-template):
+the engine, both adapters, the checks and the docs come from there, and this repo
+owns only the 9Router surface.
 
-- `plugins/opencode.ts` configures OpenCode from the live `/v1/models` response.
-- `extensions/pi.ts` registers Pi's OpenAI Chat Completions-compatible provider at `<router-root>/v1`.
-- `src/catalog.ts` owns discovery and exact catalog validation.
-- `src/effort.ts` owns the measured model-to-wire-effort mapping.
-- `src/capabilities.ts` projects raw capability flags into the shared view both
-  client integrations read.
-- `src/check-report.ts` is the pure analysis behind `pnpm check:catalog`; the
-  script only fetches, prints, and sets the exit code.
-- `src/fallback.ts` owns the pinned offline startup catalog shared by both clients.
-- `src/invariants.ts` owns curated capability ground truth.
+## What this repo owns
 
-Consumers load these TypeScript entrypoints directly from this repository. No
-package publication or runtime dependency installation is required.
+| Path | Contents |
+|---|---|
+| `packages/provider/src/pack.ts` | router root, key, excluded ids, label maps, format overrides |
+| `packages/provider/src/curated.ts` | facts for the two pinned fallback models |
+| `packages/provider/src/effort.ts` | the measured effort table |
+| `packages/provider/src/invariants.ts` | capability ground truth |
+| `packages/provider/fixtures/` | one captured catalog (24 models) |
+| `packages/provider/test/` | effort-matrix and fallback consistency |
+| `extensions/pi.ts`, `plugins/opencode.ts` | one-line shims over the adapters |
+| `docs/EFFORT_MATRIX.md` | how each effort mapping was observed |
 
-The catalog serves no display names, so `displayName()` in `src/catalog.ts`
-derives picker labels locally: `cbcn/kimi-k3` shows as `Kimi K3 (CodeBuddy CN)`.
-Model IDs remain the canonical key everywhere else. Catalog discovery remains at
-`<router-root>/v1/models`, while OpenCode and Pi use `<router-root>/v1` as their
-OpenAI-compatible API base.
+Everything else is engine.
 
-Both clients start offline with DeepSeek V4.1 Flash and the tt-pinned GPT 5.6
-Terra fallback (`src/fallback.ts`); OpenCode logs a discovery-failure warning
-when it boots on the fallback. Terra is a reasoning, text-and-image model with
-a 272,000-token context window and 128,000-token output limit. A successful
-catalog refresh replaces those fallbacks with the exact live membership.
+## Install
 
-## Checks
+### Pi
 
-```sh
-pnpm check
-pnpm check:catalog
+```jsonc
+// ~/.pi/agent/settings.json
+{ "extensions": ["<path-to-checkout>/extensions/pi.ts"] }
 ```
 
-`pnpm check` typechecks every project file (including `test/`) and runs the
-unit test suite. The tests cover catalog parsing for every envelope shape, URL
-and env-variable resolution, display-name rendering, both client projections,
-capability invariants, the capability view, and the check report itself; they
-stub the network via `globalThis.fetch`, so they run without a live router.
+`extensions/pi.ts` is a shim, so an existing path keeps working. It re-exports
+`adapters/pi/src/index.ts`.
 
-`pnpm check:catalog` fetches the live catalog, exercises both client
-projections, verifies curated capability invariants, and fails when a new
-reasoning model has no measured wire-effort entry. Runtime integrations keep
-that model visible without forcing an unverified effort while the measurement
-is pending. Pass `pnpm check:catalog --allow-unmeasured` when checking
-projection compatibility without requiring the effort table to be complete, or
-`--allow-stale` while pruning effort entries for retired models.
+### OpenCode
 
-The capability invariants in `src/invariants.ts` are the independent source of
-truth for externally verifiable facts (for example, that
-`cbcn/deepseek-v4.1-flash` is natively multimodal). They catch a router
-capability regression that the projections alone cannot: a wrong `vision` flag
-silently drops image input without throwing, so `check:catalog` would otherwise
-pass.
+```jsonc
+// opencode.json
+{ "plugins": ["file://<path-to-checkout>/plugins/opencode.ts"] }
+```
 
-Live effort evidence and the re-probe rule are recorded in
-[`docs/EFFORT_MATRIX.md`](docs/EFFORT_MATRIX.md).
+Paths are placeholders on purpose: an absolute path is machine-specific. See
+`docs/INSTALL.md` for both harnesses and for why a `github:` spec does not work
+until the adapter is published or bundled.
+
+Environment:
+
+- `NINE_ROUTER_API_KEY` (default `sk_9router`)
+- `NINE_ROUTER_BASE_URL` (default `http://127.0.0.1:20128`)
+
+## Verify
+
+```sh
+task setup
+task check            # typecheck, unit tests, conformance, invariants, doctor
+task check:catalog    # project the captured catalog, assert the invariants
+task report --write   # regenerate docs/PROVIDERS.md
+task pricing          # print the T3 Code price block for this provider
+```
+
+`task check:catalog -- --live` talks to the router, so it only runs where the
+router does.
+
+## Why the effort table is measured
+
+The router normalises effort: asking for `max` can reach the upstream as `xhigh`,
+and for one route the router translates it into a Claude thinking budget. A table
+copied from a vendor would therefore be wrong in a way that looks authoritative.
+Every entry in `src/effort.ts` corresponds to a line in
+[`docs/EFFORT_MATRIX.md`](docs/EFFORT_MATRIX.md), observed in the router's
+`THINK:<level>` request log.
+
+A model with no entry and no declaration gets no effort menu; it stays visible.
+`task check:catalog` lists those, which is how the gap stays visible instead of
+being filled with a guess.
+
+## License
+
+MIT.
