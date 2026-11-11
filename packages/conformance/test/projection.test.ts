@@ -64,13 +64,31 @@ for (const pack of packs) {
 			assert.ok(piModel, `${model.id} missing from pi`);
 			assert.ok(opencodeModel, `${model.id} missing from opencode`);
 
-			if (measured === undefined) {
-				assert.equal(piModel.thinkingLevelMap, undefined, `${model.id} pi must offer no menu`);
-				assert.equal(opencodeModel.capabilities.reasoning?.effort, undefined, `${model.id} opencode must offer no menu`);
-			} else {
+			// A menu exists only when the host can send the format, and then either from a
+			// measurement or from the provider's declared levels. Anything else stays closed.
+			const mappable = piModel.compat?.thinkingFormat !== undefined;
+			const declared = model.thinking.efforts;
+
+			if (!mappable) {
+				assert.equal(piModel.thinkingLevelMap, undefined, `${model.id} pi: unmapped format must offer no menu`);
+				assert.equal(opencodeModel.capabilities.reasoning?.effort, undefined, `${model.id} opencode: unmapped format`);
+				continue;
+			}
+
+			if (measured !== undefined) {
 				assert.equal(piModel.thinkingLevelMap?.max, measured, `${model.id} pi menu value`);
 				assert.deepEqual(opencodeModel.capabilities.reasoning?.effort, [measured], `${model.id} opencode effort`);
+				continue;
 			}
+
+			if (declared !== undefined) {
+				assert.ok(piModel.thinkingLevelMap !== undefined, `${model.id} pi: a declared menu should be exposed`);
+				assert.ok((opencodeModel.capabilities.reasoning?.effort?.length ?? 0) > 0, `${model.id} opencode: declared menu`);
+				continue;
+			}
+
+			assert.equal(piModel.thinkingLevelMap, undefined, `${model.id} pi must offer no menu`);
+			assert.equal(opencodeModel.capabilities.reasoning?.effort, undefined, `${model.id} opencode must offer no menu`);
 		}
 	});
 

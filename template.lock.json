@@ -1,6 +1,6 @@
 {
   "template": "luthfisolahudin/ai-provider-integrations-template",
-  "version": "v0.7.3",
+  "version": "v0.8.1",
   "packSchemaVersion": 1,
   "identity": {
     "name": "9router-integrations",
@@ -22,5 +22,6 @@
   ],
   "deleted": [
     "examples/**"
-  ]
+  ],
+  "commit": "eaf8ea05a3dd4ffa21f4c022c1bea114c8b67505"
 }
