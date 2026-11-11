@@ -40,6 +40,10 @@ export const nineRouterPack = definePack({
 		nonChatPattern: "(^|[-_/])(embed|embedding|rerank)([-_/]|$)",
 		dropOffline: true,
 	},
+	// The router translates effort itself and renamed its formats. The matrix records
+	// that `reasoning_effort` is honoured on these routes, so the equivalence is
+	// measured, not guessed.
+	thinkingFormatOverrides: { "gemini-budget": "openai", "claude-adaptive": "openai" },
 	fallback: FALLBACK.map((id) => ({ id })),
 	curated,
 	defaults: { contextWindow: 128_000, maxOutput: 16_384 },
