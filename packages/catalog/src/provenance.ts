@@ -96,9 +96,10 @@ function mergeFacts(pack: Pack, record: RawRecord): MergedFacts | undefined {
 		thinkingFormat: firstDefined(catalog.thinkingFormat, curated.thinkingFormat),
 		thinkingCanDisable: firstDefined(catalog.thinkingCanDisable, curated.thinkingCanDisable),
 		efforts: firstDefined(curated.efforts, catalog.efforts),
+		api: firstDefined(catalog.api, curated.api),
 		availability: firstDefined(catalog.availability, curated.availability) ?? "unknown",
 	};
-	for (const key of ["name", "contextWindow", "maxOutput", "tools", "thinkingFormat", "thinkingCanDisable"] as const) {
+	for (const key of ["name", "contextWindow", "maxOutput", "tools", "thinkingFormat", "thinkingCanDisable", "api", "efforts"] as const) {
 		if (effective[key] === undefined) delete effective[key];
 	}
 
@@ -171,7 +172,7 @@ export function buildModel(pack: Pack, merged: MergedFacts, options: BuildOption
 		cacheWrite: curated.cost?.cacheWrite ?? hint?.cost?.cacheWrite ?? ZERO_COST.cacheWrite,
 	};
 
-	const routedApi = effective.api ?? pack.hooks?.route?.(effective);
+	const routedApi = effective.api !== undefined && effective.api.length > 0 ? effective.api : pack.hooks?.route?.(effective);
 	const model: NormalizedModel = {
 		providerId: pack.id,
 		id: effective.id,
