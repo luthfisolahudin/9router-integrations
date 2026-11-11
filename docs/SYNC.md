@@ -68,3 +68,12 @@ task check:catalog
 as mode `120000`. A Windows clone without symlink privilege writes `CLAUDE.md` as
 a one-line text file. `task doctor` fails loudly with that diagnosis; fix it with
 `git config core.symlinks true` and Developer Mode, or clone from `thunk`.
+
+## Known limitation: a sync that changes this command
+
+The command runs from your working tree, so a tag that rewrites
+`packages/cli/src/commands/sync-template.ts` cannot apply its own fix-machinery
+during that same run. When a template release changes the sync command itself,
+the merge stops with `n` conflicts; resolve them by hand using the same rule the
+command documents (template content, your package prefix, the root manifest merged
+field-wise), commit, then run the command again to bump the lock.

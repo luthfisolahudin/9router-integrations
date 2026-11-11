@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { execFileSync, execSync } from "node:child_process";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { join, relative, sep } from "node:path";
 
 interface Lock {
 	template: string;
@@ -132,6 +132,12 @@ if (remaining.length > 0) {
 	process.exit(2);
 }
 
+// A clean merge can still introduce template-prefixed imports (a file that only
+// the template touched), so the prefix is restored across the workspace, not
+// only on conflicted paths.
+const relabelled = restoreWorkspacePrefix(prefixes);
+if (relabelled > 0) console.log(`restored this repo's prefix in ${relabelled} file(s)`);
+
 const staged = git(["diff", "--cached", "--name-only"]).split("\n").filter((line) => line.length > 0);
 console.log(`\n${staged.length} path(s) changed by the merge`);
 
@@ -156,6 +162,42 @@ execFileSync(
 	{ cwd: ROOT, stdio: "inherit" },
 );
 console.log(`\nsynced to ${version}.`);
+
+/**
+ * Rewrites the template's package prefix to this repo's across the workspace and
+ * stages whatever changed. Idempotent, so it also runs on a clean merge.
+ */
+function restoreWorkspacePrefix(prefixes: WorkspacePrefixes): number {
+	let changed = 0;
+	for (const file of [
+		...walkSource(join(ROOT, "packages")),
+		...walkSource(join(ROOT, "adapters")),
+		...walkSource(join(ROOT, "examples")),
+		join(ROOT, "tsconfig.json"),
+	]) {
+		if (!existsSync(file)) continue;
+		const before = readFileSync(file, "utf8");
+		if (!before.includes(prefixes.from)) continue;
+		writeFileSync(file, before.split(prefixes.from).join(prefixes.to));
+		git(["add", "--", relative(ROOT, file).split(sep).join("/")]);
+		changed += 1;
+	}
+	return changed;
+}
+
+function walkSource(directory: string, files: string[] = []): string[] {
+	if (!existsSync(directory)) return files;
+	for (const entry of readdirSync(directory, { withFileTypes: true })) {
+		const path = join(directory, entry.name);
+		if (entry.isDirectory()) {
+			if (entry.name === "node_modules" || entry.name === "dist") continue;
+			walkSource(path, files);
+		} else if (entry.isFile() && /\.(ts|json)$/.test(entry.name)) {
+			files.push(path);
+		}
+	}
+	return files;
+}
 
 function matches(pattern: string, path: string): boolean {
 	if (!pattern.includes("*")) return pattern === path;
