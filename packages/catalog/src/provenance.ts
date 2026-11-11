@@ -171,7 +171,7 @@ export function buildModel(pack: Pack, merged: MergedFacts, options: BuildOption
 		cacheWrite: curated.cost?.cacheWrite ?? hint?.cost?.cacheWrite ?? ZERO_COST.cacheWrite,
 	};
 
-	const routedApi = pack.hooks?.route?.(effective);
+	const routedApi = effective.api ?? pack.hooks?.route?.(effective);
 	const model: NormalizedModel = {
 		providerId: pack.id,
 		id: effective.id,

@@ -23,6 +23,8 @@ export interface ModelFacts {
 	thinkingFormat?: string;
 	thinkingCanDisable?: boolean;
 	availability?: Availability;
+	/** Wire api for this model when the provider mixes protocols. */
+	api?: string;
 	/** Effort levels the provider's own catalog declares. */
 	efforts?: string[];
 	/** Explicit USD per 1M override; beats the models.dev hint. */

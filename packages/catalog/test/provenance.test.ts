@@ -247,3 +247,12 @@ test("a model without a routed api keeps the host default", () => {
 	const models = buildModels(tierA(), [{ id: "chat-plain" }]);
 	assert.equal(models[0]?.api, undefined);
 });
+
+test("a normalize hook can set the wire api from the raw record", () => {
+	const pack = definePack({
+		...tierA(),
+		hooks: { normalize: (record) => ({ api: String(record.protocol ?? "") }) },
+	});
+	const models = buildModels(pack, [{ id: "a", protocol: "anthropic-messages" }]);
+	assert.equal(models[0]?.api, "anthropic-messages");
+});
