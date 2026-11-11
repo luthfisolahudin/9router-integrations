@@ -1,17 +1,53 @@
 {
   "compilerOptions": {
-    "target": "es2022",
-    "lib": ["es2022", "dom"],
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
+    "target": "ES2023",
+    "lib": [
+      "ES2023"
+    ],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "strict": true,
-    "noEmit": true,
-    "types": ["node"],
+    "noUncheckedIndexedAccess": true,
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "erasableSyntaxOnly": true,
     "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "noEmit": true,
+    "types": [
+      "node"
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@luthfisolahudin/9router-integrations-contract": [
+        "packages/contract/src/index.ts"
+      ],
+      "@luthfisolahudin/9router-integrations-catalog": [
+        "packages/catalog/src/index.ts"
+      ],
+      "@luthfisolahudin/9router-integrations-provider": [
+        "packages/provider/src/index.ts"
+      ],
+      "@luthfisolahudin/9router-integrations-cli": [
+        "packages/cli/src/index.ts"
+      ],
+      "@luthfisolahudin/9router-integrations-pi": [
+        "adapters/pi/src/index.ts"
+      ],
+      "@luthfisolahudin/9router-integrations-opencode": [
+        "adapters/opencode/src/index.ts"
+      ],
+      "@luthfisolahudin/9router-integrations-pi/model": [
+        "adapters/pi/src/model.ts"
+      ],
+      "@luthfisolahudin/9router-integrations-opencode/model": [
+        "adapters/opencode/src/model.ts"
+      ]
+    }
   },
-  "include": ["src", "extensions", "plugins", "scripts", "types", "test"]
+  "include": [
+    "packages/**/*.ts",
+    "adapters/**/*.ts",
+    "examples/**/*.ts"
+  ]
 }

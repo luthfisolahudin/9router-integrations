@@ -1,0 +1,17 @@
+{
+  "name": "@luthfisolahudin/9router-integrations-cli",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@luthfisolahudin/9router-integrations-catalog": "workspace:*",
+    "@luthfisolahudin/9router-integrations-contract": "workspace:*",
+    "@luthfisolahudin/9router-integrations-provider": "workspace:*"
+  },
+  "scripts": {
+    "test": "node --test \"test/**/*.test.ts\""
+  }
+}

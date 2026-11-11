@@ -2,27 +2,50 @@
   "name": "@luthfisolahudin/9router-integrations",
   "version": "0.1.0",
   "private": true,
-  "description": "Canonical 9Router model-catalog integration shared by OpenCode, standalone Pi, and tt Pi.",
   "type": "module",
+  "license": "MIT",
+  "description": "9Router model-catalog integration for OpenCode and Pi with live model discovery",
+  "main": "./adapters/opencode/src/index.ts",
+  "exports": {
+    ".": "./adapters/opencode/src/index.ts"
+  },
+  "pi": {
+    "extensions": [
+      "./adapters/pi/src/index.ts"
+    ]
+  },
   "engines": {
-    "node": ">=26.13.0"
+    "node": ">=24"
+  },
+  "packageManager": "pnpm@12.18.0",
+  "scripts": {
+    "check": "pnpm run typecheck && pnpm run test:packages && pnpm run check:boundaries && pnpm run doctor",
+    "typecheck": "tsc -p tsconfig.json",
+    "test:packages": "pnpm -r test",
+    "check:boundaries": "node packages/cli/src/commands/boundaries.ts",
+    "check:catalog": "node packages/cli/src/commands/check-catalog.ts",
+    "conformance": "pnpm --filter @repo/conformance test",
+    "report": "node packages/cli/src/commands/report.ts",
+    "doctor": "node packages/cli/src/commands/doctor.ts",
+    "probe:effort": "node packages/cli/src/commands/probe-effort.ts",
+    "probe:routes": "node packages/cli/src/commands/probe-routes.ts",
+    "sync:template": "node packages/cli/src/commands/sync-template.ts",
+    "init": "node packages/cli/src/commands/init.ts",
+    "pricing": "node packages/cli/src/commands/pricing.ts"
+  },
+  "devDependencies": {
+    "@earendil-works/pi-ai": "catalog:",
+    "@earendil-works/pi-coding-agent": "catalog:",
+    "@opencode/ai": "catalog:",
+    "@opencode/plugin": "catalog:",
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
   },
   "devEngines": {
     "packageManager": {
       "name": "pnpm",
-      "version": "12.16.1+sha512.091d1dee7927575661b25dab3c2ae31cafc1c54d6b71ed6a6600cf0c1cb10434a447eae14015f1b23e2e6bedeed79df94a932e2164d2832280dce3fb32f656d1",
+      "version": "12.18.0+sha512.9d7882d5dc82147ecfc4e062aa34834e0ad0296710a1837a1115ae012127d36b7109e321ac1598a1dd0a65597681b1e99917e12ed0d749eae91187943363beb3",
       "onFail": "error"
     }
-  },
-  "scripts": {
-    "test": "node --test test/*.test.ts",
-    "typecheck": "tsc -p tsconfig.json",
-    "check": "pnpm run typecheck && pnpm run test",
-    "check:catalog": "node scripts/check-catalog.ts"
-  },
-  "devDependencies": {
-    "@earendil-works/pi-coding-agent": "^1.4.0",
-    "@types/node": "^26.6.5",
-    "typescript": "^7.0.2"
   }
 }

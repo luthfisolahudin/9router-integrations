@@ -1,0 +1,26 @@
+{
+  "template": "luthfisolahudin/ai-provider-integrations-template",
+  "version": "v0.7.3",
+  "packSchemaVersion": 1,
+  "identity": {
+    "name": "9router-integrations",
+    "description": "9Router model-catalog integration for OpenCode and Pi with live model discovery"
+  },
+  "owned": [
+    "README.md",
+    "LICENSE",
+    "SECURITY.md",
+    "packages/provider/**",
+    "docs/EFFORT_MATRIX.md",
+    "docs/EVIDENCE.md",
+    "docs/PROVIDERS.md",
+    "docs/REPO.md",
+    "extensions/**",
+    "plugins/**",
+    "package.json#name",
+    "package.json#description"
+  ],
+  "deleted": [
+    "examples/**"
+  ]
+}

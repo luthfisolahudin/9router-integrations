@@ -1,0 +1,17 @@
+{
+  "name": "@luthfisolahudin/9router-integrations-conformance",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test \"test/**/*.test.ts\""
+  },
+  "dependencies": {
+    "@luthfisolahudin/9router-integrations-opencode": "workspace:*",
+    "@luthfisolahudin/9router-integrations-pi": "workspace:*",
+    "@luthfisolahudin/9router-integrations-catalog": "workspace:*",
+    "@luthfisolahudin/9router-integrations-cli": "workspace:*",
+    "@luthfisolahudin/9router-integrations-contract": "workspace:*",
+    "@luthfisolahudin/9router-integrations-provider": "workspace:*"
+  }
+}
