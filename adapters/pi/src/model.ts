@@ -54,7 +54,7 @@ export function toPiModel(model: NormalizedModel, options: ProjectOptions): PiMo
 		baseUrl: options.baseUrl,
 		reasoning: model.reasoning,
 		input: model.input.filter((m): m is "text" | "image" => m === "text" || m === "image"),
-		cost: { ...ZERO_COST },
+		cost: { ...model.cost },
 		contextWindow: model.contextWindow,
 		maxTokens: model.maxOutput,
 	};

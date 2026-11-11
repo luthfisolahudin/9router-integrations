@@ -90,7 +90,6 @@ export interface CapabilityView {
 	readonly thinkingFormat: string | undefined;
 	readonly thinkingCanDisable: boolean | undefined;
 	readonly availability: Availability | undefined;
-	readonly priceBlended: number | undefined;
 	readonly declaredInput: string[] | undefined;
 }
 
@@ -110,7 +109,6 @@ export function capabilityView(record: RawRecord, fields: FieldAliases = {}): Ca
 		thinkingFormat: firstString(record, fields.thinkingFormat),
 		thinkingCanDisable: firstBoolean(record, fields.thinkingCanDisable),
 		availability: availabilityOf(record, fields.availability),
-		priceBlended: firstPositive(record, fields.priceBlended),
 		declaredInput: firstStringArray(record, fields.inputModalities),
 	};
 }

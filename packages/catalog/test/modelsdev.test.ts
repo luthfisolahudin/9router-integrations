@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { buildLimitIndex, modelKey, normalizeModelKey } from "../src/index.ts";
+import { buildModelIndex, modelKey, normalizeModelKey } from "../src/index.ts";
 
 function catalog(): unknown {
 	return {
@@ -14,21 +14,24 @@ function catalog(): unknown {
 }
 
 test("the majority window wins, not the first seen", () => {
-	const index = buildLimitIndex(catalog());
-	assert.deepEqual(index.get("gpt-5.4"), { contextWindow: 1_050_000, maxOutput: 128_000 });
+	const index = buildModelIndex(catalog());
+	const metadata = index.get("gpt-5.4");
+	assert.equal(metadata?.contextWindow, 1_050_000);
+	assert.equal(metadata?.maxOutput, 128_000);
 });
 
 test("output caps are counted only for the winning window", () => {
-	const index = buildLimitIndex({
+	const index = buildModelIndex({
 		a: { models: { m: { limit: { context: 100_000, output: 8_000 } } } },
 		b: { models: { m: { limit: { context: 200_000, output: 4_000 } } } },
 		c: { models: { m: { limit: { context: 200_000, output: 4_000 } } } },
 	});
-	assert.deepEqual(index.get("m"), { contextWindow: 200_000, maxOutput: 4_000 });
+	assert.equal(index.get("m")?.contextWindow, 200_000);
+	assert.equal(index.get("m")?.maxOutput, 4_000);
 });
 
-test("ties go to the larger value", () => {
-	const index = buildLimitIndex({
+test("ties go to the larger limit", () => {
+	const index = buildModelIndex({
 		a: { models: { m: { limit: { context: 100_000, output: 1_000 } } } },
 		b: { models: { m: { limit: { context: 200_000, output: 2_000 } } } },
 	});
@@ -36,7 +39,7 @@ test("ties go to the larger value", () => {
 });
 
 test("gateway prefixes and free tags still resolve", () => {
-	const index = buildLimitIndex({
+	const index = buildModelIndex({
 		a: { models: { "vendor/kimi-k3": { limit: { context: 1_000_000, output: 131_072 } } } },
 		b: { models: { "kimi-k3:free": { limit: { context: 1_000_000, output: 131_072 } } } },
 	});
@@ -45,14 +48,52 @@ test("gateway prefixes and free tags still resolve", () => {
 	assert.equal(normalizeModelKey("Kimi-K3-20260101"), "kimi-k3");
 });
 
-test("entries without limits are ignored, and an absent model returns undefined", () => {
-	const index = buildLimitIndex({ a: { models: { m: { limit: {} }, n: {} } } });
+test("modalities, reasoning and tools come from the declared flags", () => {
+	const index = buildModelIndex({
+		a: {
+			models: {
+				m: { attachment: true, reasoning: true, tool_call: true, modalities: { input: ["text", "image"] } },
+			},
+		},
+		b: { models: { m: { attachment: false, reasoning: false, tool_call: false } } },
+		c: { models: { m: { attachment: false, reasoning: false, tool_call: false } } },
+	});
+	const metadata = index.get("m");
+	assert.equal(metadata?.image, false, "two of three say no image");
+	assert.equal(metadata?.reasoning, false);
+	assert.equal(metadata?.tools, false);
+});
+
+test("capability ties resolve to the capable side, because a dropped input is silent", () => {
+	const index = buildModelIndex({
+		a: { models: { m: { attachment: true } } },
+		b: { models: { m: { attachment: false } } },
+	});
+	assert.equal(index.get("m")?.image, true);
+});
+
+test("pricing is read in USD per 1M and kept per field", () => {
+	const index = buildModelIndex({
+		a: { models: { m: { cost: { input: 3, output: 15, cache_read: 0.3 } } } },
+		b: { models: { m: { cost: { input: 3, output: 15, cache_read: 0.3 } } } },
+	});
+	assert.deepEqual(index.get("m")?.cost, { input: 3, output: 15, cacheRead: 0.3 });
+});
+
+test("entries without limits or cost still contribute capability hints", () => {
+	const index = buildModelIndex({ a: { models: { m: { reasoning: true } } } });
+	assert.equal(index.size, 1);
+	assert.equal(index.get("m")?.reasoning, true);
+	assert.equal(index.get("m")?.cost, undefined);
+});
+
+test("an empty model record contributes nothing", () => {
+	const index = buildModelIndex({ a: { models: { m: {}, n: "nope" } } });
 	assert.equal(index.size, 0);
 	assert.equal(index.get("m"), undefined);
-	assert.equal(index.get("absent"), undefined);
 });
 
 test("a non-object catalog yields an empty index instead of throwing", () => {
-	assert.equal(buildLimitIndex(null).size, 0);
-	assert.equal(buildLimitIndex([]).size, 0);
+	assert.equal(buildModelIndex(null).size, 0);
+	assert.equal(buildModelIndex([]).size, 0);
 });

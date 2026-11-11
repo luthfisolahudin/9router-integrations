@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { loadModelIndex, modelsDevCachePath } from "@luthfisolahudin/ai-provider-integrations-template-catalog";
 import {
 	checkInvariants,
 	excluded,
@@ -20,9 +21,11 @@ const loaded = [];
 const problems: string[] = [];
 
 if (live) {
+	const modelsDev = await loadModelIndex({ cachePath: modelsDevCachePath() });
+	console.log(`models.dev hint: ${modelsDev.size} model(s) known`);
 	for (const entry of loadAll(process.cwd())) {
 		try {
-			loaded.push(await loadLivePack(entry.pack));
+			loaded.push(await loadLivePack(entry.pack, {}, modelsDev));
 		} catch (error) {
 			problems.push(`${entry.pack.id}: live discovery failed (${error instanceof Error ? error.message : String(error)})`);
 			loaded.push(entry);

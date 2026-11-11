@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { buildModels, buildLimitIndex, discover, type DiscoverOptions } from "@luthfisolahudin/ai-provider-integrations-template-catalog";
+import { buildModels, buildModelIndex, discover, type DiscoverOptions } from "@luthfisolahudin/ai-provider-integrations-template-catalog";
 import { capabilityView, inputModalities, type NormalizedModel, type Pack, type RawRecord } from "@luthfisolahudin/ai-provider-integrations-template-contract";
 import { MEASURED_WIRE_EFFORT, invariants, measuredIds, packs } from "@luthfisolahudin/ai-provider-integrations-template-provider";
 
@@ -50,12 +50,16 @@ export function loadAll(root: string, options: { live?: boolean } & DiscoverOpti
 	return loaded;
 }
 
-export async function loadLivePack(pack: Pack, options: DiscoverOptions = {}): Promise<LoadedPack> {
+export async function loadLivePack(
+	pack: Pack,
+	options: DiscoverOptions = {},
+	modelsDev?: ReturnType<typeof buildModelIndex>,
+): Promise<LoadedPack> {
 	const result = await discover(pack, options);
 	return {
 		pack,
 		fixture: result.raw,
-		models: buildModels(pack, result.raw, { measuredIds }),
+		models: buildModels(pack, result.raw, { measuredIds, ...(modelsDev === undefined ? {} : { modelsDev }) }),
 		source: "network",
 	};
 }
@@ -129,6 +133,7 @@ export function inventoryRows(models: readonly NormalizedModel[]): string[][] {
 			model.name,
 			`${Math.round(model.contextWindow / 1000)}K`,
 			`${Math.round(model.maxOutput / 1000)}K`,
+			model.cost.input === 0 && model.cost.output === 0 ? "-" : `$${model.cost.input}/$${model.cost.output}`,
 			model.input.join("+"),
 			model.reasoning ? "yes" : "no",
 			model.thinking.format ?? "-",
@@ -143,6 +148,7 @@ export const INVENTORY_HEADER = [
 	"name",
 	"context",
 	"max-out",
+	"cost/1M",
 	"input",
 	"reasoning",
 	"format",
@@ -156,4 +162,4 @@ export function declaredFormat(pack: Pack, record: RawRecord): string | undefine
 	return capabilityView(record, pack.fields).thinkingFormat;
 }
 
-export { buildLimitIndex, inputModalities };
+export { buildModelIndex, inputModalities };

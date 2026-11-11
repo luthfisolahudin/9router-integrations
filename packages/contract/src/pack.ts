@@ -23,7 +23,6 @@ export interface FieldAliases {
 	thinkingFormat?: string[];
 	thinkingCanDisable?: string[];
 	availability?: string[];
-	priceBlended?: string[];
 	displayName?: string[];
 }
 
@@ -49,20 +48,6 @@ export interface FilterSpec {
 	nonChatPattern?: string;
 	/** Drop models the provider reports as offline. Defaults to true. */
 	dropOffline?: boolean;
-}
-
-export interface PricingSpec {
-	/** Alias that carries the price. Defaults to `fields.priceBlended`. */
-	field?: string;
-	currency: "IDR" | "USD";
-	/** Unit the number is expressed in, e.g. 1_000_000 for "per 1M tokens". */
-	per: number;
-	/** The catalog gives one blended price, not separate input/output. */
-	blended: boolean;
-	/** Emit a USD cost into hosts. Off by default: see docs/DESIGN.md §13. */
-	emitUsd?: boolean;
-	/** Pinned, dated IDR->USD rate used only when `emitUsd` is true. */
-	usdRate?: { rate: number; asOf: string };
 }
 
 export interface HookContext {
@@ -119,7 +104,6 @@ export interface Pack {
 	/** Membership served before the first successful discovery. Keep it minimal. */
 	fallback?: { id: string }[];
 	defaults?: { contextWindow?: number; maxOutput?: number };
-	pricing?: PricingSpec;
 	/** Curated overrides keyed by model id. */
 	curated?: Record<string, Partial<ModelFacts>>;
 	brands?: Record<string, string>;
@@ -152,12 +136,6 @@ export function validatePack(pack: Pack): void {
 	}
 	if (pack.discovery.timeoutMs !== undefined && pack.discovery.timeoutMs <= 0) {
 		throw new Error(`pack "${pack.id}": discovery.timeoutMs must be positive`);
-	}
-	if (pack.pricing?.emitUsd === true && pack.pricing.usdRate === undefined) {
-		throw new Error(`pack "${pack.id}": pricing.emitUsd requires usdRate`);
-	}
-	if (pack.pricing?.emitUsd === true && !pack.pricing.blended) {
-		throw new Error(`pack "${pack.id}": split pricing is not supported by the blended mapper`);
 	}
 	for (const [modelId, facts] of Object.entries(pack.curated ?? {})) {
 		if (facts.id !== undefined && facts.id !== modelId) {

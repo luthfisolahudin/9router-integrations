@@ -23,8 +23,14 @@ export interface ModelFacts {
 	thinkingFormat?: string;
 	thinkingCanDisable?: boolean;
 	availability?: Availability;
-	/** Blended price from the catalog, in the pack's declared currency. */
-	priceBlended?: number;
+}
+
+export interface ModelCost {
+	/** USD per 1M tokens. Sourced from models.dev; zero when unknown. */
+	input: number;
+	output: number;
+	cacheRead: number;
+	cacheWrite: number;
 }
 
 export interface Provenance {
@@ -55,6 +61,7 @@ export interface NormalizedModel {
 	tools?: boolean;
 	reasoning: boolean;
 	thinking: ThinkingFacts;
+	cost: ModelCost;
 	availability: Availability;
 	provenance: Provenance;
 	/** Present when the record was dropped from pickers; never dropped silently. */

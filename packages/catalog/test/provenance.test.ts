@@ -3,7 +3,7 @@ import { test } from "node:test";
 
 import { PACK_SCHEMA_VERSION, definePack, type Pack } from "@luthfisolahudin/ai-provider-integrations-template-contract";
 
-import { buildLimitIndex, buildModels, exclusionReason } from "../src/index.ts";
+import { buildModelIndex, buildModels, exclusionReason } from "../src/index.ts";
 
 function tierA(): Pack {
 	return definePack({
@@ -75,15 +75,45 @@ test("curated facts fill what the catalog cannot express", () => {
 });
 
 test("models.dev only fills a gap, never overrides the catalog", () => {
-	const index = buildLimitIndex({
+	const index = buildModelIndex({
 		p: { models: { "chat-vision": { limit: { context: 8_192, output: 1_024 } } } },
 	});
 	const [model] = buildModels(tierA(), RECORDS, { modelsDev: index }).filter((e) => e.id === "chat-vision");
 	assert.equal(model?.contextWindow, 1_000_000);
+	assert.deepEqual(model?.provenance.limits, { context: "catalog", maxOutput: "catalog" });
+});
+
+test("models.dev supplies modalities when the pack declares none", () => {
+	const index = buildModelIndex({ p: { models: { "chat-plain": { attachment: true, reasoning: true, tool_call: true } } } });
+	const [model] = buildModels(tierA(), RECORDS, { modelsDev: index }).filter((e) => e.id === "chat-plain");
+	assert.deepEqual(model?.input, ["text", "image"]);
+	assert.equal(model?.reasoning, true);
+	assert.equal(model?.tools, true);
+	assert.equal(model?.provenance.modalities, "models.dev");
+	assert.equal(model?.provenance.reasoning, "models.dev");
+});
+
+test("models.dev never overrides a declared capability", () => {
+	const index = buildModelIndex({ p: { models: { "chat-vision": { attachment: false, reasoning: false } } } });
+	const [model] = buildModels(tierA(), RECORDS, { modelsDev: index }).filter((e) => e.id === "chat-vision");
+	assert.deepEqual(model?.input, ["text", "image"]);
+	assert.equal(model?.reasoning, true);
+	assert.equal(model?.provenance.modalities, "catalog");
+});
+
+test("USD cost comes from models.dev and stays zero when absent", () => {
+	const index = buildModelIndex({ p: { models: { "chat-vision": { cost: { input: 3, output: 15, cache_read: 0.3 } } } } });
+	const priced = buildModels(tierA(), RECORDS, { modelsDev: index }).find((e) => e.id === "chat-vision");
+	assert.deepEqual(priced?.cost, { input: 3, output: 15, cacheRead: 0.3, cacheWrite: 0 });
+	assert.equal(priced?.provenance.pricing, "models.dev");
+
+	const unpriced = buildModels(tierA(), RECORDS).find((e) => e.id === "chat-vision");
+	assert.deepEqual(unpriced?.cost, { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 });
+	assert.equal(unpriced?.provenance.pricing, "default");
 });
 
 test("models.dev supplies a limit when nothing else does", () => {
-	const index = buildLimitIndex({ p: { models: { "chat-plain": { limit: { context: 200_000, output: 8_000 } } } } });
+	const index = buildModelIndex({ p: { models: { "chat-plain": { limit: { context: 200_000, output: 8_000 } } } } });
 	const [model] = buildModels(tierA(), RECORDS, { modelsDev: index }).filter((e) => e.id === "chat-plain");
 	assert.equal(model?.contextWindow, 200_000);
 	assert.deepEqual(model?.provenance.limits, { context: "models.dev", maxOutput: "models.dev" });

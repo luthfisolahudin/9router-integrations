@@ -1,4 +1,13 @@
-import { buildModels, readSnapshot, refreshCatalog, snapshotPath, writeSnapshot } from "@luthfisolahudin/ai-provider-integrations-template-catalog";
+import {
+	buildModels,
+	loadModelIndex,
+	modelsDevCachePath,
+	readCachedModelIndex,
+	readSnapshot,
+	refreshCatalog,
+	snapshotPath,
+	writeSnapshot,
+} from "@luthfisolahudin/ai-provider-integrations-template-catalog";
 import type { Pack } from "@luthfisolahudin/ai-provider-integrations-template-contract";
 import { MEASURED_WIRE_EFFORT, measuredIds, packs } from "@luthfisolahudin/ai-provider-integrations-template-provider";
 import { createProvider, openAICompletionsApi } from "@earendil-works/pi-ai/compat";
@@ -23,7 +32,9 @@ function hostOptions(pack: Pack): HostOptions {
  */
 function baseline(pack: Pack) {
 	const snapshot = readSnapshot(snapshotPath({ providerId: pack.id }));
-	const models = buildModels(pack, snapshot?.raw ?? [], { measuredIds });
+	// Cache only: startup must never wait on the network.
+	const modelsDev = readCachedModelIndex(modelsDevCachePath());
+	const models = buildModels(pack, snapshot?.raw ?? [], { measuredIds, ...(modelsDev === undefined ? {} : { modelsDev }) });
 	return toPiModels(models, MEASURED_WIRE_EFFORT, hostOptions(pack));
 }
 
@@ -51,11 +62,13 @@ function apiKeyAuth(pack: Pack) {
 				async fetchModels(context) {
 					if (!context.allowNetwork || context.signal.aborted) return baseline(pack);
 					try {
+						const modelsDev = await loadModelIndex({ cachePath: modelsDevCachePath(), signal: context.signal });
 						const outcome = await refreshCatalog(pack, {
 							snapshot: readSnapshot(snapshotPath({ providerId: pack.id })),
 							ttlMs: TTL_MS,
 							signal: context.signal,
 							measuredIds,
+							modelsDev,
 						});
 						if (outcome.source === "network" && outcome.models.length > 0) {
 							// Keep our own snapshot so both hosts start warm, not just Pi.

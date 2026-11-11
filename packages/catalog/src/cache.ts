@@ -89,3 +89,8 @@ export function writeSnapshot(path: string, snapshot: Snapshot): void {
 export function isFresh(snapshot: Snapshot, ttlMs: number, now = Date.now()): boolean {
 	return now >= snapshot.checkedAt && now - snapshot.checkedAt < ttlMs;
 }
+
+/** Where the models.dev hint snapshot lives, next to the provider snapshots. */
+export function modelsDevCachePath(options: { env?: NodeJS.ProcessEnv; platform?: NodeJS.Platform; home?: string } = {}): string {
+	return join(cacheDirectory(options), "models.dev.json");
+}

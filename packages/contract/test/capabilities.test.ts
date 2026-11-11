@@ -23,7 +23,6 @@ const FIELDS = {
 	thinkingFormat: ["capabilities.thinkingFormat"],
 	thinkingCanDisable: ["capabilities.thinkingCanDisable"],
 	availability: ["status"],
-	priceBlended: ["price_per_1m"],
 	inputModalities: ["input_modalities"],
 	displayName: ["name"],
 };
@@ -85,7 +84,6 @@ test("gutsai-shaped flags are read from top-level fields", () => {
 	assert.equal(view.vision, true);
 	assert.equal(view.reasoning, true);
 	assert.equal(view.availability, "offline");
-	assert.equal(view.priceBlended, 500);
 	assert.deepEqual(inputModalities(view), ["text", "image", "pdf"]);
 });
 

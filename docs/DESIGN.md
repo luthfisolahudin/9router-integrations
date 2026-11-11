@@ -161,7 +161,7 @@ Resolution ladder, first hit wins, **provenance recorded per group**:
 | 1 | live catalog, pack-declared field aliases | CosmosHub `capabilities.contextWindow`; GutsAI `input_modalities` |
 | 2 | disk snapshot | offline start |
 | 3 | pack curated table (vendor-documented) | GutsAI limits from `gutsai.id/models`; InferX limits for the ids you actually use |
-| 4 | `models.dev` by provider id, then by normalized model slug | InferX (5/14 hits), CommandCode (72) |
+| 4 | `models.dev` by provider id, then by normalized model slug | limits, modalities, reasoning, tools and USD cost; InferX (5/14 hits), CommandCode (72) |
 | 5 | pack default + explicit "unknown" mark | `contextWindow: 128000, provenance: "default"` |
 
 `models.dev` resolution needs the two tricks `pi-bifrost-provider` already
@@ -461,22 +461,20 @@ exists for pruning days. That is the 9router contract, reused verbatim.
 
 ## 13. Pricing policy
 
-- CosmosHub, InferX: no price in the catalog → emit zero cost, mark
-  `pricing.source: "none"`. T3 Code's `usagePriceOverrides` is the right place
-  for real numbers.
-- GutsAI: `price_per_1m` is **IDR per 1M tokens, blended in/out** (verified:
-  `gpt-5.6-luna` = `500` ↔ "Rp 500 per 1M"; claude models = 3000/1400/1800 ↔
-  Rp 3.000/1.400/1.800). Two problems: it is not USD, and Pi/OpenCode want
-  separate input/output USD per 1M. Options, in order of preference:
-  1. zero cost + T3 overrides (default),
-  2. opt-in conversion with a **pinned, dated** IDR→USD rate and the blended
-     price applied to both fields, clearly labelled approximate,
-  3. curate the vendor's official in/out prices from `gutsai.id/models` (drifts
-     with upstream pricing changes; needs a check).
-- Never invent a cache-read/write price. Zero plus a note beats a plausible
-  fiction in a usage report.
-- Emit `usage-model-aliases`-friendly ids unchanged; do not normalize model ids
-  (`deepseek-v4.1-flash` ≠ `deepseek-v4.1-flash-1017`).
+Decided: **a pack never declares a price.** Cost is USD per 1M tokens from
+models.dev, and zero when models.dev does not publish the model.
+
+- The catalog price an aggregator sends is ignored on purpose. CosmoHub publishes
+  none; GutsAI publishes `price_per_1m` in **IDR, blended in/out**, which cannot
+  be mapped honestly into Pi's four USD fields. Mixing a converted IDR figure into
+a usage report makes the report wrong in a way that looks authoritative.
+- `provenance.pricing` records which it was: `models.dev` or `default`.
+- The value is a hint, not a contract: models.dev lists the same model once per
+  gateway, so the most common published price wins, and a gateway's own markup is
+  invisible. Real billing belongs in T3 Code's `usagePriceOverrides`.
+- Never invent a cache-read or cache-write price; they stay zero when unpublished.
+- Model ids are emitted unchanged (`deepseek-v4.1-flash` ≠ `deepseek-v4.1-flash-1017`)
+  so `usageModelAliases` keeps working.
 
 ## 14. Deployment across two machines
 

@@ -16,13 +16,11 @@ export const tierBPack = definePack({
 		reasoning: ["supports_reasoning"],
 		inputModalities: ["input_modalities"],
 		availability: ["status"],
-		priceBlended: ["price_per_1m"],
 		displayName: ["provider"],
 	},
 	filter: { dropOffline: true, nonChatPattern: "(^|[-_/])(embed|image)([-_/]|$)" },
 	fallback: [{ id: "tier-b-chat" }],
 	defaults: { contextWindow: 128_000, maxOutput: 32_768 },
-	pricing: { currency: "IDR", per: 1_000_000, blended: true, emitUsd: false },
 	curated: {
 		"tier-b-chat": { contextWindow: 1_000_000, maxOutput: 384_000 },
 	},

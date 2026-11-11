@@ -2,7 +2,7 @@ import type { NormalizedModel, Pack, RawRecord } from "@luthfisolahudin/ai-provi
 
 import { isFresh, type Snapshot } from "./cache.ts";
 import { discover, type DiscoverOptions } from "./discover.ts";
-import type { LimitIndex } from "./modelsdev.ts";
+import type { ModelIndex } from "./modelsdev.ts";
 import { buildModels } from "./provenance.ts";
 
 export interface RefreshOutcome {
@@ -20,7 +20,7 @@ export interface RefreshOptions extends DiscoverOptions {
 	snapshot?: Snapshot;
 	/** Skip the network entirely while the snapshot is younger than this. */
 	ttlMs?: number;
-	modelsDev?: LimitIndex;
+	modelsDev?: ModelIndex;
 	measuredIds?: ReadonlySet<string>;
 	/** Called once per improvement so a host can publish without waiting. */
 	onModels?: (outcome: RefreshOutcome) => void;

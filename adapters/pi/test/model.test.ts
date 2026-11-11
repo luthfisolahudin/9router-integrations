@@ -19,6 +19,7 @@ function model(overrides: Partial<NormalizedModel> = {}): NormalizedModel {
 		tools: true,
 		reasoning: true,
 		thinking: { format: "openai", canDisable: true },
+		cost: { input: 3, output: 15, cacheRead: 0.3, cacheWrite: 0 },
 		availability: "ok",
 		provenance: {
 			limits: { context: "catalog", maxOutput: "catalog" },

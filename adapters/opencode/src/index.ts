@@ -1,4 +1,13 @@
-import { buildModels, readSnapshot, refreshCatalog, snapshotPath, writeSnapshot } from "@luthfisolahudin/ai-provider-integrations-template-catalog";
+import {
+	buildModels,
+	loadModelIndex,
+	modelsDevCachePath,
+	readCachedModelIndex,
+	readSnapshot,
+	refreshCatalog,
+	snapshotPath,
+	writeSnapshot,
+} from "@luthfisolahudin/ai-provider-integrations-template-catalog";
 import type { Pack } from "@luthfisolahudin/ai-provider-integrations-template-contract";
 import { MEASURED_WIRE_EFFORT, measuredIds, packs } from "@luthfisolahudin/ai-provider-integrations-template-provider";
 import { Plugin } from "@opencode/plugin";
@@ -43,7 +52,9 @@ function providerInfo(pack: Pack): OpencodeProviderInfo {
 
 function baseline(pack: Pack): OpencodeModel[] {
 	const snapshot = readSnapshot(snapshotPath({ providerId: pack.id }));
-	return toOpencodeModels(buildModels(pack, snapshot?.raw ?? [], { measuredIds }), MEASURED_WIRE_EFFORT);
+	const modelsDev = readCachedModelIndex(modelsDevCachePath());
+	const models = buildModels(pack, snapshot?.raw ?? [], { measuredIds, ...(modelsDev === undefined ? {} : { modelsDev }) });
+	return toOpencodeModels(models, MEASURED_WIRE_EFFORT);
 }
 
 /**
@@ -79,10 +90,12 @@ export default Plugin.define({
 			let changed = false;
 			for (const pack of packs) {
 				try {
+					const modelsDev = await loadModelIndex({ cachePath: modelsDevCachePath() });
 					const outcome = await refreshCatalog(pack, {
 						snapshot: readSnapshot(snapshotPath({ providerId: pack.id })),
 						ttlMs: TTL_MS,
 						measuredIds,
+						modelsDev,
 					});
 					const models = toOpencodeModels(outcome.models, MEASURED_WIRE_EFFORT);
 					if (models.length > 0) {

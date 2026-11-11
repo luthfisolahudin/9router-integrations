@@ -33,22 +33,8 @@ test("a positive timeout is required when set", () => {
 	assert.throws(() => validatePack({ ...basePack(), discovery: { path: "/models", timeoutMs: 0 } }), /timeoutMs/);
 });
 
-test("emitting USD requires a pinned rate", () => {
-	assert.throws(
-		() =>
-			validatePack({
-				...basePack(),
-				pricing: { currency: "IDR", per: 1_000_000, blended: true, emitUsd: true },
-			}),
-		/usdRate/,
-	);
-});
-
 test("curated keys must agree with their id", () => {
-	assert.throws(
-		() => validatePack({ ...basePack(), curated: { a: { id: "b" } } }),
-		/disagrees/,
-	);
+	assert.throws(() => validatePack({ ...basePack(), curated: { a: { id: "b" } } }), /disagrees/);
 });
 
 test("an invalid non-chat regex is rejected at import time", () => {

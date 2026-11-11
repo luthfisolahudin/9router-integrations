@@ -21,8 +21,8 @@ for (const entry of loaded) {
 	lines.push(`- base: \`${entry.pack.baseUrl}\``);
 	lines.push(`- discovery: \`${entry.pack.discovery.path}\`${entry.fixture === undefined ? " (no fixture)" : ""}`);
 	lines.push(`- source: ${entry.source}, ${entry.models.length} model(s)`, "");
-	lines.push("| id | name | context | max-out | input | reasoning | format | wire-effort | limits-src | effort-src |");
-	lines.push("|---|---|---|---|---|---|---|---|---|---|");
+	lines.push("| id | name | context | max-out | cost/1M | input | reasoning | format | wire-effort | limits-src | effort-src |");
+	lines.push("|---|---|---|---|---|---|---|---|---|---|---|");
 	for (const row of inventoryRows(entry.models)) lines.push(`| ${row.join(" | ")} |`);
 
 	const hidden = excluded(entry.models);
