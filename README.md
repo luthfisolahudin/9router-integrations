@@ -29,15 +29,19 @@ task check          # typecheck + 100 unit tests + import boundaries + doctor
 task check:catalog  # project the fixture, assert curated invariants
 ```
 
-Install (one path per harness):
+Install (one entry per harness, path to your own checkout):
 
 ```jsonc
 // Pi settings.json
-{ "extensions": ["/path/to/repo/adapters/pi/src/index.ts"] }
+{ "extensions": ["<path-to-checkout>/adapters/pi/src/index.ts"] }
 
 // OpenCode opencode.json
-{ "plugins": ["file:///path/to/repo/adapters/opencode/src/index.ts"] }
+{ "plugins": ["file://<path-to-checkout>/adapters/opencode/src/index.ts"] }
 ```
+
+Paths are intentionally shown as placeholders: an absolute path is
+machine-specific. See `docs/INSTALL.md` for both harnesses, and for why a
+`github:` spec does not work yet.
 
 ## Make it yours
 
