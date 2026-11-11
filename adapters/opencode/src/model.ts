@@ -38,7 +38,11 @@ export function effortLevels(wireEffort: string | undefined, canDisable: boolean
 	return [wireEffort, ...(canDisable === false ? [] : [])];
 }
 
-export function toOpencodeModel(model: NormalizedModel, forcedEffort?: string): OpencodeModel | undefined {
+export function toOpencodeModel(
+	model: NormalizedModel,
+	forcedEffort?: string,
+	thinkingFormatOverrides?: Record<string, string>,
+): OpencodeModel | undefined {
 	if (model.excluded !== undefined) return undefined;
 
 	const projected: OpencodeModel = {
@@ -54,7 +58,7 @@ export function toOpencodeModel(model: NormalizedModel, forcedEffort?: string): 
 
 	if (!model.reasoning) return projected;
 
-	const mapping = mapThinkingFormat(model.thinking.format);
+	const mapping = mapThinkingFormat(model.thinking.format, (thinkingFormatOverrides ?? {}) as Record<string, never>);
 	const mappable = mapping.pi !== undefined;
 	const measured = effortLevels(forcedEffort, model.thinking.canDisable);
 	// Measured levels win; otherwise advertise the provider's declared ones. Both
@@ -76,10 +80,11 @@ export function toOpencodeModel(model: NormalizedModel, forcedEffort?: string): 
 export function toOpencodeModels(
 	models: readonly NormalizedModel[],
 	effort: Readonly<Record<string, string>>,
+	thinkingFormatOverrides?: Record<string, string>,
 ): OpencodeModel[] {
 	const projected: OpencodeModel[] = [];
 	for (const model of models) {
-		const entry = toOpencodeModel(model, effort[model.id]);
+		const entry = toOpencodeModel(model, effort[model.id], thinkingFormatOverrides);
 		if (entry !== undefined) projected.push(entry);
 	}
 	return projected;

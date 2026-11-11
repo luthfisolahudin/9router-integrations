@@ -126,3 +126,17 @@ test("declared levels on an unmapped format are not advertised", () => {
 	const projected = toPiModel(model({ thinking: { format: "kimi", canDisable: true, efforts: ["low", "high"] } }), HOST);
 	assert.equal(projected?.thinkingLevelMap, undefined);
 });
+
+test("a pack's measured format override unlocks a declared menu", () => {
+	const projected = toPiModel(
+		model({ thinking: { format: "gemini-budget", canDisable: true, efforts: ["low", "high"] } }),
+		{ ...HOST, thinkingFormatOverrides: { "gemini-budget": "openai" } },
+	);
+	assert.equal(projected?.compat?.thinkingFormat, "openai");
+	assert.equal(projected?.thinkingLevelMap?.high, "high");
+});
+
+test("without the override the same model stays closed", () => {
+	const projected = toPiModel(model({ thinking: { format: "gemini-budget", canDisable: true, efforts: ["low", "high"] } }), HOST);
+	assert.equal(projected?.thinkingLevelMap, undefined);
+});

@@ -29,7 +29,11 @@ for (const pack of packs) {
 		const models = buildModels(pack, records(), { measuredIds });
 		assert.ok(models.length > 0, "no models projected");
 
-		const host = { providerId: pack.id, baseUrl: pack.baseUrl };
+		const host = {
+			providerId: pack.id,
+			baseUrl: pack.baseUrl,
+			...(pack.thinkingFormatOverrides === undefined ? {} : { thinkingFormatOverrides: pack.thinkingFormatOverrides }),
+		};
 		const pi = toPiModels(models, MEASURED_WIRE_EFFORT, host);
 		const opencode = toOpencodeModels(models, MEASURED_WIRE_EFFORT);
 

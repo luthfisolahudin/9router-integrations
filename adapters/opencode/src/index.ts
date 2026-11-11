@@ -54,7 +54,7 @@ function baseline(pack: Pack): OpencodeModel[] {
 	const snapshot = readSnapshot(snapshotPath({ providerId: pack.id }));
 	const modelsDev = readCachedModelIndex(modelsDevCachePath());
 	const models = buildModels(pack, snapshot?.raw ?? [], { measuredIds, ...(modelsDev === undefined ? {} : { modelsDev }) });
-	return toOpencodeModels(models, MEASURED_WIRE_EFFORT);
+	return toOpencodeModels(models, MEASURED_WIRE_EFFORT, pack.thinkingFormatOverrides);
 }
 
 /**
@@ -97,7 +97,7 @@ export default Plugin.define({
 						measuredIds,
 						modelsDev,
 					});
-					const models = toOpencodeModels(outcome.models, MEASURED_WIRE_EFFORT);
+					const models = toOpencodeModels(outcome.models, MEASURED_WIRE_EFFORT, pack.thinkingFormatOverrides);
 					if (models.length > 0) {
 						inventory.set(pack.id, models);
 						changed = true;

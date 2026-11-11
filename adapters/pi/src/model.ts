@@ -25,6 +25,8 @@ export interface HostOptions {
 	api?: "openai-completions";
 	/** Provider-level compatibility defaults, overridable per model. */
 	compat?: Record<string, unknown>;
+	/** Measured format equivalences declared by the pack. */
+	thinkingFormatOverrides?: Record<string, string>;
 }
 
 export interface ProjectOptions extends HostOptions {
@@ -61,7 +63,10 @@ export function toPiModel(model: NormalizedModel, options: ProjectOptions): PiMo
 
 	if (!model.reasoning) return projected;
 
-	const mapping = mapThinkingFormat(model.thinking.format);
+	const mapping = mapThinkingFormat(
+		model.thinking.format,
+		(options.thinkingFormatOverrides ?? {}) as Record<string, never>,
+	);
 	// A measurement wins. Without one, the levels the provider declares are used,
 	// but only when Pi can send that format: an effort menu on an unmapped format
 	// would advertise behaviour this integration cannot ask for.

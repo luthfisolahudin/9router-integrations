@@ -58,3 +58,9 @@ test("an alias needs a non-empty id and target", () => {
 	assert.throws(() => validatePack({ ...basePack(), aliases: { a: " " } }), /aliases/);
 	assert.doesNotThrow(() => validatePack({ ...basePack(), aliases: { a: "b" } }));
 });
+
+test("a format override must target a Pi format", () => {
+	assert.throws(() => validatePack({ ...basePack(), thinkingFormatOverrides: { x: "not-a-format" } }), /not a Pi format/);
+	assert.throws(() => validatePack({ ...basePack(), thinkingFormatOverrides: { "": "openai" } }), /declared format/);
+	assert.doesNotThrow(() => validatePack({ ...basePack(), thinkingFormatOverrides: { x: "openai" } }));
+});

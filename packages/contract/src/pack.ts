@@ -1,4 +1,5 @@
 import type { ModelFacts, NormalizedModel, RawRecord } from "./record.ts";
+import { PI_THINKING_FORMATS } from "./thinking.ts";
 
 /** Bump when a pack needs new fields or renamed hooks. `provider-doctor` checks it. */
 export const PACK_SCHEMA_VERSION = 1;
@@ -110,6 +111,12 @@ export interface Pack {
 	 * capabilities are published under another entry.
 	 */
 	aliases?: Record<string, string>;
+	/**
+	 * Measured equivalences for a format Pi does not name, e.g. mapping the
+	 * router's `gemini-budget` onto `openai`. Only with evidence in the repo's
+	 * effort matrix or evidence log.
+	 */
+	thinkingFormatOverrides?: Record<string, string>;
 	/** Curated overrides keyed by model id. `cost` here beats models.dev. */
 	curated?: Record<string, Partial<ModelFacts>>;
 	brands?: Record<string, string>;
@@ -151,6 +158,16 @@ export function validatePack(pack: Pack): void {
 	for (const [modelId, facts] of Object.entries(pack.curated ?? {})) {
 		if (facts.id !== undefined && facts.id !== modelId) {
 			throw new Error(`pack "${pack.id}": curated key "${modelId}" disagrees with its id "${facts.id}"`);
+		}
+	}
+	for (const [declared, mapped] of Object.entries(pack.thinkingFormatOverrides ?? {})) {
+		if (declared.trim().length === 0) {
+			throw new Error(`pack "${pack.id}": thinkingFormatOverrides needs a declared format`);
+		}
+		if (!PI_THINKING_FORMATS.has(mapped)) {
+			throw new Error(
+				`pack "${pack.id}": thinkingFormatOverrides maps "${declared}" to "${mapped}", which is not a Pi format`,
+			);
 		}
 	}
 	if (pack.filter?.nonChatPattern !== undefined) {
