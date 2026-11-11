@@ -25,9 +25,13 @@ test("the fixture is a catalog the pack can read", () => {
 	assert.ok(fixtureIds.size === records.length, "the fixture contains duplicate ids");
 });
 
-test("every curated id exists in the fixture", () => {
+test("every curated id is known: in the fixture or a pinned fallback", () => {
+	const fallbacks = new Set((pack.fallback ?? []).map((entry) => entry.id));
 	for (const id of Object.keys(pack.curated ?? {})) {
-		assert.ok(fixtureIds.has(id), `curated entry "${id}" is not in the fixture (typo or retired model)`);
+		// Curated facts exist for a model the catalog may not list right now, such as
+		// a pinned offline fallback. It still has to be a model this pack knows.
+		const known = fixtureIds.has(id) || fallbacks.has(id);
+		assert.ok(known, `curated entry "${id}" is neither in the fixture nor a fallback (typo or retired model)`);
 	}
 });
 
