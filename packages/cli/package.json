@@ -10,5 +10,8 @@
     "@luthfisolahudin/ai-provider-integrations-template-catalog": "workspace:*",
     "@luthfisolahudin/ai-provider-integrations-template-contract": "workspace:*",
     "@luthfisolahudin/ai-provider-integrations-template-provider": "workspace:*"
+  },
+  "scripts": {
+    "test": "node --test \"test/**/*.test.ts\""
   }
 }

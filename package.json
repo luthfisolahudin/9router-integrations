@@ -30,7 +30,8 @@
     "probe:effort": "node packages/cli/src/commands/probe-effort.ts",
     "probe:routes": "node packages/cli/src/commands/probe-routes.ts",
     "sync:template": "node packages/cli/src/commands/sync-template.ts",
-    "init": "node packages/cli/src/commands/init.ts"
+    "init": "node packages/cli/src/commands/init.ts",
+    "pricing": "node packages/cli/src/commands/pricing.ts"
   },
   "devDependencies": {
     "@earendil-works/pi-ai": "catalog:",

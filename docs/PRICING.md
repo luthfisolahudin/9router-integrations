@@ -80,3 +80,36 @@ Two consequences for this repo:
 The settings file is the source of truth. T3 Code applies it without restarting
 the harness, and any settings panel in the app writes the same keys. Edit the
 file when you want a change that survives a reinstall of the app.
+
+## Generating the T3 Code block from this repo
+
+Each provider repo can produce, compare, or apply its own slice of T3 Code's
+pricing. The command is scoped by provider id, so running it from two repos never
+fights over the same keys.
+
+```sh
+task pricing                  # dry run: print the JSON fragment
+task pricing -- --write       # merge into ~/.t3/userdata/settings.json
+task pricing -- --check       # compare; exit 1 on drift (useful in CI or a task)
+task pricing -- --write --prune   # also drop entries for models this repo dropped
+task pricing -- --live        # price from the live catalog instead of the fixture
+```
+
+What it writes, and what it refuses to write:
+
+- only models with a real price (`provenance.pricing` is `models.dev` or
+  `curated`); a zero is not emitted, because writing zero would tell T3 the model
+  is free;
+- `cacheReadCostPerMillionTokens` only when it is above zero;
+- `usageModelAliases` from `pack.aliases`, and only for models present in the
+  catalog;
+- nothing outside `<providerId>/` keys. Other providers' entries and every other
+  settings key are preserved, in their original order.
+
+`--write` copies the file to `settings.json.bak-<timestamp>` first and reuses the
+file's own indentation, so a rewrite does not reflow a hand-edited settings file.
+`T3_SETTINGS_PATH` overrides the location for non-standard installs or tests.
+
+A typical loop: change a price in `curated`, run `task pricing -- --check` (it
+reports the drift), then `task pricing -- --write`, then restart nothing — T3
+reads the file.
