@@ -95,6 +95,8 @@ const conflicts = git(["diff", "--name-only", "--diff-filter=U"])
 	.split("\n")
 	.filter((line) => line.length > 0);
 
+const prefixes = workspacePrefixes(target, lock);
+
 for (const path of conflicts) {
 	if (lock.owned.some((pattern) => matches(pattern, path))) {
 		git(["checkout", "HEAD", "--", path]);
@@ -105,6 +107,20 @@ for (const path of conflicts) {
 	if (lock.deleted.some((pattern) => matches(pattern, path))) {
 		git(["rm", "-f", "--", path]);
 		console.log(`kept deletion: ${path}`);
+		continue;
+	}
+	if (path === "package.json") {
+		resolveRootManifest(path);
+		continue;
+	}
+	if (/^(packages|adapters|examples)\//.test(path)) {
+		// Take the template's improvement, then put this repo's package prefix back.
+		git(["checkout", "--theirs", "--", path]);
+		const absolute = join(ROOT, path);
+		const content = readFileSync(absolute, "utf8").split(prefixes.from).join(prefixes.to);
+		writeFileSync(absolute, content);
+		git(["add", "--", path]);
+		console.log(`took template + restored prefix: ${path}`);
 		continue;
 	}
 	console.error(`unresolved engine conflict: ${path}`);
@@ -145,6 +161,44 @@ function matches(pattern: string, path: string): boolean {
 	if (!pattern.includes("*")) return pattern === path;
 	const regex = new RegExp(`^${pattern.split("**").map(escapeRegExp).join(".*").replace(/\/\*$/, "(/.*)?")}$`);
 	return regex.test(path);
+}
+
+interface WorkspacePrefixes {
+	/** Package prefix of the incoming template, e.g. `@scope/template-`. */
+	from: string;
+	/** Package prefix of this repo, e.g. `@scope/cosmoshub-integrations-`. */
+	to: string;
+}
+
+/**
+ * Both sides renamed the workspace on purpose, so an engine conflict has to be
+ * resolved as "their content, our prefix" rather than either side wholesale.
+ */
+function workspacePrefixes(target: string, lock: Lock): WorkspacePrefixes {
+	const templateManifest = JSON.parse(
+		git(["show", `${target}:package.json`]),
+	) as { name?: string };
+	const templateName = templateManifest.name ?? "";
+	const scope = templateName.includes("/") ? templateName.split("/")[0]! : "@repo";
+	const templateRoot = templateName.includes("/") ? templateName.split("/")[1]! : templateName;
+	return { from: `${scope}/${templateRoot}-`, to: `${scope}/${lock.identity.name}-` };
+}
+
+/**
+ * The root manifest mixes both owners: `name`/`description` are the repo's,
+ * everything else is the template's (entrypoints, devEngines, scripts).
+ */
+function resolveRootManifest(path: string): void {
+	const ours = JSON.parse(git(["show", `HEAD:${path}`])) as Record<string, unknown>;
+	git(["checkout", "--theirs", "--", path]);
+	const theirs = JSON.parse(readFileSync(join(ROOT, path), "utf8")) as Record<string, unknown>;
+	const merged = { ...theirs };
+	for (const key of ["name", "description"]) {
+		if (ours[key] !== undefined) merged[key] = ours[key];
+	}
+	writeFileSync(join(ROOT, path), `${JSON.stringify(merged, null, 2)}\n`);
+	git(["add", "--", path]);
+	console.log(`merged root manifest: template fields, our identity (${String(ours["name"])})`);
 }
 
 function escapeRegExp(value: string): string {
