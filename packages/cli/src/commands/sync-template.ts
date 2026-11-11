@@ -141,9 +141,13 @@ if (relabelled > 0) console.log(`restored this repo's prefix in ${relabelled} fi
 const staged = git(["diff", "--cached", "--name-only"]).split("\n").filter((line) => line.length > 0);
 console.log(`\n${staged.length} path(s) changed by the merge`);
 
-console.log("\nrunning `pnpm check` before committing...");
+// A merged lockfile is not a resolution: a template change can add a dependency
+// (or a catalog entry) that the current node_modules does not have yet, so the
+// gate installs first.
+console.log("\ninstalling, then running `pnpm check` before committing...");
 // A shell resolves the pnpm shim on every platform; execFile does not find the
-// Windows .cmd wrapper. The command is a literal, so no input is interpolated.
+// Windows .cmd wrapper. The commands are literals, so no input is interpolated.
+execSync("pnpm install --no-frozen-lockfile", { cwd: ROOT, stdio: "inherit" });
 execSync("pnpm check", { cwd: ROOT, stdio: "inherit" });
 
 writeFileSync(LOCK_PATH, `${JSON.stringify({ ...lock, version, commit: target }, null, 2)}\n`);
