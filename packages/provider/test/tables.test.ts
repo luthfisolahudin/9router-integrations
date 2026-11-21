@@ -44,3 +44,17 @@ test("the repo ships exactly one pack", () => {
 	assert.equal(packs.length, 1);
 	assert.equal(packs[0]?.id, "9router");
 });
+
+test("the configured router root keeps a single API suffix", async () => {
+	const original = process.env["NINE_ROUTER_BASE_URL"];
+	try {
+		for (const [index, url] of ["https://router.example.test/proxy", "https://router.example.test/proxy/v1/"].entries()) {
+			process.env["NINE_ROUTER_BASE_URL"] = url;
+			const { nineRouterPack: configured } = await import("../src/pack.ts?config=" + index) as typeof import("../src/pack.ts");
+			assert.equal(configured.baseUrl, "https://router.example.test/proxy/v1");
+		}
+	} finally {
+		if (original === undefined) delete process.env["NINE_ROUTER_BASE_URL"];
+		else process.env["NINE_ROUTER_BASE_URL"] = original;
+	}
+});

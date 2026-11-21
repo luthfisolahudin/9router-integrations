@@ -3,6 +3,14 @@ import { PACK_SCHEMA_VERSION, definePack } from "@luthfisolahudin/9router-integr
 import { curated } from "./curated.ts";
 import { FALLBACK } from "./fallback.ts";
 
+const DEFAULT_ROUTER_ROOT = "http://127.0.0.1:20128";
+const root = new URL(process.env["NINE_ROUTER_BASE_URL"]?.trim() || DEFAULT_ROUTER_ROOT);
+if (!["http:", "https:"].includes(root.protocol) || root.username || root.password || root.search || root.hash) {
+	throw new Error("NINE_ROUTER_BASE_URL must be an HTTP(S) URL without credentials, query, or fragment");
+}
+const rootPath = root.pathname.replace(/\/+$/, "");
+root.pathname = rootPath.endsWith("/v1") ? rootPath : rootPath + "/v1";
+
 /**
  * 9Router's catalog is self-describing (`capabilities` with limits, modalities, a
  * thinking hint and `thinkingCanDisable`), and it is the one provider here that
@@ -15,7 +23,7 @@ export const nineRouterPack = definePack({
 	schemaVersion: PACK_SCHEMA_VERSION,
 	id: "9router",
 	name: "9Router",
-	baseUrl: "http://127.0.0.1:20128/v1",
+	baseUrl: root.href,
 	api: "openai-completions",
 	auth: { kind: "bearer", apiKeyEnv: "NINE_ROUTER_API_KEY", apiKey: "sk_9router" },
 	discovery: { path: "/models", timeoutMs: 5_000 },
