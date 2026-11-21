@@ -3,7 +3,7 @@
 Repo-owned. Things a future reader would otherwise rediscover the hard way.
 
 - Root: `http://127.0.0.1:20128`, API base `/v1`, default key `sk_9router`
-  (override with `NINE_ROUTER_API_KEY`).
+  (override the key with `NINE_ROUTER_API_KEY` and the root with `NINE_ROUTER_BASE_URL`).
 - Catalog: `GET /v1/models`, `{object, data[]}`, self-describing capabilities
   including `thinkingFormat`, `thinkingCanDisable` and a `thinkingRange` that is
   always `null`.

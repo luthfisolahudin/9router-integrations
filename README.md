@@ -48,7 +48,7 @@ until the adapter is published or bundled.
 Environment:
 
 - `NINE_ROUTER_API_KEY` (default `sk_9router`)
-- `NINE_ROUTER_BASE_URL` (default `http://127.0.0.1:20128`)
+- `NINE_ROUTER_BASE_URL` (default `http://127.0.0.1:20128`, with an optional `/v1` suffix)
 
 ## Verify
 

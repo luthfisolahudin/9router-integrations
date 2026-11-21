@@ -46,11 +46,13 @@ for (const pack of packs) {
 
 		for (const model of pi) {
 			assert.equal(model.provider, pack.id);
-			assert.equal(model.baseUrl, pack.baseUrl);
+			const expectedBase = model.api === "anthropic-messages" ? pack.baseUrl.replace(/\/v1\/*$/, "") : pack.baseUrl;
+			assert.equal(model.baseUrl, expectedBase);
 			// A provider may route each model to a different wire api, so assert that the
 			// projection agrees with the model rather than that it is the default.
 			const source = models.find((entry) => entry.id === model.id);
 			assert.equal(model.api, source?.api ?? "openai-completions", `${model.id} api`);
+			assert.deepEqual(model.cost, source?.cost, `${model.id} price`);
 			assert.ok(
 				["openai-completions", "anthropic-messages", "openai-responses"].includes(model.api),
 				`${model.id} api is one this adapter can drive`,
