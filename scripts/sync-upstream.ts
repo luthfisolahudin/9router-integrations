@@ -12,7 +12,7 @@ const stage = mkdtempSync(join(tmpdir(), "sync-upstream-"));
 try {
 	for (const marker of ["runtime", "dev"]) {
 		const target = marker; // relative to the stage cwd
-		execSync(`npx --yes degit luthfisolahudin/ai-integrations/packages/${marker}#${tag} ${target} --force`, { cwd: stage, stdio: "inherit", timeout: 120000, shell: process.platform === "win32" ? "cmd.exe" : "/bin/sh" });
+		execSync(`npx --yes degit luthfisolahudin/ai-integrations/packages/${marker}#${tag} ${target} --force`, { cwd: stage, stdio: "inherit", timeout: 120000, env: { ...process.env, npm_config_yes: "true" } });
 		rmSync(`packages/${marker}`, { recursive: true, force: true });
 		cpSync(join(stage, marker), `packages/${marker}`, { recursive: true });
 	}
