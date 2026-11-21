@@ -1,9 +1,9 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { buildFallbackModels, buildModels, buildModelIndex, discover, type CatalogModel, type DiscoverOptions } from "@luthfisolahudin/9router-integrations-catalog";
-import { capabilityView, inputModalities, type NormalizedModel, type Pack, type RawRecord } from "@luthfisolahudin/9router-integrations-contract";
-import { MEASURED_WIRE_EFFORT, invariants, measuredIds, packs } from "@luthfisolahudin/9router-integrations-provider";
+import { buildFallbackModels, buildModels, buildModelIndex, discover, type CatalogModel, type DiscoverOptions } from "../../../../engine/catalog/index.ts";
+import { capabilityView, inputModalities, type NormalizedModel, type Pack, type RawRecord } from "../../../../engine/contract/index.ts";
+import { MEASURED_WIRE_EFFORT, invariants, measuredIds, packs } from "../../../provider/src/index.ts";
 
 export interface LoadedPack {
 	pack: Pack;

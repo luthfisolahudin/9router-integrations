@@ -3,11 +3,11 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
 
-import { toOpencodeModels } from "@luthfisolahudin/9router-integrations-opencode/model";
-import { toPiModels } from "@luthfisolahudin/9router-integrations-pi/model";
-import { buildModels } from "@luthfisolahudin/9router-integrations-catalog";
-import type { RawRecord } from "@luthfisolahudin/9router-integrations-contract";
-import { MEASURED_WIRE_EFFORT, measuredIds, packs } from "@luthfisolahudin/9router-integrations-provider";
+import { toOpencodeModels } from "../../../engine/opencode/model.ts";
+import { toPiModels } from "../../../engine/pi/model.ts";
+import { buildModels } from "../../../engine/catalog/index.ts";
+import type { RawRecord } from "../../../engine/contract/index.ts";
+import { MEASURED_WIRE_EFFORT, measuredIds, packs } from "../../provider/src/index.ts";
 
 const ROOT = join(import.meta.dirname, "../../..");
 const FIXTURE = join(ROOT, "packages/provider/fixtures/catalog.json");
@@ -65,7 +65,13 @@ for (const pack of packs) {
 
 	test(`${pack.id}: an effort menu exists only where a measurement does`, () => {
 		const models = buildModels(pack, records(), { measuredIds });
-		const host = { providerId: pack.id, baseUrl: pack.baseUrl, thinkingFormatOverrides: pack.thinkingFormatOverrides };
+		// The Pi projection needs the same format overrides the runtime passes, or a
+		// pack that declares an equivalence would look unprojected here only.
+		const host = {
+			providerId: pack.id,
+			baseUrl: pack.baseUrl,
+			...(pack.thinkingFormatOverrides === undefined ? {} : { thinkingFormatOverrides: pack.thinkingFormatOverrides }),
+		};
 		const pi = new Map(toPiModels(models, MEASURED_WIRE_EFFORT, host).map((model) => [model.id, model]));
 		const opencode = new Map(toOpencodeModels(models, MEASURED_WIRE_EFFORT, pack.thinkingFormatOverrides).map((model) => [String(model.id), model]));
 

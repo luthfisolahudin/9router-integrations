@@ -1,21 +1,14 @@
-# ai-provider-integrations-template
-
-A template repo for OpenAI Chat Completions provider integrations with live
-model discovery for Pi and OpenCode. Membership comes from the provider's
-`/models`; nothing is typed by hand.
+# 9router-integrations
 
 ## What this repo is
 
-A pnpm workspace with role-separated packages: the engine is generic, the vendor
-lives in exactly one package, and two adapters translate normalised models into
-each harness's API. The template ships three example packs covering three real
-catalog qualities:
+A provider checkout for **9Router** (`http://127.0.0.1:20128/v1` by default),
+shared by Pi and OpenCode. The router's own catalog is read at `/v1/models`; no
+model list is maintained by hand.
 
-- `packages/provider` — the starter (Tier A: the catalog describes itself);
-- `examples/tier-b` — modalities, availability and price only (Tier B);
-- `examples/tier-c` — ids and nothing else (Tier C).
-
-The provider code and fixtures live in this checkout. The engine is pinned by `engine.lock.json`.
+The router normalises effort itself — asking for `max` can reach the upstream as
+`xhigh`, and for one route it becomes a Claude thinking budget — so the effort
+table is measured, never copied from a vendor.
 
 ## Read first
 
@@ -48,10 +41,15 @@ Import rules, enforced by `workspace:*` deps and `task check:boundaries`:
 - Import across packages by package name (`<scope>/<repo>-<suffix>`), never by
   relative path. The contract and catalog workspace packages re-export the copied engine.
 
+`engine/`, `packages/cli`, `packages/conformance`, and the engine's own tests are
+release-owned. `engine.lock.json` lists each of those files with its sha256, so
+editing one is a lock violation, not a quiet fork. Change them upstream and take a
+new tag; see `docs/SYNC.md`.
+
 ## Commands
 
 ```sh
-task check            # typecheck + unit tests + boundaries + doctor
+task check            # engine verify + typecheck + tests + boundaries + catalog + report + doctor
 task check:catalog    # project the fixture/live catalog, assert invariants
 task probe:effort     # measure thinking/effort for one model (needs an API key)
 task probe:routes     # which wire routes the endpoint exposes
@@ -98,5 +96,4 @@ turning a `default` provenance into a `curated` one.
 
 ## Vendor notes
 
-Vendor-specific quirks, quirks of the API and undocumented behaviour live in
-`docs/REPO.md`.
+`docs/EFFORT_MATRIX.md` records how each effort mapping was observed; `docs/REPO.md` holds the rest.

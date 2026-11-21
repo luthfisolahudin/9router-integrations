@@ -1,1 +1,1 @@
-export { resolveApiKey as resolveKey } from "@luthfisolahudin/9router-integrations-catalog";
+export { resolveApiKey as resolveKey } from "../../../../engine/catalog/index.ts";

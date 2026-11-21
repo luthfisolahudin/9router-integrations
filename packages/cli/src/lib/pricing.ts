@@ -1,5 +1,5 @@
-import type { CatalogModel } from "@luthfisolahudin/9router-integrations-catalog";
-import type { NormalizedModel, Pack } from "@luthfisolahudin/9router-integrations-contract";
+import type { CatalogModel } from "../../../../engine/catalog/index.ts";
+import type { NormalizedModel, Pack } from "../../../../engine/contract/index.ts";
 
 /** T3 Code's Settings → Usage shape, verified from `~/.t3/userdata/settings.json`. */
 export interface T3Price {

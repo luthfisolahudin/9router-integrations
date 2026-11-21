@@ -3,7 +3,7 @@ import { copyFileSync, existsSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
-import { loadModelIndex, modelsDevCachePath } from "@luthfisolahudin/9router-integrations-catalog";
+import { loadModelIndex, modelsDevCachePath } from "../../../../engine/catalog/index.ts";
 
 import {
 	buildPricingFragment,
