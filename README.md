@@ -5,8 +5,7 @@ shared by Pi and OpenCode. The catalog is read from the router at
 `http://127.0.0.1:20128/v1/models`; no model list is maintained by hand.
 
 Built on [`ai-provider-integrations-template`](https://github.com/luthfisolahudin/ai-provider-integrations-template):
-the engine, both adapters, the checks and the docs come from there, and this repo
-owns only the 9Router surface.
+This repo owns the provider pack and pins the [copied engine](docs/SYNC.md).
 
 ## What this repo owns
 
@@ -39,7 +38,7 @@ Everything else is engine.
 
 ```jsonc
 // opencode.json
-{ "plugins": ["file://<path-to-checkout>/plugins/opencode.ts"] }
+{ "plugins": ["file://<path-to-checkout>"] }
 ```
 
 Paths are placeholders on purpose: an absolute path is machine-specific. See

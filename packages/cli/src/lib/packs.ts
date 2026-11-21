@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { buildModels, buildModelIndex, discover, type DiscoverOptions } from "@luthfisolahudin/9router-integrations-catalog";
+import { buildFallbackModels, buildModels, buildModelIndex, discover, type DiscoverOptions } from "@luthfisolahudin/9router-integrations-catalog";
 import { capabilityView, inputModalities, type NormalizedModel, type Pack, type RawRecord } from "@luthfisolahudin/9router-integrations-contract";
 import { MEASURED_WIRE_EFFORT, invariants, measuredIds, packs } from "@luthfisolahudin/9router-integrations-provider";
 
@@ -34,20 +34,10 @@ export function loadAll(
 	const hint = options.modelsDev === undefined ? {} : { modelsDev: options.modelsDev };
 	for (const pack of packs) {
 		const fixture = loadFixture(root, pack);
-		if (options.live === true) {
-			// The caller awaits the network path separately.
-			loaded.push({
-				pack,
-				...(fixture === undefined ? {} : { fixture }),
-				models: buildModels(pack, fixture ?? [], { measuredIds, ...hint }),
-				source: fixture === undefined ? "fallback" : "fixture",
-			});
-			continue;
-		}
 		loaded.push({
 			pack,
 			...(fixture === undefined ? {} : { fixture }),
-			models: buildModels(pack, fixture ?? [], { measuredIds, ...hint }),
+			models: fixture === undefined ? buildFallbackModels(pack, { measuredIds, ...hint }) : buildModels(pack, fixture, { measuredIds, ...hint }),
 			source: fixture === undefined ? "fallback" : "fixture",
 		});
 	}

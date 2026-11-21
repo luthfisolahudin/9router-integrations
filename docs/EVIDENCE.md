@@ -27,3 +27,5 @@ difference between a `measured` entry and a `models.dev` declaration.
 ## Never used
 
 - `thinkingRange` (always null) and the router's own display names (it serves none).
+
+- 2026-11-21: engine v2.0.0 passed live catalog validation on the existing router and streamed chat in Pi 1.5.2 and OpenCode 2.3.2 through an isolated instance with `verified-free/nemotron-3.5-lightning`. Guts AI reported zero input and output rates for that model before each request.
