@@ -7,3 +7,4 @@ node_modules/
 *.p12
 *.pfx
 *.pem
+.engine-updating/
