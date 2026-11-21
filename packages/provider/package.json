@@ -10,6 +10,6 @@
     "test": "node --test \"test/**/*.test.ts\""
   },
   "dependencies": {
-    "@luthfisolahudin/9router-integrations-contract": "workspace:*"
+    "@luthfisolahudin/ai-integrations-contract": "workspace:*"
   }
 }

@@ -4,8 +4,9 @@ Live model discovery and OpenAI Chat Completions for [9Router](https://github.co
 shared by Pi and OpenCode. The catalog is read from the router at
 `http://127.0.0.1:20128/v1/models`; no model list is maintained by hand.
 
-Built on [`ai-provider-integrations-template`](https://github.com/luthfisolahudin/ai-provider-integrations-template):
-This repo owns the provider pack and pins the [copied engine](docs/SYNC.md).
+Built on [`ai-integrations`](https://github.com/luthfisolahudin/ai-integrations):
+`packages/runtime` and `packages/dev` are copied from its releases and pinned by
+`ai-integrations.lock.json`.
 
 ## What this repo owns
 
@@ -20,7 +21,7 @@ This repo owns the provider pack and pins the [copied engine](docs/SYNC.md).
 | `extensions/pi.ts`, `plugins/opencode.ts` | one-line shims over the adapters |
 | `docs/EFFORT_MATRIX.md` | how each effort mapping was observed |
 
-Everything else is engine.
+Everything else is copied from `ai-integrations` and pinned by the lock.
 
 ## Install
 

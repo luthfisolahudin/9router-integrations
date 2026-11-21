@@ -8,12 +8,8 @@
     ".": "./src/index.ts",
     "./model": "./src/model.ts"
   },
-  "scripts": {
-    "test": "node --test \"test/**/*.test.ts\""
-  },
   "dependencies": {
-    "@luthfisolahudin/9router-integrations-catalog": "workspace:*",
-    "@luthfisolahudin/9router-integrations-contract": "workspace:*",
+    "@luthfisolahudin/ai-integrations-opencode": "workspace:*",
     "@luthfisolahudin/9router-integrations-provider": "workspace:*"
   },
   "peerDependencies": {

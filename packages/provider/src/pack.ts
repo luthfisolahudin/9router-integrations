@@ -1,4 +1,4 @@
-import { PACK_SCHEMA_VERSION, definePack } from "@luthfisolahudin/9router-integrations-contract";
+import { PACK_SCHEMA_VERSION, definePack } from "@luthfisolahudin/ai-integrations-contract";
 
 import { curated } from "./curated.ts";
 import { FALLBACK } from "./fallback.ts";

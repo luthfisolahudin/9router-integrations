@@ -1,4 +1,4 @@
-import type { ModelFacts } from "@luthfisolahudin/9router-integrations-contract";
+import type { ModelFacts } from "@luthfisolahudin/ai-integrations-contract";
 
 /**
  * Facts the router cannot be trusted to report.
