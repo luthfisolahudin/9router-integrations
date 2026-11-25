@@ -40,6 +40,7 @@ export const nineRouterPack = definePack({
 		reasoning: ["capabilities.reasoning"],
 		thinkingFormat: ["capabilities.thinkingFormat"],
 		thinkingCanDisable: ["capabilities.thinkingCanDisable"],
+		efforts: ["thinking_levels"],
 	},
 	filter: {
 		// Unused routes: a second Kimi K3 spelling, two retired DeepSeek variants,
@@ -51,7 +52,7 @@ export const nineRouterPack = definePack({
 	// The router translates effort itself and renamed its formats. The matrix records
 	// that `reasoning_effort` is honoured on these routes, so the equivalence is
 	// measured, not guessed.
-	thinkingFormatOverrides: { "gemini-budget": "openai", "claude-adaptive": "openai" },
+	thinkingFormatOverrides: { "gemini-budget": "openai", "claude-adaptive": "openai", "gemini-level": "openai" },
 	fallback: FALLBACK.map((id) => ({ id })),
 	curated,
 	defaults: { contextWindow: 128_000, maxOutput: 16_384 },
