@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import { nineRouterPack } from "../src/index.ts";
-import { capabilityView } from "../../../engine/contract/capabilities.ts";
+import { capabilityView } from "../../runtime/contract/src/capabilities.ts";
 
 // The router publishes the selectable effort levels on `thinking_levels`, next to the
 // `capabilities` block. The committed fixture is a capture that predates that field, so
