@@ -3,8 +3,7 @@
 Measured through local 9Router. The current active reasoning models and their
 configured wire effort mappings are listed below:
 
-- `cbcn/minimax-m3`: client `max` -> wire `xhigh`
-- `cbcn/glm-5.3`: client `max` -> wire `xhigh`
+- `cbcn/minimax-m3`: client `max` -> wire `xhigh`- `cbcn/glm-5.3`: client `max` -> wire `xhigh`
 - `cbcn/glm-5.3-flash`: client `max` -> wire `xhigh`
 - `cbcn/deepseek-v4.1-flash`: client `max` -> wire `xhigh`
 - `cbcn/kimi-k3`: client `max` -> wire `xhigh`
@@ -109,3 +108,28 @@ the active connection set, or one of these model revisions changes. Retry
 unmeasured active reasoning model remains visible without an explicit effort so
 one new catalog record cannot hide either provider; `pnpm check:catalog` fails
 loudly until that probe is complete.
+
+## Antigravity Gemini 4 levels
+
+Antigravity names the effort in two places, and 9Router now derives one from the
+other: `reasoning_effort` selects the upstream tier id, and the same level is
+written to `generationConfig.thinkingConfig.thinkingLevel`.
+
+| Catalog id | Levels |
+|---|---|
+| `ag/gemini-4-hydrogen` | low, medium, high, xhigh |
+| `ag/gemini-4-neon` | low, medium, high, xhigh |
+| `ag/gemini-4-carbon` | low, medium, high |
+| `ag/gemini-4-argon` | low, medium, high |
+
+The router lists one id per family and publishes the level set on
+`thinking_levels`, so a client sends `reasoning_effort` and never picks a tier
+suffix. Tier ids (`ag/gemini-4-neon-low`, `...-xhigh`) still resolve for a stored
+alias, and each advertises only the level it pins.
+
+Evidence, router-side only: a request carrying `reasoning_effort` builds
+`<family>-<level>(<level>)` as the wire model and writes the matching
+`thinkingLevel`, so what reaches Antigravity is consistent by construction. The
+upstream completion was not re-observed; that needs an Antigravity account in the
+local router. `gemini-level` therefore maps to `openai` for effort delivery, and
+the model keeps reporting thinking content as before.

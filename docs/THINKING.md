@@ -15,7 +15,8 @@ Two separate questions, deliberately not merged:
 | `deepseek` | `deepseek` | mapped |
 | `qwen` | `qwen` | mapped |
 | `zai` | `zai` | mapped |
-| `kimi`, `gemini-level`, `minimax`, `step` | — | **unmapped** |
+| `gemini-budget`, `claude-adaptive`, `gemini-level` | `openai` | override, measured router-side (below) |
+| `kimi`, `minimax`, `step` | — | **unmapped** |
 
 An unmapped format produces no effort menu. The model still reports thinking
 content; the integration simply does not claim it can shape it. Adding an
