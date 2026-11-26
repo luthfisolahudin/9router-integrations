@@ -2,6 +2,7 @@ import { PACK_SCHEMA_VERSION, definePack } from "@luthfisolahudin/ai-integration
 
 import { curated } from "./curated.ts";
 import { FALLBACK } from "./fallback.ts";
+import { readNineRouterQuota } from "./quota.ts";
 
 const DEFAULT_ROUTER_ROOT = "http://127.0.0.1:20128";
 const root = new URL(process.env["NINE_ROUTER_BASE_URL"]?.trim() || DEFAULT_ROUTER_ROOT);
@@ -75,6 +76,11 @@ export const nineRouterPack = definePack({
 		"ag/claude-sonnet-4-6": "Claude Sonnet 4.6",
 		"ag/gemini-3.8-flash-high": "Gemini 3.8 Flash",
 		"ag/gpt-oss-120b-medium": "GPT OSS 120B",
+	},
+	hooks: {
+		quota(context) {
+			return readNineRouterQuota(context);
+		},
 	},
 	hosts: {
 		pi: { smallModel: "cbcn/deepseek-v4.1-flash" },
