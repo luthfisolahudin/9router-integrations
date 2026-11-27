@@ -21,3 +21,7 @@ Repo-owned. Things a future reader would otherwise rediscover the hard way.
   `cbcn/deepseek-v4.1-flash` in the pack's host hints for that reason.
 - The router only exists on the machine that runs it (`thunk`), so the committed
   fixture is the CI surface; `task check:catalog -- --live` needs the router up.
+- **Quota labels are window-only.** T3's HTTP quota source has no model-scoping
+  field, so `packages/provider/src/quota.ts` appends the provider as a suffix in
+  each `window.label` (`Gemini Session · Antigravity`) and drops the image/embedding
+  window, which is not a chat quota. Account labels stay verbatim for the Usage page.
